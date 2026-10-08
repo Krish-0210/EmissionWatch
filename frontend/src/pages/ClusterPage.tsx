@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef, useState, type CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import type { ClusterDetail, ModelStats, MonthPoint } from '../api'
-import { briefAvailable, fetchCluster, fetchTimeseries, generateBrief } from '../api'
+import { briefAvailable, fetchCluster, fetchTimeseries, generateBrief, type Brief } from '../api'
 import { ConfidenceBadge, RiskBadge } from '../components/Badges'
 import BigWord from '../components/BigWord'
 import { GenerationChart, No2Chart } from '../components/ClusterCharts'
@@ -271,7 +271,7 @@ function ConfidenceCard({ c }: { c: ClusterDetail }) {
 }
 
 function BriefPanel({ id }: { id: string }) {
-  const [state, setState] = useState<{ loading?: boolean; md?: string; error?: string; info?: string }>({})
+  const [state, setState] = useState<{ loading?: boolean; md?: string; source?: Brief['source']; error?: string; info?: string }>({})
   const run = async () => {
     if (!briefAvailable) {
       setState({ info: 'Brief generation available in deployed version.' })
@@ -280,7 +280,7 @@ function BriefPanel({ id }: { id: string }) {
     setState({ loading: true })
     try {
       const b = await generateBrief(id)
-      setState({ md: b.markdown })
+      setState({ md: b.markdown, source: b.source })
     } catch (e) {
       setState({ error: e instanceof Error ? e.message : String(e) })
     }
@@ -303,7 +303,14 @@ function BriefPanel({ id }: { id: string }) {
         )}
         {state.info && <div className="alert">{state.info}</div>}
         {state.error && <div className="alert err">{state.error}</div>}
-        {state.md && <Markdown source={state.md} />}
+        {state.md && (
+          <>
+            <div className="micro brief-source">
+              {state.source === 'bedrock' ? 'Written by AI (Amazon Bedrock) from the numbers above' : 'Template brief from the numbers above'}
+            </div>
+            <Markdown source={state.md} />
+          </>
+        )}
       </div>
     </div>
   )

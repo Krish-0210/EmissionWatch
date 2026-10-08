@@ -110,6 +110,7 @@ export interface SummaryFile {
 
 export interface Brief {
   markdown: string
+  source: 'bedrock' | 'template' // AI-written (Bedrock) or the deterministic fallback
 }
 
 // VITE_API_URL unset: static files from public/data/. Set: the deployed API, same shapes.
@@ -117,7 +118,7 @@ export interface Brief {
 //   GET  {API}/clusters/{id}             -> ClusterDetail
 //   GET  {API}/clusters/{id}/timeseries  -> TimeseriesFile
 //   GET  {API}/summary                   -> SummaryFile
-//   POST {API}/brief/{id}                -> Brief
+//   POST {API}/brief/{id}                -> Brief {markdown, source}
 const rawApi = import.meta.env.VITE_API_URL as string | undefined
 export const API_URL = rawApi ? rawApi.replace(/\/$/, '') : undefined
 export const briefAvailable = API_URL !== undefined
