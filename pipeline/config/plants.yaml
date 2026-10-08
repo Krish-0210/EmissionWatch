@@ -1,0 +1,11 @@
+# Coal plant registry. One entry per plant; plants sharing a Sentinel-5P pixel share a cluster.
+plants:
+  - id: ""            # unique slug, e.g. "vindhyachal-stps"
+    name: ""
+    state: ""
+    lat: 0.0
+    lon: 0.0
+    capacity_mw: 0
+    cluster: ""       # cluster id for plants within ~5 km of each other
+    fgd_status: ""    # installed | under_construction | not_installed | unknown
+    scr_status: ""    # installed | under_construction | not_installed | unknown

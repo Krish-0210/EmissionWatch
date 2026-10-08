@@ -1,0 +1,9 @@
+earthengine-api
+pandas
+numpy
+requests
+pdfplumber
+openpyxl
+python-dotenv
+boto3
+pyyaml
