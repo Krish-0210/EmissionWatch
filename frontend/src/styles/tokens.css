@@ -1,0 +1,28 @@
+/* Orbit & Ember: a cold satellite verifying hot coal plants. Dark only. */
+:root {
+  --bg: #07090c;
+  --surface: #0e1217;
+  --surface-2: #121820;
+  --border: #1c232b;
+  --border-2: #2a333d;
+  --text: #e8edf2;
+  --muted: #8a96a3;
+  --signal: #7ce8d8;
+  --signal-ink: #04201c;
+  --ember: #ff8a3d;
+  --risk-low: #7ce8d8;
+  --risk-medium: #ffc24b;
+  --risk-high: #ff5a3c;
+
+  --font-display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  --radius: 14px;
+  --max: 1280px;
+  --gutter: clamp(16px, 4vw, 48px);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --nav-h: 64px;
+
+  color-scheme: dark;
+}

@@ -1,5 +1,10 @@
-import { useEffect, useState } from 'react'
+import Lenis from 'lenis'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { gsap, ScrollTrigger } from '../lib/gsap'
+import { prefersReducedMotion } from '../lib/motion'
+import BigWord from './BigWord'
+import Cursor from './Cursor'
 
 export const GITHUB_URL = 'https://github.com/Krish-0210/EmissionWatch'
 
@@ -13,18 +18,106 @@ const LINKS = [
 
 function GitHubIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+    <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
       <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
     </svg>
   )
 }
 
+let lenis: Lenis | null = null
+
+// Smooth scroll (desktop, motion allowed), synced with GSAP ScrollTrigger.
+function useSmoothScroll() {
+  useEffect(() => {
+    if (prefersReducedMotion() || window.matchMedia('(pointer: coarse)').matches) return
+    lenis = new Lenis({ lerp: 0.12, wheelMultiplier: 0.9 })
+    lenis.on('scroll', ScrollTrigger.update)
+    const tick = (t: number) => lenis?.raf(t * 1000)
+    gsap.ticker.add(tick)
+    gsap.ticker.lagSmoothing(0)
+    return () => {
+      gsap.ticker.remove(tick)
+      lenis?.destroy()
+      lenis = null
+    }
+  }, [])
+}
+
+// Adds .in to .reveal / .rule elements as they enter the viewport, and drifts [data-parallax]
+// elements relative to their section. Watches the DOM so lazily loaded content is picked up.
+function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: string) {
+  useEffect(() => {
+    const el = root.current
+    if (!el) return
+    const reduced = prefersReducedMotion()
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('in')
+            io.unobserve(e.target)
+          }
+        }),
+      { rootMargin: '0px 0px -10% 0px' },
+    )
+    const seen = new WeakSet<Element>()
+    let para: HTMLElement[] = []
+    const scan = () => {
+      el.querySelectorAll('.reveal, .rule').forEach((n) => {
+        if (!seen.has(n)) {
+          seen.add(n)
+          io.observe(n)
+        }
+      })
+      para = Array.from(el.querySelectorAll<HTMLElement>('[data-parallax]'))
+    }
+    scan()
+    const mo = new MutationObserver(scan)
+    mo.observe(el, { childList: true, subtree: true })
+
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const vh = window.innerHeight
+      for (const p of para) {
+        const host = p.parentElement
+        if (!host) continue
+        const r = host.getBoundingClientRect()
+        if (r.bottom < -200 || r.top > vh + 200) continue
+        const speed = Number(p.dataset.parallax) || 0.15
+        p.style.transform = `translate3d(0, ${((r.top + r.height / 2 - vh / 2) * -speed).toFixed(1)}px, 0)`
+      }
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    if (!reduced) {
+      window.addEventListener('scroll', onScroll, { passive: true })
+      onScroll()
+    }
+    return () => {
+      io.disconnect()
+      mo.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(raf)
+    }
+  }, [root, key])
+}
+
 export default function Layout() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const main = useRef<HTMLElement>(null)
+  useSmoothScroll()
+  useRevealAndParallax(main, pathname)
+
   useEffect(() => {
-    window.scrollTo(0, 0)
+    if (lenis) lenis.scrollTo(0, { immediate: true })
+    else window.scrollTo(0, 0)
+    const id = setTimeout(() => ScrollTrigger.refresh(), 450)
+    return () => clearTimeout(id)
   }, [pathname])
+
   const close = () => setOpen(false)
 
   return (
@@ -32,22 +125,19 @@ export default function Layout() {
       <a className="skip" href="#main">
         Skip to content
       </a>
+      <Cursor />
       <div className="proto-banner" role="note">
-        <strong>Prototype.</strong> Research demo built on public data; results are indicative and not an official
-        assessment.
+        <span className="micro">
+          <b>Prototype</b> · research demo on public data · indicative, not an official assessment
+        </span>
       </div>
       <header className="nav">
         <div className="container nav-inner">
-          <Link to="/" className="brand">
+          <Link to="/" className="brand" onClick={close}>
             <span className="brand-mark" aria-hidden="true" />
             EmissionWatch
           </Link>
-          <button
-            className="nav-toggle"
-            aria-expanded={open}
-            aria-controls="nav-links"
-            onClick={() => setOpen((o) => !o)}
-          >
+          <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpen((o) => !o)}>
             {open ? 'Close' : 'Menu'}
           </button>
           <nav id="nav-links" className={`nav-links${open ? ' open' : ''}`} aria-label="Main">
@@ -59,33 +149,60 @@ export default function Layout() {
             <a className="nav-gh" href={GITHUB_URL} target="_blank" rel="noreferrer" aria-label="GitHub repository">
               <GitHubIcon />
             </a>
-            <Link to="/map" className="btn btn-primary" onClick={close}>
-              Explore the map
+            <Link to="/map" className="pill" onClick={close}>
+              Explore the map <span className="arrow" aria-hidden="true">→</span>
             </Link>
           </nav>
         </div>
       </header>
-      <main id="main">
-        <Outlet />
+      <main id="main" ref={main}>
+        <div className="page" key={pathname}>
+          <Outlet />
+        </div>
       </main>
       <footer className="footer">
-        <div className="container footer-inner">
+        <BigWord speed={0.05}>Ember</BigWord>
+        <div className="container layer footer-grid">
           <div>
-            <strong>EmissionWatch</strong>
-            <br />
-            Satellite-verified accountability for Indian coal plants.
+            <Link to="/" className="brand">
+              <span className="brand-mark" aria-hidden="true" />
+              EmissionWatch
+            </Link>
+            <p className="muted small" style={{ marginTop: 16, maxWidth: '40ch' }}>
+              Satellite-verified accountability for Indian coal plants. Flags anomalies that warrant an audit, not
+              proof of wrongdoing.
+            </p>
           </div>
           <div>
-            Data: CEA / National Power Portal, ESA Sentinel-5P (Copernicus), ECMWF ERA5, Global Energy Monitor.
-            <br />
-            Processed with Google Earth Engine. Map tiles © OpenStreetMap contributors.
+            <div className="micro" style={{ marginBottom: 12 }}>
+              Sources
+            </div>
+            <ul>
+              <li>CEA daily generation reports · National Power Portal</li>
+              <li>ESA Sentinel-5P TROPOMI (Copernicus)</li>
+              <li>ECMWF ERA5 reanalysis</li>
+              <li>Global Energy Monitor · Natural Earth</li>
+              <li>Google Earth Engine</li>
+            </ul>
           </div>
           <div>
-            <a href={GITHUB_URL} target="_blank" rel="noreferrer">
-              Source on GitHub
-            </a>
-            <br />
-            <Link to="/limits">Limits of this method</Link>
+            <div className="micro" style={{ marginBottom: 12 }}>
+              Project
+            </div>
+            <ul>
+              <li>
+                <a href={GITHUB_URL} target="_blank" rel="noreferrer">
+                  Source on GitHub ↗
+                </a>
+              </li>
+              <li>
+                <Link to="/how-it-works">How it works</Link>
+              </li>
+              <li>
+                <Link to="/limits">Limits of this method</Link>
+              </li>
+              <li>Map tiles © OpenStreetMap contributors © CARTO</li>
+            </ul>
           </div>
         </div>
       </footer>

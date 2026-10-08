@@ -1,9 +1,9 @@
 import type { Confidence, RiskLevel } from '../api'
 
 export const RISK_COLOR: Record<RiskLevel, string> = {
-  low: '#0ca30c',
-  medium: '#fab219',
-  high: '#d03b3b',
+  low: '#7ce8d8',
+  medium: '#ffc24b',
+  high: '#ff5a3c',
 }
 
 export const RISK_LABEL: Record<RiskLevel, string> = { low: 'Low risk', medium: 'Medium risk', high: 'High risk' }
