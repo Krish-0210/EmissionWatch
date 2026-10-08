@@ -15,3 +15,6 @@ export function stepFor(p: number) {
   })
   return s
 }
+
+// How It Works: scroll positions (0..1) where each of the six method steps starts.
+export const METHOD_AT = [0, 0.16, 0.33, 0.5, 0.66, 0.83]

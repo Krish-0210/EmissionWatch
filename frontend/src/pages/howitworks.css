@@ -1,0 +1,49 @@
+.hiw-intro { position: relative; overflow: hidden; }
+.hiw-stage { position: relative; height: 640vh; }
+.hiw-sticky { position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); height: calc(100svh - var(--nav-h)); display: flex; flex-direction: column; overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.hiw-top, .hiw-body { width: 100%; }
+.hiw-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 18px; padding-bottom: 10px; }
+.hiw-chips { list-style: none; margin: 0; padding: 0; gap: 8px; }
+.hiw-progress .text { font-size: 18px; }
+.hiw-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+.hiw-scene { height: 100%; min-height: 0; display: flex; align-items: center; }
+.method-scene { width: 100%; max-height: 100%; }
+.hiw-text { position: relative; min-height: 280px; }
+.hiw-step { position: absolute; inset: 0 0 auto 0; opacity: 0; transform: translateY(20px); transition: opacity 0.22s ease-in, transform 0.22s ease-in; }
+.hiw-step.on { opacity: 1; transform: none; transition: opacity 0.6s var(--ease-out) 0.12s, transform 0.6s var(--ease-out) 0.12s; }
+.hiw-step h2 { margin: 14px 0 16px; }
+.hiw-bar { height: 2px; background: var(--border); }
+.hiw-bar > div { height: 100%; background: var(--signal); transform-origin: left; box-shadow: 0 0 10px var(--signal); }
+@media (max-width: 860px) {
+  .hiw-stage { height: 560vh; }
+  .hiw-chips .chip:not(.on) { display: none; }
+  .hiw-body { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; gap: 8px; align-items: start; padding-bottom: 16px; }
+  .hiw-text { min-height: 230px; }
+  .hiw-step h2 { font-size: 22px; margin: 8px 0 8px; }
+  .hiw-step p { font-size: 14px; margin-bottom: 0.6em; }
+}
+
+.method-scene .ms-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; fill: var(--muted); }
+.method-scene .ms-score { font-family: var(--font-mono); font-size: 52px; fill: var(--text); }
+.ms-plume { animation: plume 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ms-puff { animation: puff 2.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.ms-puff.d2 { animation-delay: 1.1s; }
+@keyframes plume { 50% { transform: scale(1.15); opacity: 0.8; } }
+@keyframes puff { 0% { transform: translateY(0) scale(0.6); opacity: 1; } 100% { transform: translateY(-22px) scale(1.8); opacity: 0; } }
+.ms-wind { stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 6 8; animation: wind 1.6s linear infinite; }
+@keyframes wind { to { stroke-dashoffset: -28; } }
+
+.note-signal { border-left: 2px solid var(--signal); padding: 6px 0 6px 24px; max-width: 80ch; }
+.results-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 28px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.results-stats .big { display: block; font-size: clamp(28px, 3.4vw, 48px); color: var(--text); line-height: 1.1; margin-bottom: 6px; }
+@media (max-width: 760px) { .results-stats { grid-template-columns: repeat(2, 1fr); } }
+.findings ol { list-style: none; margin: 10px 0 0; padding: 0; }
+.findings li { display: grid; grid-template-columns: 32px 1fr; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.findings li:last-child { border-bottom: 0; }
+.chart-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.chart-legend i.sq { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+.sources-list { margin: 0; }
+.sources-list > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.sources-list dt { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.sources-list dd { margin: 0; }
+@media (max-width: 640px) { .sources-list > div { grid-template-columns: 1fr; gap: 4px; } }
