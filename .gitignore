@@ -36,6 +36,7 @@ pipeline/data/raw/*
 !pipeline/data/raw/.gitkeep
 pipeline/data/processed/*
 !pipeline/data/processed/.gitkeep
+pipeline/data/export/
 
 # OS / editor
 .DS_Store
