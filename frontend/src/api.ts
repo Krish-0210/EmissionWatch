@@ -1,5 +1,5 @@
 // Data contract between the pipeline export (pipeline/src/export/to_json.py) and the map app.
-// Static JSON served from public/data/. Units: generation in MU (GWh); NO2 in µmol/m²
+// Static JSON from public/data/, or the API when VITE_API_URL is set. Units: generation in MU (GWh); NO2 in µmol/m²
 // (tropospheric column, 20 km ring minus 50–80 km background). null = no valid data.
 
 export type RiskLevel = 'low' | 'medium' | 'high'
@@ -84,14 +84,62 @@ export interface TimeseriesFile {
   months: MonthPoint[]
 }
 
-const base = `${import.meta.env.BASE_URL}data/`
+export interface BacktestRow {
+  cluster: string // cluster id, or 'POOLED'
+  gen_2019: number // MU/day, mean over valid days of Apr 1 – May 31
+  gen_2020: number
+  days_2019: number
+  days_2020: number
+  observed_2019: number // µmol/m²
+  observed_2020: number
+  predicted_2020: number
+  gen_change_pct: number
+  observed_change_pct: number
+  predicted_change_pct: number
+  error: number // predicted − observed, µmol/m²
+}
 
-async function getJson<T>(file: string): Promise<T> {
-  const res = await fetch(base + file)
-  if (!res.ok) throw new Error(`${file}: HTTP ${res.status}`)
+export interface SummaryFile {
+  generated_at: string
+  units: { coef: string; backtest: string }
+  pooled_model: { enhancement: ModelStats; ratio: ModelStats }
+  clusters: { id: string; generation_coef: number; p: number }[]
+  backtest: BacktestRow[]
+  findings: string[]
+}
+
+export interface Brief {
+  markdown: string
+}
+
+// VITE_API_URL unset: static files from public/data/. Set: the deployed API, same shapes.
+//   GET  {API}/clusters                  -> ClustersFile
+//   GET  {API}/clusters/{id}             -> ClusterDetail
+//   GET  {API}/clusters/{id}/timeseries  -> TimeseriesFile
+//   GET  {API}/summary                   -> SummaryFile
+//   POST {API}/brief/{id}                -> Brief
+const rawApi = import.meta.env.VITE_API_URL as string | undefined
+export const API_URL = rawApi ? rawApi.replace(/\/$/, '') : undefined
+export const briefAvailable = API_URL !== undefined
+
+const staticBase = `${import.meta.env.BASE_URL}data/`
+const url = (apiPath: string, file: string) => (API_URL ? API_URL + apiPath : staticBase + file)
+
+async function getJson<T>(href: string): Promise<T> {
+  const res = await fetch(href)
+  if (!res.ok) throw new Error(`${href}: HTTP ${res.status}`)
   return res.json() as Promise<T>
 }
 
-export const fetchClusters = () => getJson<ClustersFile>('clusters.json')
-export const fetchCluster = (id: string) => getJson<ClusterDetail>(`cluster_${id}.json`)
-export const fetchTimeseries = (id: string) => getJson<TimeseriesFile>(`timeseries_${id}.json`)
+export const fetchClusters = () => getJson<ClustersFile>(url('/clusters', 'clusters.json'))
+export const fetchCluster = (id: string) => getJson<ClusterDetail>(url(`/clusters/${id}`, `cluster_${id}.json`))
+export const fetchTimeseries = (id: string) =>
+  getJson<TimeseriesFile>(url(`/clusters/${id}/timeseries`, `timeseries_${id}.json`))
+export const fetchSummary = () => getJson<SummaryFile>(url('/summary', 'summary.json'))
+
+export async function generateBrief(id: string): Promise<Brief> {
+  if (!API_URL) throw new Error('Brief generation available in deployed version')
+  const res = await fetch(`${API_URL}/brief/${id}`, { method: 'POST' })
+  if (!res.ok) throw new Error(`Brief request failed: HTTP ${res.status}`)
+  return res.json() as Promise<Brief>
+}
