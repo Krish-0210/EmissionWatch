@@ -248,3 +248,4 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
   .page { animation: fade-only 200ms both; }
   @keyframes fade-only { from { opacity: 0; } to { opacity: 1; } }
 }
+.nocase { text-transform: none; }
