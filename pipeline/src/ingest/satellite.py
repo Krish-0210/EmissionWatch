@@ -1,14 +1,20 @@
 """Fetch Sentinel-5P TROPOMI NO2 columns around plants via Google Earth Engine.
 
 Monthly tropospheric NO2 (mol/m^2) from COPERNICUS/S5P/OFFL/L3_NO2 for:
-  - each cluster in plants.yaml (centroid of its plants): 10 km and 20 km disks, plus a
-    background annulus 50-80 km out that excludes a 25 km buffer around every registry plant
+  - each cluster in plants.yaml (centroid of its operating plants): 10 km and 20 km disks, plus a
+    background annulus 50-80 km out that excludes a 25 km buffer around every registry plant and
+    every operating Indian coal plant >= 500 MW in config/all_coal_plants_india.csv
   - each plant: 10 km disk (flagged `overlapping` when another plant is < 15 km away)
 
 How a month is built: the orbits for each day are averaged into one daily image,
 and the month value is the mean of those daily images. valid_fraction is the
 share of (pixel, day) pairs in the 20 km disk that have a valid retrieval, i.e. how
 much of the month cloud, monsoon or swath gaps removed.
+
+background_valid_fraction = (annulus area left after exclusion / full annulus area)
+x (valid share of the remaining pixel-days). A cluster gets background_flag=True when the
+median of this over all months is below BACKGROUND_MIN_VALID: its background then rests on
+little data.
 
 Usage (from pipeline/):
     python -m src.ingest.satellite [--start 2019-01] [--end 2026-08]
@@ -31,6 +37,7 @@ log = logging.getLogger(__name__)
 
 PIPELINE_DIR = Path(__file__).resolve().parents[2]
 PLANTS_PATH = PIPELINE_DIR / "config" / "plants.yaml"
+INDIA_CSV = PIPELINE_DIR / "config" / "all_coal_plants_india.csv"
 OUT_PATH = PIPELINE_DIR / "data" / "processed" / "no2_monthly.parquet"
 
 COLLECTION = "COPERNICUS/S5P/OFFL/L3_NO2"
@@ -39,9 +46,10 @@ SCALE_M = 1113.2  # native grid of the GEE L3 product (0.01 deg)
 BACKGROUND_KM = (50, 80)
 EXCLUDE_KM = 25
 OVERLAP_KM = 15
+BACKGROUND_MIN_VALID = 0.3
 
 COLUMNS = ["month", "entity_type", "entity_id", "ring_10km", "ring_20km", "background",
-           "enhancement", "valid_fraction", "overlapping"]
+           "enhancement", "valid_fraction", "background_valid_fraction", "background_flag", "overlapping"]
 
 
 def load_plants(path: Path = PLANTS_PATH) -> list[dict]:
@@ -54,24 +62,38 @@ def haversine_km(a: dict, b: dict) -> float:
     return 6371 * 2 * math.asin(math.sqrt(h))
 
 
-def build_regions(plants: list[dict]) -> ee.FeatureCollection:
-    """One feature per (entity, region) that gets a mean reduction."""
+def cluster_centroids(plants: list[dict]) -> dict[str, tuple[float, float]]:
+    """(lon, lat) per cluster: mean of its operating plants (retired plants would pull it off-centre)."""
+    out = {}
+    for c in sorted({p["cluster"] for p in plants}):
+        members = [p for p in plants if p["cluster"] == c and p.get("status", "operating") == "operating"]
+        out[c] = (sum(p["lon"] for p in members) / len(members), sum(p["lat"] for p in members) / len(members))
+    return out
+
+
+def build_regions(plants: list[dict], other_plants: list[tuple[float, float]] = ()) -> ee.FeatureCollection:
+    """One feature per (entity, region) that gets a mean reduction.
+
+    other_plants: extra (lon, lat) points kept out of the background annulus.
+    """
     point = lambda p: ee.Geometry.Point([p["lon"], p["lat"]])
-    exclusion = ee.FeatureCollection([ee.Feature(point(p).buffer(EXCLUDE_KM * 1000)) for p in plants]).union(1).geometry()
+    points = [point(p) for p in plants] + [ee.Geometry.Point([lon, lat]) for lon, lat in other_plants]
+    exclusion = ee.FeatureCollection([ee.Feature(pt.buffer(EXCLUDE_KM * 1000)) for pt in points]).union(1).geometry()
 
     feats = []
-    clusters = sorted({p["cluster"] for p in plants})
-    for c in clusters:
-        members = [p for p in plants if p["cluster"] == c]
-        centroid = ee.Geometry.Point([sum(p["lon"] for p in members) / len(members),
-                                      sum(p["lat"] for p in members) / len(members)])
-        annulus = (centroid.buffer(BACKGROUND_KM[1] * 1000)
-                   .difference(centroid.buffer(BACKGROUND_KM[0] * 1000), 1)
-                   .difference(exclusion, 1))
+    for c, (lon, lat) in cluster_centroids(plants).items():
+        centroid = ee.Geometry.Point([lon, lat])
+        full = centroid.buffer(BACKGROUND_KM[1] * 1000).difference(centroid.buffer(BACKGROUND_KM[0] * 1000), 1)
+        annulus = full.difference(exclusion, 1)
+        area_fraction = annulus.area(1).divide(full.area(1))
         for region, geom in (("ring_10km", centroid.buffer(10_000)),
                              ("ring_20km", centroid.buffer(20_000)),
                              ("background", annulus)):
-            feats.append(ee.Feature(geom, {"entity_type": "cluster", "entity_id": c, "region": region}))
+            props = {"entity_type": "cluster", "entity_id": c, "region": region}
+            feat = ee.Feature(geom, props)
+            if region == "background":
+                feat = feat.set("area_fraction", area_fraction)
+            feats.append(feat)
     for p in plants:
         feats.append(ee.Feature(point(p).buffer(10_000),
                                 {"entity_type": "plant", "entity_id": p["id"], "region": "ring_10km"}))
@@ -138,6 +160,13 @@ def to_table(records: list[dict], plants: list[dict]) -> pd.DataFrame:
     # valid_fraction is defined on ring_20km; plants only have a 10 km disk, so use that for them.
     wide = wide.merge(valid[["month", "entity_type", "entity_id", "valid"]].rename(columns={"valid": "valid_fraction"}),
                       on=["month", "entity_type", "entity_id"], how="left")
+    bg = raw[raw.region == "background"].assign(background_valid_fraction=lambda d: d["area_fraction"] * d["valid"])
+    wide = wide.merge(bg[["month", "entity_type", "entity_id", "background_valid_fraction"]],
+                      on=["month", "entity_type", "entity_id"], how="left")
+    median_bg = wide.groupby("entity_id")["background_valid_fraction"].median()
+    flag = (median_bg < BACKGROUND_MIN_VALID).astype("boolean")
+    wide["background_flag"] = wide["entity_id"].map(flag).astype("boolean")
+    wide.loc[wide["entity_type"] == "plant", "background_flag"] = pd.NA
     for col in ("ring_10km", "ring_20km", "background"):
         if col not in wide:
             wide[col] = float("nan")
@@ -155,7 +184,8 @@ def run(start: date, end: date | None = None, out_path: Path = OUT_PATH) -> pd.D
     ee.Initialize(project=os.environ["GEE_PROJECT_ID"])
 
     plants = load_plants()
-    regions = build_regions(plants)
+    india = pd.read_csv(INDIA_CSV)
+    regions = build_regions(plants, list(zip(india["lon"], india["lat"])))
     collection = ee.ImageCollection(COLLECTION).filterBounds(regions.geometry().bounds())
     end = end or latest_full_month(collection)
     months = [d.date() for d in pd.date_range(start, end, freq="MS")]
