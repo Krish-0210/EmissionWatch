@@ -9,3 +9,4 @@ boto3
 pyyaml
 xlrd
 pyarrow
+matplotlib
