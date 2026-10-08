@@ -283,7 +283,7 @@ plants:
 
   - id: adani-mundra-tpp
     name: Adani Mundra TPP
-    cea_names: ["MUNDRA TPS", "MUNDRA TPS-I & II", "MUNDRA TPS-III", "ADANI POWER LIMITED MUNDRA TPP - I & II", "ADANI POWER LIMITED MUNDRA TPP - III"]
+    cea_names: ["MUNDRA TPS", "MUNDRA TPS-I & II", "MUNDRA TPS-III", "ADANI POWER LIMITED MUNDRA TPP - I & II", "ADANI POWER LIMITED MUNDRA TPP - III", "ADANI POWER LIMITED MUNDRA TPP"]
     state: Gujarat
     lat: 22.823541
     lon: 69.55443
