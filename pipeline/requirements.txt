@@ -7,3 +7,5 @@ openpyxl
 python-dotenv
 boto3
 pyyaml
+xlrd
+pyarrow
