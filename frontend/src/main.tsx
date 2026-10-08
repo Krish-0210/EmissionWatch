@@ -8,6 +8,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
+// Dev-only FPS / frame-time readout; tree-shaken from production builds.
+if (import.meta.env.DEV) void import('./dev/fpsMeter')
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
