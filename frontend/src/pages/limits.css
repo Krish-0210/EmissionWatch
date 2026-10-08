@@ -1,0 +1,23 @@
+.pixel-demo { position: relative; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #090c10; max-width: 900px; }
+.pixel-demo svg { display: block; width: 100%; height: auto; }
+.pixel-demo .cell { fill: transparent; stroke: rgba(124, 232, 216, 0.35); stroke-width: 1; opacity: 0; transform: scale(1.15); transform-box: fill-box; transform-origin: center; transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), fill 0.6s; }
+.pixel-demo.in .cell { opacity: 1; transform: none; }
+.pixel-demo.in .cell.lit { fill: rgba(255, 138, 61, 0.16); stroke: rgba(255, 138, 61, 0.7); }
+.pixel-demo .plant { fill: var(--ember); filter: drop-shadow(0 0 5px var(--ember)); }
+.pixel-demo .plant-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; fill: var(--text); }
+.pixel-caption { position: absolute; left: 16px; top: 14px; }
+
+/* Slow drifting monsoon clouds */
+.clouds { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.clouds span { position: absolute; width: 46%; height: 60%; border-radius: 50%; background: radial-gradient(closest-side, rgba(200, 212, 224, 0.2), transparent); filter: blur(18px); animation: drift 38s linear infinite; }
+.clouds span:nth-child(1) { top: -10%; left: -50%; }
+.clouds span:nth-child(2) { top: 40%; left: -60%; width: 60%; animation-duration: 52s; animation-delay: -18s; }
+.clouds span:nth-child(3) { top: 10%; left: -40%; width: 36%; animation-duration: 44s; animation-delay: -30s; opacity: 0.8; }
+@keyframes drift { to { transform: translateX(320%); } }
+
+.limits-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
+@media (max-width: 860px) { .limits-list { grid-template-columns: 1fr; } }
+.limit { display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 28px 0; border-top: 1px solid var(--border); }
+.limit-n { color: var(--signal); font-size: 13px; padding-top: 4px; }
+.limit-title { font-size: 19px; font-weight: 500; margin: 0 0 8px; }
+.limit p { margin: 0; }
