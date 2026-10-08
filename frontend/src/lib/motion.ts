@@ -43,3 +43,13 @@ export const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 export const span = (x: number, a: number, b: number) => clamp01((x - a) / (b - a))
 export const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
 export const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+
+// Replace an element's text by editing its text node (a characterData change, so it doesn't wake
+// the reveal MutationObserver, which watches childList).
+export function setText(el: Element | null | undefined, text: string) {
+  if (!el) return
+  const n = el.firstChild
+  if (n && n.nodeType === Node.TEXT_NODE && !n.nextSibling) {
+    if ((n as Text).data !== text) (n as Text).data = text
+  } else el.textContent = text
+}

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { prefersReducedMotion, useInView } from '../lib/motion'
+import { useEffect, useRef } from 'react'
+import { prefersReducedMotion, setText, useInView } from '../lib/motion'
 
 interface Props {
   value: number
@@ -22,32 +22,35 @@ export default function CountUp({ value, decimals = 0, duration = 1600, pad = 0,
   const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref)
   const go = start ?? inView
-  const [shown, setShown] = useState(0)
+  const out = useRef<HTMLSpanElement>(null)
 
+  // Writes the text node directly each frame; no React state while counting.
   useEffect(() => {
-    if (!go) return
+    const el = out.current
+    if (!go || !el) return
+    const show = (x: number) => {
+      setText(el, `${prefix}${format(x, decimals, pad)}${suffix}`)
+    }
     if (prefersReducedMotion()) {
-      const id = requestAnimationFrame(() => setShown(value))
-      return () => cancelAnimationFrame(id)
+      show(value)
+      return
     }
     let raf = 0
     const t0 = performance.now()
     const tick = (t: number) => {
       const k = Math.min(1, (t - t0) / duration)
-      setShown(value * (1 - Math.pow(1 - k, 4)))
+      show(value * (1 - Math.pow(1 - k, 4)))
       if (k < 1) raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [go, value, duration])
+  }, [go, value, duration, decimals, pad, prefix, suffix])
 
   return (
     <span ref={ref} className={`mono ${className ?? ''}`}>
       <span className="sr-only">{`${prefix}${format(value, decimals, 0)}${suffix}`}</span>
-      <span aria-hidden="true">
-        {prefix}
-        {format(shown, decimals, pad)}
-        {suffix}
+      <span ref={out} aria-hidden="true">
+        {`${prefix}${format(0, decimals, pad)}${suffix}`}
       </span>
     </span>
   )

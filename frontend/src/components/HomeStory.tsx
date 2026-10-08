@@ -1,11 +1,13 @@
+import { useEffect, useRef, type MutableRefObject, type RefObject } from 'react'
 import type { ClusterSummary, MonthPoint, SummaryFile } from '../api'
 import { CONF_LABEL, RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { easeOut, span } from '../lib/motion'
-import { STEP_AT, STEPS } from '../lib/story'
+import { STEP_AT, STEPS, type RegisterDrive } from '../lib/story'
 import CountUp from './CountUp'
 
 // Generation and observed NO2, each indexed to its own mean = 100 so they share one axis.
-function IndexedChart({ months, progress }: { months: MonthPoint[]; progress: number }) {
+// Line drawing is driven from scroll through refs (see HomeStory's drive), not props.
+function IndexedChart({ months, gen, no2 }: { months: MonthPoint[]; gen: RefObject<SVGPathElement | null>; no2: RefObject<SVGPathElement | null> }) {
   const W = 520, H = 200, P = 8
   const mean = (k: 'generation_mu' | 'observed_no2') => {
     const v = months.map((m) => m[k]).filter((x): x is number => x != null)
@@ -29,7 +31,6 @@ function IndexedChart({ months, progress }: { months: MonthPoint[]; progress: nu
     })
     return d
   }
-  const draw = easeOut(progress)
   const years = months.filter((m) => m.month.endsWith('-01'))
   return (
     <svg viewBox={`0 0 ${W} ${H + 18}`} className="story-chart" role="img" aria-label="Monthly generation and observed NO2, indexed to their own means">
@@ -42,15 +43,16 @@ function IndexedChart({ months, progress }: { months: MonthPoint[]; progress: nu
           </text>
         )
       })}
-      <path d={path('generation_mu', gm)} pathLength={1} className="line gen" style={{ strokeDashoffset: 1 - draw }} />
-      <path d={path('observed_no2', nm)} pathLength={1} className="line no2" style={{ strokeDashoffset: 1 - span(draw, 0.15, 1) }} />
+      <path ref={gen} d={path('generation_mu', gm)} pathLength={1} className="line gen" style={{ strokeDashoffset: 1 }} />
+      <path ref={no2} d={path('observed_no2', nm)} pathLength={1} className="line no2" style={{ strokeDashoffset: 1 }} />
     </svg>
   )
 }
 
-function ScoreRing({ score, color, progress }: { score: number; color: string; progress: number }) {
-  const r = 70, c = 2 * Math.PI * r
-  const k = easeOut(progress) * (score / 100)
+const RING_C = 2 * Math.PI * 70
+const local = (p: number, i: number) => span(p, STEP_AT[i], STEP_AT[i + 1] ?? 1)
+function ScoreRing({ color, arc }: { color: string; arc: RefObject<SVGCircleElement | null> }) {
+  const r = 70, c = RING_C
   return (
     <svg viewBox="0 0 180 180" className="score-ring" aria-hidden="true">
       <circle cx="90" cy="90" r={r} fill="none" stroke="#1c232b" strokeWidth="6" />
@@ -63,16 +65,17 @@ function ScoreRing({ score, color, progress }: { score: number; color: string; p
         strokeWidth="6"
         strokeLinecap="round"
         strokeDasharray={c}
-        strokeDashoffset={c * (1 - k)}
+        strokeDashoffset={c}
         transform="rotate(-90 90 90)"
-        style={{ filter: `drop-shadow(0 0 8px ${color})` }}
+        ref={arc}
       />
     </svg>
   )
 }
 
 interface Props {
-  p: number
+  register: RegisterDrive
+  progress: MutableRefObject<{ progress: number }>
   step: number
   clusters: ClusterSummary[]
   focus: ClusterSummary
@@ -80,12 +83,27 @@ interface Props {
   months?: MonthPoint[]
 }
 
-export default function HomeStory({ p, step, clusters, focus, summary, months }: Props) {
+export default function HomeStory({ register, progress, step, clusters, focus, summary, months }: Props) {
   const plants = clusters.reduce((a, c) => a + c.n_plants, 0)
   const mw = clusters.reduce((a, c) => a + c.capacity_mw, 0)
   const years = months?.length ? Number(months[months.length - 1].month.slice(0, 4)) - Number(months[0].month.slice(0, 4)) + 1 : 0
-  const local = (i: number) => span(p, STEP_AT[i], STEP_AT[i + 1] ?? 1)
   const color = RISK_COLOR[focus.risk_level]
+  const gen = useRef<SVGPathElement>(null)
+  const no2 = useRef<SVGPathElement>(null)
+  const arc = useRef<SVGCircleElement>(null)
+  const score = focus.risk_score
+
+  useEffect(() => {
+    const apply = (p: number) => {
+      const draw = easeOut(local(p, 2))
+      gen.current?.style.setProperty('stroke-dashoffset', (1 - draw).toFixed(4))
+      no2.current?.style.setProperty('stroke-dashoffset', (1 - span(draw, 0.15, 1)).toFixed(4))
+      const k = easeOut(Math.min(1, local(p, 3) * 1.6)) * (score / 100)
+      arc.current?.setAttribute('stroke-dashoffset', (RING_C * (1 - k)).toFixed(2))
+    }
+    apply(progress.current.progress)
+    return register(apply)
+  }, [register, progress, score, months])
 
   return (
     <div className="story" aria-live="polite">
@@ -158,7 +176,7 @@ export default function HomeStory({ p, step, clusters, focus, summary, months }:
             <span className="key no2">Observed NO₂</span>
             <span className="micro">{focus.name} · monthly · index, mean = 100</span>
           </div>
-          {months && <IndexedChart months={months} progress={local(2)} />}
+          {months && <IndexedChart months={months} gen={gen} no2={no2} />}
           {years > 0 && (
             <div className="story-stats">
               <div>
@@ -176,7 +194,7 @@ export default function HomeStory({ p, step, clusters, focus, summary, months }:
         <section className={`story-panel ${step === 3 ? 'on' : ''}`} aria-hidden={step !== 3}>
           <div className="micro signal">04 / The score</div>
           <div className="score-wrap">
-            <ScoreRing score={focus.risk_score} color={color} progress={local(3) * 1.6} />
+            <ScoreRing color={color} arc={arc} />
             <div className="score-center">
               <CountUp value={Math.round(focus.risk_score)} start={step >= 3} pad={3} className="score-num" />
               <div className="micro">/ 100</div>

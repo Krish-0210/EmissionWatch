@@ -13,13 +13,21 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  background: transparent; /* html paints --bg; the glow below is its own fixed layer */
+  overflow-x: hidden;
+}
+/* Ambient glow on a fixed, composited layer (background-attachment: fixed repaints on every scroll). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(1200px 800px at 85% -10%, rgba(66, 92, 120, 0.18), transparent 60%),
     radial-gradient(900px 700px at -10% 40%, rgba(44, 62, 82, 0.16), transparent 60%),
-    radial-gradient(800px 600px at 60% 110%, rgba(40, 58, 76, 0.14), transparent 60%),
-    var(--bg);
-  background-attachment: fixed;
-  overflow-x: hidden;
+    radial-gradient(800px 600px at 60% 110%, rgba(40, 58, 76, 0.14), transparent 60%);
+  transform: translateZ(0);
 }
 /* Film grain: inline SVG noise, very faint */
 body::after {
@@ -29,6 +37,7 @@ body::after {
   pointer-events: none;
   z-index: 3000;
   opacity: 0.045;
+  transform: translateZ(0);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 img, svg, canvas { max-width: 100%; }
@@ -109,6 +118,7 @@ h1, h2, h3, h4 { margin: 0 0 0.5em; font-weight: 400; }
   z-index: 0;
   font-size: clamp(120px, 24vw, 420px);
   will-change: transform;
+  contain: layout paint;
 }
 .layer { position: relative; z-index: 1; }
 /* Clip giant background words without creating a scroll container (keeps position: sticky working). */
@@ -220,17 +230,18 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
 
 /* ---------- Page transition ---------- */
 .page { animation: page-in 380ms var(--ease-out) both; }
-@keyframes page-in { from { opacity: 0; filter: blur(6px); transform: scale(0.992); } to { opacity: 1; filter: none; transform: none; } }
+@keyframes page-in { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
 
 /* ---------- Cursor follower ---------- */
-.cursor {
-  position: fixed; left: 0; top: 0; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%;
-  border: 1px solid rgba(124, 232, 216, 0.55); pointer-events: none; z-index: 4000;
-  transition: width 0.25s var(--ease-out), height 0.25s var(--ease-out), margin 0.25s var(--ease-out), opacity 0.3s, background 0.25s;
-  mix-blend-mode: screen; opacity: 0;
+/* Outer element only translates (written by JS); the inner ring scales on hover. Transform/opacity only. */
+.cursor { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 4000; opacity: 0; transition: opacity 0.3s; will-change: transform; }
+.cursor i {
+  position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid rgba(124, 232, 216, 0.6); background: rgba(124, 232, 216, 0);
+  transition: transform 0.25s var(--ease-out), background-color 0.25s;
 }
 .cursor.on { opacity: 1; }
-.cursor.hot { width: 52px; height: 52px; margin: -26px 0 0 -26px; background: rgba(124, 232, 216, 0.08); }
+.cursor.hot i { transform: scale(1.85); background: rgba(124, 232, 216, 0.08); }
 
 /* ---------- Footer ---------- */
 .footer { border-top: 1px solid var(--border); padding: 56px 0 40px; position: relative; overflow: hidden; }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { BacktestRow, SummaryFile } from '../api'
@@ -8,8 +8,8 @@ import CountUp from '../components/CountUp'
 import MethodScene from '../components/MethodScene'
 import { fmt, fmtP, fmtPct, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
-import { useInView, useReducedMotion } from '../lib/motion'
-import { METHOD_AT } from '../lib/story'
+import { setText, useInView, useReducedMotion } from '../lib/motion'
+import { METHOD_AT, type RegisterDrive } from '../lib/story'
 import { useAsync } from '../lib/useAsync'
 import './howitworks.css'
 
@@ -224,17 +224,37 @@ export default function HowItWorks() {
   const ts = useAsync(() => (focus ? fetchTimeseries(focus.id) : Promise.resolve(undefined)), [focus?.id])
 
   const stage = useRef<HTMLDivElement>(null)
-  const [p, setP] = useState(0)
+  // Scroll progress goes to refs and DOM; React re-renders only when the step changes.
+  const progress = useRef(0)
+  const sceneDrive = useRef<((p: number) => void) | null>(null)
+  const register = useCallback<RegisterDrive>((fn) => {
+    sceneDrive.current = fn
+    return () => {
+      if (sceneDrive.current === fn) sceneDrive.current = null
+    }
+  }, [])
+  const counter = useRef<HTMLSpanElement>(null)
+  const bar = useRef<HTMLDivElement>(null)
+  const [step, setStep] = useState(0)
   useEffect(() => {
     const el = stage.current
     if (!el) return
-    const st = ScrollTrigger.create({ trigger: el, start: 'top top', end: 'bottom bottom', onUpdate: (s) => setP(s.progress) })
+    const apply = (p: number) => {
+      progress.current = p
+      let k = 0
+      METHOD_AT.forEach((a, i) => {
+        if (p >= a) k = i
+      })
+      setStep(k)
+      sceneDrive.current?.(p)
+      const n = String(Math.round(p * 100)).padStart(3, '0')
+      setText(counter.current, n)
+      if (bar.current) bar.current.style.transform = `scaleX(${p.toFixed(4)})`
+    }
+    const st = ScrollTrigger.create({ trigger: el, start: 'top top', end: 'bottom bottom', onUpdate: (s) => apply(s.progress) })
+    apply(st.progress)
     return () => st.kill()
   }, [])
-  let step = 0
-  METHOD_AT.forEach((a, i) => {
-    if (p >= a) step = i
-  })
 
   return (
     <>
@@ -263,13 +283,14 @@ export default function HowItWorks() {
               ))}
             </ol>
             <div className="micro hiw-progress">
-              <span className="mono text">{String(Math.round(p * 100)).padStart(3, '0')}</span> / 100
+              <span ref={counter} className="mono text">000</span> / 100
             </div>
           </div>
           <div className="container hiw-body">
             <div className="hiw-scene">
               <MethodScene
-                p={p}
+                register={register}
+                progress={progress}
                 residuals={ts.data?.months}
                 score={focus?.risk_score}
                 scoreColor={focus ? RISK_COLOR[focus.risk_level] : undefined}
@@ -293,7 +314,7 @@ export default function HowItWorks() {
             </div>
           </div>
           <div className="hiw-bar" aria-hidden="true">
-            <div style={{ transform: `scaleX(${p})` }} />
+            <div ref={bar} style={{ transform: 'scaleX(0)' }} />
           </div>
         </div>
       </div>

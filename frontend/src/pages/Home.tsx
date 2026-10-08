@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
 import BigWord from '../components/BigWord'
@@ -7,7 +7,7 @@ import GlobePoster from '../components/GlobePoster'
 import HomeStory from '../components/HomeStory'
 import { ScrollTrigger } from '../lib/gsap'
 import { useIsMobile, useReducedMotion } from '../lib/motion'
-import { stepFor } from '../lib/story'
+import { stepFor, type RegisterDrive } from '../lib/story'
 import { webglOk } from '../lib/webgl'
 import { useAsync } from '../lib/useAsync'
 import type { GlobeControl } from '../three/GlobeScene'
@@ -66,7 +66,15 @@ export default function Home() {
   const mobile = useIsMobile()
   const stage = useRef<HTMLDivElement>(null)
   const control = useRef<GlobeControl>({ progress: 0, dragging: false, dragYaw: 0, dragPitch: 0, mouseX: 0, mouseY: 0 })
-  const [p, setP] = useState(0)
+  const hero = useRef<HTMLDivElement>(null)
+  const storyDrive = useRef<((p: number) => void) | null>(null)
+  const register = useCallback<RegisterDrive>((fn) => {
+    storyDrive.current = fn
+    return () => {
+      if (storyDrive.current === fn) storyDrive.current = null
+    }
+  }, [])
+  const [step, setStep] = useState(-1)
   const [mount3d, setMount3d] = useState(false)
   const [ready3d, setReady3d] = useState(false)
   const onReady = useCallback(() => setReady3d(true), [])
@@ -92,24 +100,28 @@ export default function Home() {
     return cleanup
   }, [reduced])
 
-  // Scroll progress through the pinned stage.
+  // Scroll progress through the pinned stage. Continuous values go straight to refs and DOM;
+  // React only re-renders when the story step changes.
   useEffect(() => {
     const el = stage.current
     if (!el) return
-    const st = ScrollTrigger.create({
-      trigger: el,
-      start: 'top top',
-      end: 'bottom bottom',
-      onUpdate: (s) => {
-        control.current.progress = s.progress
-        setP(s.progress)
-      },
-    })
+    const apply = (p: number) => {
+      control.current.progress = p
+      setStep(stepFor(p))
+      storyDrive.current?.(p)
+      const h = hero.current
+      if (h) {
+        const out = Math.min(1, p / 0.1)
+        h.style.opacity = String(1 - out)
+        h.style.transform = `translate3d(0, ${(-out * 40).toFixed(1)}px, 0)`
+        h.style.pointerEvents = out > 0.5 ? 'none' : ''
+      }
+    }
+    const st = ScrollTrigger.create({ trigger: el, start: 'top top', end: 'bottom bottom', onUpdate: (s) => apply(s.progress) })
+    apply(st.progress)
     return () => st.kill()
   }, [])
 
-  const step = stepFor(p)
-  const heroOut = Math.min(1, p / 0.1)
   const years = months?.length ? `${months[0].month.slice(0, 4)}–${months[months.length - 1].month.slice(0, 4)}` : '2019–2026'
 
   return (
@@ -126,10 +138,7 @@ export default function Home() {
           </div>
           <div className="stage-vignette" aria-hidden="true" />
 
-          <div
-            className="hero container"
-            style={{ opacity: 1 - heroOut, transform: `translateY(${-heroOut * 40}px)`, pointerEvents: heroOut > 0.5 ? 'none' : undefined }}
-          >
+          <div ref={hero} className="hero container">
             <div className="micro signal hero-micro">
               <span className="live-dot" aria-hidden="true" /> Live data · {clusters.data?.clusters.length ?? 11} clusters · {years}
             </div>
@@ -155,11 +164,20 @@ export default function Home() {
           </div>
 
           {clusters.data && focus && step >= 0 && (
-            <HomeStory p={p} step={step} clusters={clusters.data.clusters} focus={focus} summary={summary.data} months={months} />
+            <HomeStory register={register} progress={control} step={step} clusters={clusters.data.clusters} focus={focus} summary={summary.data} months={months} />
           )}
         </div>
       </div>
 
+      <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} />
+    </>
+  )
+}
+
+// Static sections below the stage; memoised so step changes in the story don't re-render them.
+const HomeSections = memo(function HomeSections({ clusterCount, years }: { clusterCount: number; years: string }) {
+  return (
+    <>
       <section className="section">
         <BigWord style={{ top: '0.1em', right: '-0.05em' }}>01</BigWord>
         <div className="container layer">
@@ -206,7 +224,7 @@ export default function Home() {
         <div className="container">
           <div className="numbers-grid">
             <div className="reveal">
-              <CountUp value={clusters.data?.clusters.length ?? 11} pad={2} className="num" />
+              <CountUp value={clusterCount} pad={2} className="num" />
               <div className="micro">coal plant clusters</div>
             </div>
             <div className="reveal" style={{ '--d': '100ms' } as React.CSSProperties}>
@@ -257,4 +275,4 @@ export default function Home() {
       </section>
     </>
   )
-}
+})

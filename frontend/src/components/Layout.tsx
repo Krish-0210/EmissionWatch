@@ -26,16 +26,21 @@ function GitHubIcon() {
 
 let lenis: Lenis | null = null
 
-// Smooth scroll (desktop, motion allowed), synced with GSAP ScrollTrigger.
+// Smooth scroll on desktop with motion allowed; touch keeps native scrolling. Lenis runs inside
+// GSAP's ticker (first in the queue) and feeds ScrollTrigger, so there is a single frame loop.
 function useSmoothScroll() {
   useEffect(() => {
-    if (prefersReducedMotion() || window.matchMedia('(pointer: coarse)').matches) return
-    lenis = new Lenis({ lerp: 0.12, wheelMultiplier: 0.9 })
+    const refresh = () => ScrollTrigger.refresh()
+    document.fonts?.ready.then(refresh)
+    window.addEventListener('load', refresh, { once: true })
+    if (prefersReducedMotion() || window.matchMedia('(pointer: coarse)').matches) return () => window.removeEventListener('load', refresh)
+    lenis = new Lenis({ lerp: 0.1, smoothWheel: true, syncTouch: false, wheelMultiplier: 0.9, autoRaf: false })
     lenis.on('scroll', ScrollTrigger.update)
     const tick = (t: number) => lenis?.raf(t * 1000)
-    gsap.ticker.add(tick)
+    gsap.ticker.add(tick, false, true)
     gsap.ticker.lagSmoothing(0)
     return () => {
+      window.removeEventListener('load', refresh)
       gsap.ticker.remove(tick)
       lenis?.destroy()
       lenis = null
@@ -62,6 +67,8 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
     )
     const seen = new WeakSet<Element>()
     let para: HTMLElement[] = []
+    let dirty = true
+    let lastY = -1
     const scan = () => {
       el.querySelectorAll('.reveal, .rule').forEach((n) => {
         if (!seen.has(n)) {
@@ -70,36 +77,41 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
         }
       })
       para = Array.from(el.querySelectorAll<HTMLElement>('[data-parallax]'))
+      dirty = true
     }
     scan()
     const mo = new MutationObserver(scan)
     mo.observe(el, { childList: true, subtree: true })
 
-    let raf = 0
+    // Parallax runs on GSAP's ticker (after Lenis) only when the scroll position moved; all rects
+    // are read before any write.
     const update = () => {
-      raf = 0
+      const sy = window.scrollY
+      if (!dirty && sy === lastY) return
+      dirty = false
+      lastY = sy
       const vh = window.innerHeight
-      for (const p of para) {
-        const host = p.parentElement
-        if (!host) continue
-        const r = host.getBoundingClientRect()
-        if (r.bottom < -200 || r.top > vh + 200) continue
-        const speed = Number(p.dataset.parallax) || 0.15
-        p.style.transform = `translate3d(0, ${((r.top + r.height / 2 - vh / 2) * -speed).toFixed(1)}px, 0)`
-      }
+      const ys = para.map((p) => {
+        const r = p.parentElement?.getBoundingClientRect()
+        if (!r || r.bottom < -200 || r.top > vh + 200) return null
+        return (r.top + r.height / 2 - vh / 2) * -(Number(p.dataset.parallax) || 0.15)
+      })
+      ys.forEach((y, i) => {
+        if (y != null) para[i].style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`
+      })
     }
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update)
+    const onResize = () => {
+      dirty = true
     }
     if (!reduced) {
-      window.addEventListener('scroll', onScroll, { passive: true })
-      onScroll()
+      window.addEventListener('resize', onResize)
+      gsap.ticker.add(update)
     }
     return () => {
       io.disconnect()
       mo.disconnect()
-      window.removeEventListener('scroll', onScroll)
-      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', onResize)
+      gsap.ticker.remove(update)
     }
   }, [root, key])
 }

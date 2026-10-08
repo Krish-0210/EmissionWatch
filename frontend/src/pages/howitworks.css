@@ -13,7 +13,7 @@
 .hiw-step.on { opacity: 1; transform: none; transition: opacity 0.6s var(--ease-out) 0.12s, transform 0.6s var(--ease-out) 0.12s; }
 .hiw-step h2 { margin: 14px 0 16px; }
 .hiw-bar { height: 2px; background: var(--border); }
-.hiw-bar > div { height: 100%; background: var(--signal); transform-origin: left; box-shadow: 0 0 10px var(--signal); }
+.hiw-bar > div { height: 100%; background: var(--signal); transform-origin: left; will-change: transform; }
 @media (max-width: 860px) {
   .hiw-stage { height: 560vh; }
   .hiw-chips .chip:not(.on) { display: none; }
