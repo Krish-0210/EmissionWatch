@@ -1,0 +1,41 @@
+.nearme-page { position: relative; overflow: hidden; }
+.nearme-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: center; margin-top: 32px; }
+@media (max-width: 860px) { .nearme-grid { grid-template-columns: 1fr; } }
+.controls label { display: block; margin-bottom: 10px; }
+.controls select {
+  width: 100%; min-height: 50px; padding: 0 14px; border-radius: 10px; font: inherit; font-size: 16px;
+  background: var(--bg); color: var(--text); border: 1px solid var(--border-2); appearance: auto;
+}
+.controls select:focus { border-color: var(--signal); }
+.or { text-align: center; margin: 14px 0; }
+.pill.wide { width: 100%; justify-content: center; }
+
+/* Radar */
+.radar { position: relative; width: min(100%, 420px); aspect-ratio: 1; margin: 0 auto; border-radius: 50%; overflow: hidden;
+  background: radial-gradient(circle, rgba(124, 232, 216, 0.06), rgba(7, 9, 12, 0) 70%); }
+.radar svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.radar-ring { fill: none; stroke: rgba(124, 232, 216, 0.18); stroke-width: 0.4; }
+.radar-me { fill: var(--signal); filter: drop-shadow(0 0 3px var(--signal)); }
+.radar-sweep {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(124, 232, 216, 0.38), rgba(124, 232, 216, 0.08) 40deg, transparent 90deg);
+  animation: sweep 4s linear infinite; mix-blend-mode: screen;
+}
+.radar.scanning .radar-sweep { animation-duration: 1.6s; }
+@keyframes sweep { to { transform: rotate(360deg); } }
+.radar-scale { position: absolute; bottom: 6%; left: 0; right: 0; text-align: center; font-size: 10px; }
+.blip { opacity: 0; animation: blip-in 0.6s var(--ease-out) var(--d) forwards; }
+.blip-dot { fill: var(--c); filter: drop-shadow(0 0 4px var(--c)); }
+.blip-ring { fill: none; stroke: var(--c); stroke-width: 0.8; transform-origin: center; transform-box: fill-box; animation: blip-pulse 2.2s var(--ease-out) var(--d) infinite; }
+@keyframes blip-in { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; } }
+@keyframes blip-pulse { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+
+/* Results */
+.near-results { margin-top: 40px; }
+.near-card { display: block; color: var(--text); text-decoration: none; opacity: 0; transform: translateY(26px);
+  animation: rise 0.7s var(--ease-out) var(--d) forwards; transition: border-color 0.25s; }
+.near-card:hover { color: var(--text); border-color: var(--border-2); }
+.near-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.near-top h2 { margin: 0; }
+.near-dist { margin-bottom: 12px; }
+@keyframes rise { to { opacity: 1; transform: none; } }
