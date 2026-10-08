@@ -42,3 +42,6 @@ pipeline/data/processed/*
 Thumbs.db
 .vscode/
 .idea/
+
+# Local assistant notes
+CLAUDE.md
