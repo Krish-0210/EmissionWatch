@@ -1,74 +1,115 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useState, type CSSProperties } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { fetchClusters } from '../api'
 import { ConfidenceBadge, RiskBadge } from '../components/Badges'
+import BigWord from '../components/BigWord'
 import ClusterMap from '../components/ClusterMap'
+import CountUp from '../components/CountUp'
 import { RISK_COLOR, RISK_LABEL } from '../lib/format'
+import { prefersReducedMotion } from '../lib/motion'
 import { useAsync } from '../lib/useAsync'
+import './riskmap.css'
 
 export default function RiskMap() {
   const { data, error } = useAsync(fetchClusters, [])
   const [hover, setHover] = useState<string>()
+  const [flying, setFlying] = useState<string>()
+  const navigate = useNavigate()
 
-  if (error) return <div className="container section alert err">Could not load clusters: {error}</div>
-  if (!data) return <div className="container loading">Loading clusters…</div>
+  const select = (id: string) => {
+    if (prefersReducedMotion()) navigate(`/cluster/${id}`)
+    else setFlying(id)
+  }
+  const arrive = useCallback(() => {
+    if (flying) navigate(`/cluster/${flying}`)
+  }, [flying, navigate])
+
+  if (error)
+    return (
+      <div className="container section">
+        <div className="alert err">Could not load clusters: {error}</div>
+      </div>
+    )
+  if (!data) return <div className="container loading micro">Loading clusters…</div>
 
   const ranked = [...data.clusters].sort((a, b) => b.risk_score - a.risk_score)
+  const target = data.clusters.find((c) => c.id === flying)
 
   return (
-    <div className="container section">
-      <h1>Audit Risk Map</h1>
-      <p className="lede">
-        Eleven coal plant clusters, scored 0–100 on how far satellite NO₂ departs from what reported generation and
-        weather predict. Data as of {data.as_of}. Click a cluster for details.
-      </p>
-      <div className="map-layout" style={{ marginTop: 24 }}>
-        <div>
-          <div className="map-box">
-            <ClusterMap clusters={data.clusters} highlight={hover} onHover={setHover} />
-          </div>
-          <div className="legend" aria-label="Legend">
-            {(['high', 'medium', 'low'] as const).map((l) => (
-              <span key={l}>
-                <span className="badge" style={{ padding: 0, border: 0 }}>
-                  <span className="dot" style={{ background: RISK_COLOR[l] }} />
+    <div className="section-tight riskmap">
+      <BigWord style={{ top: '0.05em', right: '-0.04em' }}>Map</BigWord>
+      <div className="container layer">
+        <div className="micro signal reveal">Audit risk map · data as of {data.as_of}</div>
+        <h1 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 18px' } as CSSProperties}>
+          {data.clusters.length} clusters. <span className="dim">One score each.</span>
+        </h1>
+        <p className="lede reveal" style={{ '--d': '160ms' } as CSSProperties}>
+          Scored 0–100 on how far satellite NO₂ departs from what reported generation and weather predict. Select a
+          cluster to fly in.
+        </p>
+
+        <div className="map-layout">
+          <div className="reveal" style={{ '--d': '200ms' } as CSSProperties}>
+            <div className="map-box">
+              <ClusterMap
+                clusters={data.clusters}
+                highlight={hover ?? flying}
+                onHover={setHover}
+                onSelect={select}
+                flyTo={target}
+                onArrive={arrive}
+              />
+            </div>
+            <div className="legend" aria-label="Legend">
+              {(['high', 'medium', 'low'] as const).map((l) => (
+                <span key={l}>
+                  <i style={{ borderColor: RISK_COLOR[l], boxShadow: `0 0 8px ${RISK_COLOR[l]}` }} />
+                  {RISK_LABEL[l]}
                 </span>
-                {RISK_LABEL[l]}
-              </span>
-            ))}
-            <span>Circle size = installed capacity</span>
+              ))}
+              <span className="micro">Ring size = installed capacity</span>
+            </div>
           </div>
-        </div>
-        <div>
-          <h2 style={{ fontSize: '1.2rem' }}>Ranked by risk score</h2>
-          <ol className="rank-list">
-            {ranked.map((c, i) => (
-              <li key={c.id}>
-                <Link
-                  to={`/cluster/${c.id}`}
-                  className={`rank-item${hover === c.id ? ' hl' : ''}`}
-                  onMouseEnter={() => setHover(c.id)}
-                  onMouseLeave={() => setHover(undefined)}
-                  onFocus={() => setHover(c.id)}
-                  onBlur={() => setHover(undefined)}
-                >
-                  <span className="rank-pos">{i + 1}</span>
-                  <span>
-                    <span className="rank-name">{c.name}</span>
-                    <span className="muted small"> · {c.states.join(', ')}</span>
-                    <span style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                      <RiskBadge level={c.risk_level} />
-                      <ConfidenceBadge confidence={c.confidence} />
+
+          <div>
+            <div className="micro" style={{ marginBottom: 12 }}>
+              Ranked by risk score
+            </div>
+            <ol className="rank-list">
+              {ranked.map((c, i) => (
+                <li key={c.id} className="reveal" style={{ '--d': `${240 + i * 60}ms` } as CSSProperties}>
+                  <Link
+                    to={`/cluster/${c.id}`}
+                    className={`rank-item${hover === c.id || flying === c.id ? ' hl' : ''}`}
+                    style={{ '--rc': RISK_COLOR[c.risk_level] } as CSSProperties}
+                    onMouseEnter={() => setHover(c.id)}
+                    onMouseLeave={() => setHover(undefined)}
+                    onFocus={() => setHover(c.id)}
+                    onBlur={() => setHover(undefined)}
+                    onClick={(e) => {
+                      if (e.metaKey || e.ctrlKey || e.shiftKey) return
+                      e.preventDefault()
+                      select(c.id)
+                    }}
+                  >
+                    <span className="rank-pos mono">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="rank-body">
+                      <span className="rank-name">{c.name}</span>
+                      <span className="micro"> {c.states.join(' · ')}</span>
+                      <span className="row" style={{ gap: 6, marginTop: 8 }}>
+                        <RiskBadge level={c.risk_level} />
+                        <ConfidenceBadge confidence={c.confidence} />
+                      </span>
                     </span>
-                  </span>
-                  <span className="rank-score">
-                    <span className="n">{Math.round(c.risk_score)}</span>
-                    <span className="muted small">/ 100</span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ol>
+                    <span className="rank-score">
+                      <CountUp value={Math.round(c.risk_score)} duration={1200} className="n" />
+                      <span className="micro">/100</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </div>
     </div>

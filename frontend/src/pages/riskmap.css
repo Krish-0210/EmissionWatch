@@ -1,0 +1,46 @@
+.riskmap { position: relative; overflow: hidden; }
+.map-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; margin-top: 36px; }
+.map-box { height: min(74vh, 720px); min-height: 420px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); position: relative; }
+.map-box::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 80px rgba(7, 9, 12, 0.8); z-index: 500; }
+.map-box .leaflet-container { height: 100%; width: 100%; background: #0b0e12; font-family: var(--font-body); }
+.leaflet-control-attribution { background: rgba(7, 9, 12, 0.8) !important; color: var(--muted) !important; font-size: 10px; }
+.leaflet-control-attribution a { color: var(--muted) !important; }
+.leaflet-bar a { background: var(--surface) !important; color: var(--text) !important; border-color: var(--border) !important; }
+.leaflet-bar { border: 1px solid var(--border) !important; }
+.mk-tip { background: var(--surface) !important; color: var(--text) !important; border: 1px solid var(--border-2) !important; border-radius: 8px !important; box-shadow: none !important; font-size: 12px; }
+.mk-tip::before { display: none; }
+@media (max-width: 960px) {
+  .map-layout { grid-template-columns: 1fr; }
+  .map-box { height: 56vh; min-height: 340px; }
+}
+
+/* Pulsing ring markers */
+.mk { position: relative; display: block; width: var(--s); height: var(--s); --c: var(--risk-low); }
+.mk-medium { --c: var(--risk-medium); }
+.mk-high { --c: var(--risk-high); }
+.mk b { position: absolute; inset: 32%; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c), 0 0 2px #000; }
+.mk i { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--c); opacity: 0; animation: mk-pulse 2.8s var(--ease-out) infinite; }
+.mk i + i { animation-delay: 1.4s; }
+.mk::before { content: ''; position: absolute; inset: 8%; border-radius: 50%; border: 1px solid var(--c); opacity: 0.55; }
+.mk-high b { box-shadow: 0 0 18px var(--c), 0 0 36px rgba(255, 90, 60, 0.45); }
+.mk.hl::before { inset: -18%; opacity: 1; border-width: 2px; box-shadow: 0 0 16px var(--c); }
+@keyframes mk-pulse { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.8); opacity: 0; } }
+
+.legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); margin-top: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid; display: inline-block; }
+
+.rank-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rank-item {
+  display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: 12px; background: rgba(14, 18, 23, 0.7);
+  text-decoration: none; color: var(--text); position: relative; overflow: hidden;
+  transition: border-color 0.25s, background 0.25s, transform 0.3s var(--ease-out);
+}
+.rank-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--rc); transform: scaleY(0); transition: transform 0.3s var(--ease-out); }
+.rank-item:hover, .rank-item.hl { color: var(--text); border-color: var(--border-2); background: rgba(18, 24, 32, 0.95); transform: translateX(4px); }
+.rank-item:hover::before, .rank-item.hl::before { transform: scaleY(1); }
+.rank-pos { color: var(--muted); font-size: 12px; }
+.rank-name { font-size: 16px; font-weight: 500; }
+.rank-score { text-align: right; }
+.rank-score .n { display: block; font-size: 26px; line-height: 1; color: var(--text); }

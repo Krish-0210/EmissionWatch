@@ -201,7 +201,7 @@ export default function Layout() {
               <li>
                 <Link to="/limits">Limits of this method</Link>
               </li>
-              <li>Map tiles © OpenStreetMap contributors © CARTO</li>
+              <li>Basemap © Esri, © OpenStreetMap contributors</li>
             </ul>
           </div>
         </div>
