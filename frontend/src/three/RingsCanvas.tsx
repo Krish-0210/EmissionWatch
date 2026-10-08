@@ -64,7 +64,7 @@ function Particles({ count }: { count: number }) {
   useEffect(() => () => geo.dispose(), [geo])
   const uniforms = useMemo(() => ({ uTime: { value: 0 }, uPx: { value: 40 }, uColor: { value: EMBER } }), [])
   useFrame((_, dt) => {
-    uniforms.uTime.value += dt
+    uniforms.uTime.value += Math.min(dt, 0.1)
     uniforms.uPx.value = 40 * gl.getPixelRatio()
   })
   return (
@@ -106,20 +106,34 @@ function Scene({ count }: { count: number }) {
 export default function RingsCanvas({ count, lite }: { count: number; lite: boolean }) {
   const host = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(true)
+  const [maxDpr] = useState(() => Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.5))
+  // Render only while on screen and the tab is visible.
   useEffect(() => {
     const el = host.current
     if (!el) return
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting))
+    let onScreen = true
+    const sync = () => setVisible(onScreen && document.visibilityState !== 'hidden')
+    const io = new IntersectionObserver(([e]) => {
+      onScreen = e.isIntersecting
+      sync()
+    })
     io.observe(el)
-    return () => io.disconnect()
+    document.addEventListener('visibilitychange', sync)
+    return () => {
+      io.disconnect()
+      document.removeEventListener('visibilitychange', sync)
+    }
   }, [])
   return (
     <div ref={host} className="rings-host">
       <Canvas
-        dpr={[1, lite ? 1.25 : 1.5]}
+        dpr={[1, maxDpr]}
         frameloop={visible ? 'always' : 'never'}
         camera={{ fov: 35, position: [0, 9, 17], near: 0.1, far: 100 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: maxDpr <= 1, alpha: true, stencil: false }}
+        onCreated={({ gl }) => {
+          gl.debug.checkShaderErrors = import.meta.env.DEV
+        }}
       >
         <Scene count={count} />
         <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} minPolarAngle={0.35} maxPolarAngle={1.35} />

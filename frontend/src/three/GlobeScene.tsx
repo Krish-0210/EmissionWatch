@@ -14,6 +14,7 @@ export interface GlobeControl {
   dragPitch: number
   mouseX: number // -1..1
   mouseY: number
+  active?: boolean // set by the scene: something is moving, keep rendering
 }
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
   focusId: string
   control: MutableRefObject<GlobeControl>
   lite: boolean
+  glow: boolean // cheap additive halo instead of bloom
 }
 
 const SIGNAL = new THREE.Color('#7ce8d8')
@@ -29,14 +31,34 @@ const TEX_BASE = `${import.meta.env.BASE_URL}textures/`
 const INDIA = { lat: 22.5, lon: 81.5 }
 const fract = (x: number) => x - Math.floor(x)
 
-/* ---------- Dotted Earth ---------- */
+/* ---------- Dotted Earth: one Points geometry, round dots drawn in the shader ---------- */
+const dotShader = {
+  vertexShader: /* glsl */ `
+    uniform float uSize;
+    attribute vec3 color;
+    varying vec3 vColor;
+    void main() {
+      vColor = color;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = uSize;
+    }`,
+  fragmentShader: /* glsl */ `
+    varying vec3 vColor;
+    void main() {
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+      gl_FragColor = vec4(vColor, 0.95 * smoothstep(0.5, 0.3, d));
+    }`,
+}
 function Dots({ lite }: { lite: boolean }) {
   const [geo, setGeo] = useState<THREE.BufferGeometry>()
+  const { gl } = useThree()
   useEffect(() => {
     let live = true
     loadLandMask(TEX_BASE + 'land_mask.png').then((m) => {
       if (!live) return
-      const { positions, colors } = buildDots(m, lite ? 16000 : 30000)
+      // ~7.5k world + ~1.7k India dots on desktop, ~4k + ~1k on mobile (cap 12k).
+      const { positions, colors } = buildDots(m, lite ? 14000 : 26000, lite ? 0.5 : 0.4, 12000)
       const g = new THREE.BufferGeometry()
       g.setAttribute('position', new THREE.BufferAttribute(positions, 3))
       g.setAttribute('color', new THREE.BufferAttribute(colors, 3))
@@ -47,12 +69,48 @@ function Dots({ lite }: { lite: boolean }) {
     }
   }, [lite])
   useEffect(() => () => geo?.dispose(), [geo])
+  const uniforms = useMemo(() => ({ uSize: { value: 2.4 } }), [])
+  useFrame(() => {
+    uniforms.uSize.value = (lite ? 2.2 : 2.4) * gl.getPixelRatio()
+  })
   if (!geo) return null
   return (
     <points geometry={geo}>
-      <pointsMaterial vertexColors size={lite ? 2 : 2.2} sizeAttenuation={false} transparent opacity={0.95} depthWrite={false} />
+      <shaderMaterial uniforms={uniforms} vertexShader={dotShader.vertexShader} fragmentShader={dotShader.fragmentShader} transparent depthWrite={false} />
     </points>
   )
+}
+
+/* ---------- Halo: one additive camera-facing sprite, the cheap stand-in for bloom ---------- */
+function Halo({ strength }: { strength: MutableRefObject<number> }) {
+  const mat = useMemo(() => {
+    const c = document.createElement('canvas')
+    c.width = c.height = 256
+    const ctx = c.getContext('2d')!
+    const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128)
+    // Globe radius 1 inside a sprite of radius 1.5: the rim sits at 0.667.
+    g.addColorStop(0, 'rgba(124,232,216,0)')
+    g.addColorStop(0.6, 'rgba(124,232,216,0)')
+    g.addColorStop(0.67, 'rgba(124,232,216,0.28)')
+    g.addColorStop(0.76, 'rgba(124,232,216,0.08)')
+    g.addColorStop(1, 'rgba(124,232,216,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, 256, 256)
+    const t = new THREE.CanvasTexture(c)
+    t.colorSpace = THREE.SRGBColorSpace
+    return new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })
+  }, [])
+  useEffect(
+    () => () => {
+      mat.map?.dispose()
+      mat.dispose()
+    },
+    [mat],
+  )
+  useFrame(() => {
+    mat.opacity = strength.current
+  })
+  return <sprite material={mat} scale={[3, 3, 1]} renderOrder={-1} />
 }
 
 /* ---------- NO2 texture draped on India ---------- */
@@ -71,8 +129,10 @@ const no2Shader = {
 }
 function No2Layer({ opacity }: { opacity: MutableRefObject<number> }) {
   const uniforms = useMemo(() => {
-    const t = new THREE.TextureLoader().load(TEX_BASE + 'no2_india_2024.png')
+    const t = new THREE.TextureLoader().load(TEX_BASE + 'no2_india_2024.webp')
     t.colorSpace = THREE.SRGBColorSpace
+    t.generateMipmaps = true
+    t.minFilter = THREE.LinearMipmapLinearFilter
     t.anisotropy = 4
     return { uMap: { value: t }, uOpacity: { value: 0.6 } }
   }, [])
@@ -168,17 +228,20 @@ const plumeShader = {
       gl_FragColor = vec4(uColor * 1.6, a);
     }`,
 }
-function Plumes({ clusters, perCluster, scale }: { clusters: ClusterSummary[]; perCluster: number; scale: MutableRefObject<number> }) {
+function Plumes({ clusters, total, scale }: { clusters: ClusterSummary[]; total: number; scale: MutableRefObject<number> }) {
   const mat = useRef<THREE.ShaderMaterial>(null)
   const { gl } = useThree()
   const geo = useMemo(() => {
     const pos: number[] = [], nor: number[] = [], tan: number[] = [], seed: number[] = [], height: number[] = [], bright: number[] = []
     const up = new THREE.Vector3(0, 1, 0)
+    // A fixed particle budget shared by risk: higher scores get taller, denser plumes.
+    const weight = (c: ClusterSummary) => 0.35 + 0.65 * (c.risk_score / 100)
+    const sum = clusters.reduce((a, c) => a + weight(c), 0)
     for (const c of clusters) {
       const s = c.risk_score / 100
       const n = latLonToVec3(c.lat, c.lon).normalize()
       const t = new THREE.Vector3().crossVectors(up, n).normalize()
-      const count = Math.round(perCluster * (0.35 + 0.65 * s))
+      const count = Math.floor((total * weight(c)) / sum)
       for (let i = 0; i < count; i++) {
         pos.push(n.x * 1.002, n.y * 1.002, n.z * 1.002)
         nor.push(n.x, n.y, n.z)
@@ -196,14 +259,14 @@ function Plumes({ clusters, perCluster, scale }: { clusters: ClusterSummary[]; p
     g.setAttribute('aHeight', new THREE.Float32BufferAttribute(height, 1))
     g.setAttribute('aBright', new THREE.Float32BufferAttribute(bright, 1))
     return g
-  }, [clusters, perCluster])
+  }, [clusters, total])
   useEffect(() => () => geo.dispose(), [geo])
   const uniforms = useMemo(
     () => ({ uTime: { value: 0 }, uScale: { value: 1 }, uPx: { value: 9 }, uColor: { value: EMBER } }),
     [],
   )
   useFrame((_, dt) => {
-    uniforms.uTime.value += dt
+    uniforms.uTime.value += Math.min(dt, 0.1)
     uniforms.uScale.value = scale.current
     uniforms.uPx.value = 9 * gl.getPixelRatio()
   })
@@ -234,21 +297,22 @@ function Rings({ lat, lon, reveal }: { lat: number; lon: number; reveal: Mutable
       quaternion: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n),
     }
   }, [lat, lon])
-  const w = kmToUnits(0.45)
-  const rings: { r0: number; r1: number; color: THREE.Color; op: number; delay: number }[] = [
-    { r0: kmToUnits(10) - w, r1: kmToUnits(10) + w, color: SIGNAL, op: 1, delay: 0 },
-    { r0: kmToUnits(20) - w, r1: kmToUnits(20) + w, color: SIGNAL, op: 0.9, delay: 0.15 },
-    { r0: kmToUnits(50), r1: kmToUnits(80), color: SIGNAL, op: 0.09, delay: 0.3 },
-    { r0: kmToUnits(50) - w, r1: kmToUnits(50) + w, color: SIGNAL, op: 0.45, delay: 0.3 },
-    { r0: kmToUnits(80) - w, r1: kmToUnits(80) + w, color: SIGNAL, op: 0.45, delay: 0.3 },
-  ]
+  const rings = useMemo(() => {
+    const w = kmToUnits(0.45)
+    return [
+      { r0: kmToUnits(10) - w, r1: kmToUnits(10) + w, color: SIGNAL, op: 1, delay: 0 },
+      { r0: kmToUnits(20) - w, r1: kmToUnits(20) + w, color: SIGNAL, op: 0.9, delay: 0.15 },
+      { r0: kmToUnits(50), r1: kmToUnits(80), color: SIGNAL, op: 0.09, delay: 0.3 },
+      { r0: kmToUnits(50) - w, r1: kmToUnits(50) + w, color: SIGNAL, op: 0.45, delay: 0.3 },
+      { r0: kmToUnits(80) - w, r1: kmToUnits(80) + w, color: SIGNAL, op: 0.45, delay: 0.3 },
+    ]
+  }, [])
   useFrame(() => {
     const k = reveal.current
-    if (group.current) group.current.visible = k > 0.001
-    rings.forEach((r, i) => {
+    for (let i = 0; i < rings.length; i++) {
       const m = mats.current[i]
-      if (m) m.opacity = r.op * span(k, r.delay, r.delay + 0.55)
-    })
+      if (m) m.opacity = rings[i].op * span(k, rings[i].delay, rings[i].delay + 0.55)
+    }
   })
   return (
     <group ref={group} position={position} quaternion={quaternion} renderOrder={3}>
@@ -330,9 +394,13 @@ function Satellite({ fade }: { fade: MutableRefObject<number> }) {
 }
 
 /* ---------- Scene ---------- */
-export default function GlobeScene({ clusters, focusId, control, lite }: Props) {
+export default function GlobeScene({ clusters, focusId, control, lite, glow }: Props) {
   const globe = useRef<THREE.Group>(null)
-  const { camera, size } = useThree()
+  const { camera, size, gl, scene } = useThree()
+  // Compile every shader up front (rings included), so nothing compiles mid-scroll.
+  useEffect(() => {
+    void gl.compileAsync(scene, camera)
+  }, [gl, scene, camera])
   const focus = clusters.find((c) => c.id === focusId) ?? clusters[0]
   const indiaRot = useMemo(() => faceRotation(INDIA.lat, INDIA.lon), [])
   const focusRot = useMemo(() => faceRotation(focus.lat, focus.lon), [focus])
@@ -342,12 +410,14 @@ export default function GlobeScene({ clusters, focusId, control, lite }: Props) 
   const plumeScale = useRef(1)
   const ringReveal = useRef(0)
   const satFade = useRef(1)
+  const haloStrength = useRef(1)
   const smooth = useRef({ p: 0, mx: 0, my: 0 })
   const camPos = useMemo(() => new THREE.Vector3(), [])
   const target = useMemo(() => new THREE.Vector3(), [])
   const narrow = size.width < 768
 
-  useFrame((_, dt) => {
+  useFrame((_, delta) => {
+    const dt = Math.min(delta, 0.1)
     const c = control.current
     const s = smooth.current
     s.p += (c.progress - s.p) * Math.min(1, dt * 6)
@@ -390,6 +460,11 @@ export default function GlobeScene({ clusters, focusId, control, lite }: Props) 
     plumeScale.current = THREE.MathUtils.lerp(1, 0.09, d2)
     ringReveal.current = span(p, 0.42, 0.6)
     satFade.current = 1 - d2
+    haloStrength.current = 1 - d2
+
+    // Keep rendering while the globe auto-rotates (hero), is dragged, or scroll/parallax is still settling.
+    const settling = Math.abs(c.progress - s.p) > 1e-4 || Math.abs(c.mouseX - s.mx) > 1e-3 || Math.abs(c.mouseY - s.my) > 1e-3
+    c.active = d1 < 0.02 || c.dragging || settling
   })
 
   return (
@@ -401,7 +476,8 @@ export default function GlobeScene({ clusters, focusId, control, lite }: Props) 
       <Dots lite={lite} />
       <No2Layer opacity={no2Opacity} />
       <Atmosphere strength={rimStrength} />
-      <Plumes clusters={clusters} perCluster={lite ? 70 : 170} scale={plumeScale} />
+      {glow && <Halo strength={haloStrength} />}
+      <Plumes clusters={clusters} total={lite ? 600 : 1400} scale={plumeScale} />
       <Rings lat={focus.lat} lon={focus.lon} reveal={ringReveal} />
       <Satellite fade={satFade} />
     </group>

@@ -1,6 +1,6 @@
 """Textures for the frontend globe.
 
-1. no2_india_2024.png: 2024 mean tropospheric NO2 column (COPERNICUS/S5P/OFFL/L3_NO2) over
+1. no2_india_2024.webp: 2024 mean tropospheric NO2 column (COPERNICUS/S5P/OFFL/L3_NO2) over
    lon 68-98, lat 6-37 on a 0.04 degree equirectangular grid (north up). Colour ramp: transparent
    below the 60th percentile, then #FF8A3D (ember) to #FF5A3C with alpha rising to 0.95 at the
    99.5th percentile. The value range is written to no2_india_2024.json.
@@ -84,7 +84,8 @@ def export_no2() -> None:
     rgba = np.dstack([rgb, alpha]).round().astype("uint8")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(rgba, "RGBA").save(OUT_DIR / "no2_india_2024.png", optimize=True)
+    # WebP (lossy colour, lossless alpha): ~4x smaller than PNG for the same ramp.
+    Image.fromarray(rgba, "RGBA").save(OUT_DIR / "no2_india_2024.webp", quality=90, alpha_quality=100, method=6)
     meta = {
         "source": "COPERNICUS/S5P/OFFL/L3_NO2, tropospheric_NO2_column_number_density, mean 2024-01-01..2024-12-31",
         "units": "mol/m^2",

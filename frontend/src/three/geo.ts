@@ -49,8 +49,9 @@ export function sampleMask(m: LandMask, lat: number, lon: number): number {
   return m.data[i] > 127 ? 1 : 0
 }
 
-// Dots: a Fibonacci sphere for the world plus a denser 0.5° grid over India.
-export function buildDots(m: LandMask, n: number) {
+// Dots: a Fibonacci sphere for the world (n samples, land kept) plus a denser grid over India
+// (`step` degrees). World dots are thinned evenly if the total would exceed `cap`.
+export function buildDots(m: LandMask, n: number, step = 0.5, cap = Infinity) {
   const pos: number[] = []
   const col: number[] = []
   const land = new THREE.Color('#5d6875')
@@ -68,14 +69,25 @@ export function buildDots(m: LandMask, n: number) {
       col.push(land.r, land.g, land.b)
     }
   }
-  for (let lat = 6.25; lat < 37; lat += 0.5) {
-    for (let lon = 68.25; lon < 98; lon += 0.5) {
+  const ipos: number[] = []
+  for (let lat = 6 + step / 2; lat < 37; lat += step) {
+    for (let lon = 68 + step / 2; lon < 98; lon += step) {
       if (sampleMask(m, lat, lon) === 2) {
         latLonToVec3(lat, lon, 1.0005, v)
-        pos.push(v.x, v.y, v.z)
-        col.push(india.r, india.g, india.b)
+        ipos.push(v.x, v.y, v.z)
       }
     }
   }
-  return { positions: new Float32Array(pos), colors: new Float32Array(col) }
+  const world = pos.length / 3, nIndia = ipos.length / 3
+  const keep = Math.max(0, Math.min(world, cap - nIndia))
+  const out = new Float32Array((keep + nIndia) * 3)
+  const outCol = new Float32Array((keep + nIndia) * 3)
+  for (let i = 0; i < keep; i++) {
+    const j = Math.floor((i * world) / keep) * 3
+    out.set(pos.slice(j, j + 3), i * 3)
+    outCol.set(col.slice(j, j + 3), i * 3)
+  }
+  out.set(ipos, keep * 3)
+  for (let i = keep; i < keep + nIndia; i++) outCol.set([india.r, india.g, india.b], i * 3)
+  return { positions: out, colors: outCol }
 }
