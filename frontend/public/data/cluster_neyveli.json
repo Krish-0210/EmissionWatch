@@ -1,0 +1,158 @@
+{
+ "id": "neyveli",
+ "name": "Neyveli",
+ "states": [
+  "Tamil Nadu"
+ ],
+ "lat": 11.547541,
+ "lon": 79.436165,
+ "capacity_mw": 3640,
+ "n_plants": 4,
+ "risk_score": 68.908242,
+ "risk_level": "high",
+ "confidence": "high",
+ "headline": "Neyveli is high risk: over the last 90 days NO₂ ran 1.3 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.7× the peer median per unit generated (high confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "neyveli-tps-ii",
+   "name": "Neyveli TPS-II (incl. expansion)",
+   "state": "Tamil Nadu",
+   "lat": 11.556527,
+   "lon": 79.441365,
+   "capacity_mw": 1970,
+   "status": "operating"
+  },
+  {
+   "id": "neyveli-new-tpp",
+   "name": "Neyveli New TPP",
+   "state": "Tamil Nadu",
+   "lat": 11.547055,
+   "lon": 79.44289,
+   "capacity_mw": 1000,
+   "status": "operating"
+  },
+  {
+   "id": "neyveli-tps-i-ext",
+   "name": "Neyveli TPS-I Expansion",
+   "state": "Tamil Nadu",
+   "lat": 11.546482,
+   "lon": 79.444503,
+   "capacity_mw": 420,
+   "status": "operating"
+  },
+  {
+   "id": "neyveli-tps-i",
+   "name": "Neyveli TPS-I",
+   "state": "Tamil Nadu",
+   "lat": 11.592515,
+   "lon": 79.473851,
+   "capacity_mw": 600,
+   "status": "retired"
+  },
+  {
+   "id": "neyveli-zero",
+   "name": "Neyveli TPS (Zero) (ST-CMS)",
+   "state": "Tamil Nadu",
+   "lat": 11.5401,
+   "lon": 79.4159,
+   "capacity_mw": 250,
+   "status": "operating"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": 1.325813,
+   "score": 90.754915
+  },
+  "intensity_trend": {
+   "pct_per_year": 7.119703,
+   "t": 0.706769,
+   "score": 63.809998,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 0.13304,
+     "se": 0.164163,
+     "days": 205
+    },
+    {
+     "year": 2020,
+     "coef": 0.55047,
+     "se": 0.128785,
+     "days": 130
+    },
+    {
+     "year": 2021,
+     "coef": 0.672847,
+     "se": 0.183477,
+     "days": 197
+    },
+    {
+     "year": 2022,
+     "coef": 0.278548,
+     "se": 0.128306,
+     "days": 181
+    },
+    {
+     "year": 2023,
+     "coef": 0.317894,
+     "se": 0.117942,
+     "days": 209
+    },
+    {
+     "year": 2024,
+     "coef": 0.370675,
+     "se": 0.148756,
+     "days": 202
+    },
+    {
+     "year": 2025,
+     "coef": 0.578597,
+     "se": 0.324213,
+     "days": 177
+    },
+    {
+     "year": 2026,
+     "coef": 0.769788,
+     "se": 0.210655,
+     "days": 172
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 0.699591,
+   "score": 30.313141
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 0.35789,
+   "t": 6.526402,
+   "p": 0.0,
+   "partial_r2": 0.040281,
+   "r2": 0.406537,
+   "n": 1473
+  },
+  "ratio": {
+   "coef": 0.014976,
+   "t": 6.745777,
+   "p": 0.0,
+   "partial_r2": 0.04667,
+   "r2": 0.33165,
+   "n": 1468
+  }
+ },
+ "confidence_notes": [],
+ "coverage": {
+  "recent_valid_days": 196,
+  "ring_capacity_mw": 2970.0,
+  "unreported_capacity_mw": 0.0,
+  "unreported_plants": []
+ }
+}

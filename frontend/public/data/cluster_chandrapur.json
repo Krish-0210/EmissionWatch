@@ -1,0 +1,131 @@
+{
+ "id": "chandrapur",
+ "name": "Chandrapur",
+ "states": [
+  "Maharashtra"
+ ],
+ "lat": 20.008444,
+ "lon": 79.246717,
+ "capacity_mw": 3520,
+ "n_plants": 2,
+ "risk_score": 85.695761,
+ "risk_level": "high",
+ "confidence": "high",
+ "headline": "Chandrapur is high risk: over the last 90 days NO₂ ran 1.5 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (high confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "chandrapur-stps",
+   "name": "Chandrapur STPS",
+   "state": "Maharashtra",
+   "lat": 20.0063,
+   "lon": 79.29,
+   "capacity_mw": 2920,
+   "status": "operating"
+  },
+  {
+   "id": "dhariwal-tpp",
+   "name": "Dhariwal TPP",
+   "state": "Maharashtra",
+   "lat": 20.010588,
+   "lon": 79.203433,
+   "capacity_mw": 600,
+   "status": "operating"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": 1.464083,
+   "score": 92.841437
+  },
+  "intensity_trend": {
+   "pct_per_year": 12.952886,
+   "t": 1.98798,
+   "score": 83.988612,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 0.755146,
+     "se": 0.240224,
+     "days": 235
+    },
+    {
+     "year": 2020,
+     "coef": 0.724987,
+     "se": 0.31094,
+     "days": 160
+    },
+    {
+     "year": 2021,
+     "coef": 1.020054,
+     "se": 0.327667,
+     "days": 223
+    },
+    {
+     "year": 2022,
+     "coef": 0.407829,
+     "se": 0.236644,
+     "days": 235
+    },
+    {
+     "year": 2023,
+     "coef": 0.758141,
+     "se": 0.202978,
+     "days": 232
+    },
+    {
+     "year": 2024,
+     "coef": 0.927731,
+     "se": 0.230608,
+     "days": 214
+    },
+    {
+     "year": 2025,
+     "coef": 1.545806,
+     "se": 0.246812,
+     "days": 226
+    },
+    {
+     "year": 2026,
+     "coef": 1.391405,
+     "se": 0.32719,
+     "days": 175
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 1.532822,
+   "score": 73.111557
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 0.784147,
+   "t": 7.950326,
+   "p": 0.0,
+   "partial_r2": 0.046801,
+   "r2": 0.406489,
+   "n": 1700
+  },
+  "ratio": {
+   "coef": 0.018365,
+   "t": 6.358011,
+   "p": 0.0,
+   "partial_r2": 0.028847,
+   "r2": 0.306222,
+   "n": 1699
+  }
+ },
+ "confidence_notes": [],
+ "coverage": {
+  "recent_valid_days": 243,
+  "ring_capacity_mw": 3520.0,
+  "unreported_capacity_mw": 0.0,
+  "unreported_plants": []
+ }
+}

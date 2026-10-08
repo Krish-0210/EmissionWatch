@@ -1,0 +1,140 @@
+{
+ "id": "talcher",
+ "name": "Talcher",
+ "states": [
+  "Odisha"
+ ],
+ "lat": 21.112056,
+ "lon": 85.02779,
+ "capacity_mw": 4200,
+ "n_plants": 2,
+ "risk_score": 91.706658,
+ "risk_level": "high",
+ "confidence": "high",
+ "headline": "Talcher is high risk: over the last 90 days NO₂ ran 3.0 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 2.0× the peer median per unit generated (high confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "talcher-stps",
+   "name": "Talcher STPS (Kaniha)",
+   "state": "Odisha",
+   "lat": 21.097067,
+   "lon": 85.075027,
+   "capacity_mw": 3000,
+   "status": "operating"
+  },
+  {
+   "id": "derang-tpp",
+   "name": "Derang TPP (JITPL Angul)",
+   "state": "Odisha",
+   "lat": 21.127044,
+   "lon": 84.980552,
+   "capacity_mw": 1200,
+   "status": "operating"
+  },
+  {
+   "id": "talcher-old-tps",
+   "name": "Talcher (Old) TPS",
+   "state": "Odisha",
+   "lat": 20.911061,
+   "lon": 85.207241,
+   "capacity_mw": 460,
+   "status": "retired"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": 3.009485,
+   "score": 99.869154
+  },
+  "intensity_trend": {
+   "pct_per_year": 12.795517,
+   "t": 1.847264,
+   "score": 82.216106,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 0.6235,
+     "se": 0.29445,
+     "days": 232
+    },
+    {
+     "year": 2020,
+     "coef": 0.752209,
+     "se": 0.673084,
+     "days": 161
+    },
+    {
+     "year": 2021,
+     "coef": 1.335708,
+     "se": 0.306226,
+     "days": 210
+    },
+    {
+     "year": 2022,
+     "coef": 0.252894,
+     "se": 0.50201,
+     "days": 239
+    },
+    {
+     "year": 2023,
+     "coef": 1.276479,
+     "se": 0.38903,
+     "days": 220
+    },
+    {
+     "year": 2024,
+     "coef": 1.256645,
+     "se": 0.46412,
+     "days": 203
+    },
+    {
+     "year": 2025,
+     "coef": 1.034104,
+     "se": 0.350052,
+     "days": 220
+    },
+    {
+     "year": 2026,
+     "coef": 2.469925,
+     "se": 0.50657,
+     "days": 158
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 2.043395,
+   "score": 84.872217
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 1.045341,
+   "t": 6.647286,
+   "p": 0.0,
+   "partial_r2": 0.029128,
+   "r2": 0.325596,
+   "n": 1643
+  },
+  "ratio": {
+   "coef": 0.014954,
+   "t": 2.620996,
+   "p": 0.008767,
+   "partial_r2": 0.006966,
+   "r2": 0.198862,
+   "n": 1642
+  }
+ },
+ "confidence_notes": [],
+ "coverage": {
+  "recent_valid_days": 220,
+  "ring_capacity_mw": 4200.0,
+  "unreported_capacity_mw": 0.0,
+  "unreported_plants": []
+ }
+}

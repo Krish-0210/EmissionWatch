@@ -1,0 +1,149 @@
+{
+ "id": "tuticorin",
+ "name": "Tuticorin",
+ "states": [
+  "Tamil Nadu"
+ ],
+ "lat": 8.797727,
+ "lon": 78.162514,
+ "capacity_mw": 3775,
+ "n_plants": 4,
+ "risk_score": 14.791349,
+ "risk_level": "low",
+ "confidence": "high",
+ "headline": "Tuticorin is low risk: over the last 90 days NO₂ ran 0.9 SD below what reported generation and weather predict, NO₂ per unit of electricity has been falling about 17% a year, and it is 0.4× the peer median per unit generated (high confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "tuticorin-tps",
+   "name": "Tuticorin TPS",
+   "state": "Tamil Nadu",
+   "lat": 8.762518,
+   "lon": 78.175976,
+   "capacity_mw": 1050,
+   "status": "operating"
+  },
+  {
+   "id": "ntpl-tuticorin",
+   "name": "NTPL Tuticorin TPP",
+   "state": "Tamil Nadu",
+   "lat": 8.760363,
+   "lon": 78.171083,
+   "capacity_mw": 1000,
+   "status": "operating"
+  },
+  {
+   "id": "sepc-tuticorin",
+   "name": "SEPC Tuticorin (Tuticorin TPP St-IV)",
+   "state": "Tamil Nadu",
+   "lat": 8.755311,
+   "lon": 78.158031,
+   "capacity_mw": 525,
+   "status": "operating"
+  },
+  {
+   "id": "muthiara-tpp",
+   "name": "Mutiara / Coastal Energen TPP",
+   "state": "Tamil Nadu",
+   "lat": 8.912716,
+   "lon": 78.144965,
+   "capacity_mw": 1200,
+   "status": "operating"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": -0.903654,
+   "score": 18.308956
+  },
+  "intensity_trend": {
+   "pct_per_year": -17.290979,
+   "t": -2.483197,
+   "score": 10.719234,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 0.344969,
+     "se": 0.099332,
+     "days": 223
+    },
+    {
+     "year": 2020,
+     "coef": 0.206106,
+     "se": 0.068454,
+     "days": 174
+    },
+    {
+     "year": 2021,
+     "coef": 0.441343,
+     "se": 0.093499,
+     "days": 225
+    },
+    {
+     "year": 2022,
+     "coef": 0.253573,
+     "se": 0.081531,
+     "days": 246
+    },
+    {
+     "year": 2023,
+     "coef": 0.185531,
+     "se": 0.077395,
+     "days": 242
+    },
+    {
+     "year": 2024,
+     "coef": 0.081837,
+     "se": 0.113606,
+     "days": 232
+    },
+    {
+     "year": 2025,
+     "coef": 0.04953,
+     "se": 0.077516,
+     "days": 236
+    },
+    {
+     "year": 2026,
+     "coef": 0.150337,
+     "se": 0.133305,
+     "days": 204
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 0.440247,
+   "score": 11.828249
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 0.225217,
+   "t": 8.576414,
+   "p": 0.0,
+   "partial_r2": 0.057464,
+   "r2": 0.268016,
+   "n": 1782
+  },
+  "ratio": {
+   "coef": 0.009977,
+   "t": 6.608687,
+   "p": 0.0,
+   "partial_r2": 0.039009,
+   "r2": 0.216077,
+   "n": 1740
+  }
+ },
+ "confidence_notes": [],
+ "coverage": {
+  "recent_valid_days": 248,
+  "ring_capacity_mw": 3775.0,
+  "unreported_capacity_mw": 0.0,
+  "unreported_plants": []
+ }
+}

@@ -1,0 +1,131 @@
+{
+ "id": "mundra",
+ "name": "Mundra",
+ "states": [
+  "Gujarat"
+ ],
+ "lat": 22.819671,
+ "lon": 69.541265,
+ "capacity_mw": 8620,
+ "n_plants": 2,
+ "risk_score": 32.960015,
+ "risk_level": "low",
+ "confidence": "high",
+ "headline": "Mundra is low risk: over the last 90 days NO₂ ran 0.3 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.4× the peer median per unit generated (high confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "adani-mundra-tpp",
+   "name": "Adani Mundra TPP",
+   "state": "Gujarat",
+   "lat": 22.823541,
+   "lon": 69.55443,
+   "capacity_mw": 4620,
+   "status": "operating"
+  },
+  {
+   "id": "mundra-umtpp",
+   "name": "Mundra UMTPP (Tata)",
+   "state": "Gujarat",
+   "lat": 22.8158,
+   "lon": 69.5281,
+   "capacity_mw": 4000,
+   "status": "operating"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": -0.268665,
+   "score": 39.409361
+  },
+  "intensity_trend": {
+   "pct_per_year": -1.016795,
+   "t": -0.184044,
+   "score": 46.334029,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 0.138424,
+     "se": 0.075863,
+     "days": 274
+    },
+    {
+     "year": 2020,
+     "coef": 0.22688,
+     "se": 0.097872,
+     "days": 235
+    },
+    {
+     "year": 2021,
+     "coef": 0.122889,
+     "se": 0.036683,
+     "days": 293
+    },
+    {
+     "year": 2022,
+     "coef": 0.24579,
+     "se": 0.043627,
+     "days": 300
+    },
+    {
+     "year": 2023,
+     "coef": 0.260541,
+     "se": 0.038347,
+     "days": 285
+    },
+    {
+     "year": 2024,
+     "coef": 0.1123,
+     "se": 0.059193,
+     "days": 282
+    },
+    {
+     "year": 2025,
+     "coef": 0.15944,
+     "se": 0.048416,
+     "days": 271
+    },
+    {
+     "year": 2026,
+     "coef": 0.161551,
+     "se": 0.02921,
+     "days": 204
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 0.353678,
+   "score": 6.687308
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 0.180931,
+   "t": 14.462009,
+   "p": 0.0,
+   "partial_r2": 0.16306,
+   "r2": 0.540411,
+   "n": 2144
+  },
+  "ratio": {
+   "coef": 0.005359,
+   "t": 13.505691,
+   "p": 0.0,
+   "partial_r2": 0.142462,
+   "r2": 0.484053,
+   "n": 2104
+  }
+ },
+ "confidence_notes": [],
+ "coverage": {
+  "recent_valid_days": 277,
+  "ring_capacity_mw": 8620.0,
+  "unreported_capacity_mw": 0.0,
+  "unreported_plants": []
+ }
+}

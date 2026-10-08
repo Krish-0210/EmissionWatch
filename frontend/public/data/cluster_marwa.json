@@ -1,0 +1,126 @@
+{
+ "id": "marwa",
+ "name": "Marwa",
+ "states": [
+  "Chhattisgarh"
+ ],
+ "lat": 22.070801,
+ "lon": 82.602189,
+ "capacity_mw": 1000,
+ "n_plants": 1,
+ "risk_score": 57.366645,
+ "risk_level": "medium",
+ "confidence": "low",
+ "headline": "Marwa is medium risk: over the last 90 days NO₂ ran 0.1 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (low confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "marwa-tps",
+   "name": "Marwa TPS",
+   "state": "Chhattisgarh",
+   "lat": 22.070801,
+   "lon": 82.602189,
+   "capacity_mw": 1000,
+   "status": "operating"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": -0.079183,
+   "score": 46.844362
+  },
+  "intensity_trend": {
+   "pct_per_year": 11.809113,
+   "t": 0.685352,
+   "score": 63.407894,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 0.349552,
+     "se": 0.731783,
+     "days": 243
+    },
+    {
+     "year": 2020,
+     "coef": -1.620085,
+     "se": 1.275183,
+     "days": 163
+    },
+    {
+     "year": 2021,
+     "coef": 0.438243,
+     "se": 1.089041,
+     "days": 226
+    },
+    {
+     "year": 2022,
+     "coef": 0.164064,
+     "se": 0.850448,
+     "days": 255
+    },
+    {
+     "year": 2023,
+     "coef": 2.029036,
+     "se": 0.952582,
+     "days": 244
+    },
+    {
+     "year": 2024,
+     "coef": 0.852844,
+     "se": 1.270191,
+     "days": 215
+    },
+    {
+     "year": 2025,
+     "coef": 0.704527,
+     "se": 0.702292,
+     "days": 221
+    },
+    {
+     "year": 2026,
+     "coef": -0.185951,
+     "se": 1.122469,
+     "days": 175
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 1.509287,
+   "score": 72.369962
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 0.772107,
+   "t": 2.302109,
+   "p": 0.021329,
+   "partial_r2": 0.005289,
+   "r2": 0.226275,
+   "n": 1742
+  },
+  "ratio": {
+   "coef": 0.005342,
+   "t": 1.20865,
+   "p": 0.226797,
+   "partial_r2": 0.001192,
+   "r2": 0.065626,
+   "n": 1741
+  }
+ },
+ "confidence_notes": [
+  "generation not significant in enhancement model (p=0.021)",
+  "generation not significant in ratio model (p=0.23)",
+  "generation explains <1% of residual variance (partial R²=0.005)"
+ ],
+ "coverage": {
+  "recent_valid_days": 237,
+  "ring_capacity_mw": 1000.0,
+  "unreported_capacity_mw": 0.0,
+  "unreported_plants": []
+ }
+}

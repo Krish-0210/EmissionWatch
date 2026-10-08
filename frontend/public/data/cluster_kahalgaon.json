@@ -1,0 +1,122 @@
+{
+ "id": "kahalgaon",
+ "name": "Kahalgaon",
+ "states": [
+  "Bihar"
+ ],
+ "lat": 25.236903,
+ "lon": 87.265595,
+ "capacity_mw": 2340,
+ "n_plants": 1,
+ "risk_score": 25.994026,
+ "risk_level": "low",
+ "confidence": "high",
+ "headline": "Kahalgaon is low risk: over the last 90 days NO₂ ran 1.8 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.4× the peer median per unit generated (high confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "kahalgaon-stps",
+   "name": "Kahalgaon STPS",
+   "state": "Bihar",
+   "lat": 25.236903,
+   "lon": 87.265595,
+   "capacity_mw": 2340,
+   "status": "operating"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": -1.824308,
+   "score": 3.405278
+  },
+  "intensity_trend": {
+   "pct_per_year": -7.137366,
+   "t": -1.109124,
+   "score": 28.959709,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 0.782841,
+     "se": 0.280148,
+     "days": 237
+    },
+    {
+     "year": 2020,
+     "coef": 0.864689,
+     "se": 0.215282,
+     "days": 156
+    },
+    {
+     "year": 2021,
+     "coef": 1.148378,
+     "se": 0.251734,
+     "days": 246
+    },
+    {
+     "year": 2022,
+     "coef": 0.819571,
+     "se": 0.208184,
+     "days": 263
+    },
+    {
+     "year": 2023,
+     "coef": 0.625013,
+     "se": 0.276546,
+     "days": 254
+    },
+    {
+     "year": 2024,
+     "coef": 0.849787,
+     "se": 0.193591,
+     "days": 231
+    },
+    {
+     "year": 2025,
+     "coef": 0.860558,
+     "se": 0.372113,
+     "days": 220
+    },
+    {
+     "year": 2026,
+     "coef": -0.242979,
+     "se": 0.485789,
+     "days": 174
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 1.388438,
+   "score": 68.205839
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 0.710284,
+   "t": 7.810345,
+   "p": 0.0,
+   "partial_r2": 0.039834,
+   "r2": 0.28062,
+   "n": 1781
+  },
+  "ratio": {
+   "coef": 0.017963,
+   "t": 6.347793,
+   "p": 0.0,
+   "partial_r2": 0.028348,
+   "r2": 0.219059,
+   "n": 1781
+  }
+ },
+ "confidence_notes": [],
+ "coverage": {
+  "recent_valid_days": 236,
+  "ring_capacity_mw": 2340.0,
+  "unreported_capacity_mw": 0.0,
+  "unreported_plants": []
+ }
+}

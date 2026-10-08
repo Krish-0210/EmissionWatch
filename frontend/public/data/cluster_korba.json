@@ -1,0 +1,146 @@
+{
+ "id": "korba",
+ "name": "Korba",
+ "states": [
+  "Chhattisgarh"
+ ],
+ "lat": 22.389385,
+ "lon": 82.695356,
+ "capacity_mw": 4440,
+ "n_plants": 3,
+ "risk_score": 53.259694,
+ "risk_level": "medium",
+ "confidence": "medium",
+ "headline": "Korba is medium risk: over the last 90 days NO₂ ran 0.2 SD above what reported generation and weather predict, NO₂ per unit of electricity has been falling about 20% a year, and it is 2.2× the peer median per unit generated (medium confidence).",
+ "as_of": "2026-09-27",
+ "plants": [
+  {
+   "id": "korba-stps",
+   "name": "Korba STPS (NTPC)",
+   "state": "Chhattisgarh",
+   "lat": 22.387422,
+   "lon": 82.681896,
+   "capacity_mw": 2600,
+   "status": "operating"
+  },
+  {
+   "id": "korba-west-tps",
+   "name": "Korba-West TPS",
+   "state": "Chhattisgarh",
+   "lat": 22.412536,
+   "lon": 82.682187,
+   "capacity_mw": 1340,
+   "status": "operating"
+  },
+  {
+   "id": "dspm-tps",
+   "name": "DSPM TPS (Dr. Shyama Prasad Mukherjee)",
+   "state": "Chhattisgarh",
+   "lat": 22.368196,
+   "lon": 82.721986,
+   "capacity_mw": 500,
+   "status": "operating"
+  }
+ ],
+ "weights": {
+  "persistent_excess": 0.5,
+  "intensity_trend": 0.25,
+  "peer_intensity": 0.25
+ },
+ "signals": {
+  "persistent_excess": {
+   "z": 0.244669,
+   "score": 59.66438
+  },
+  "intensity_trend": {
+   "pct_per_year": -19.550298,
+   "t": -2.93102,
+   "score": 7.13909,
+   "yearly": [
+    {
+     "year": 2019,
+     "coef": 2.326507,
+     "se": 0.484654,
+     "days": 232
+    },
+    {
+     "year": 2020,
+     "coef": 1.53771,
+     "se": 0.553017,
+     "days": 153
+    },
+    {
+     "year": 2021,
+     "coef": 0.310237,
+     "se": 0.583248,
+     "days": 234
+    },
+    {
+     "year": 2022,
+     "coef": 0.917729,
+     "se": 0.540324,
+     "days": 242
+    },
+    {
+     "year": 2023,
+     "coef": 1.430221,
+     "se": 0.433391,
+     "days": 234
+    },
+    {
+     "year": 2024,
+     "coef": 0.726454,
+     "se": 0.634097,
+     "days": 212
+    },
+    {
+     "year": 2025,
+     "coef": 0.55948,
+     "se": 0.607524,
+     "days": 214
+    },
+    {
+     "year": 2026,
+     "coef": 0.335768,
+     "se": 0.388982,
+     "days": 159
+    }
+   ]
+  },
+  "peer_intensity": {
+   "ratio": 2.15298,
+   "score": 86.570926
+  }
+ },
+ "model": {
+  "enhancement": {
+   "coef": 1.101401,
+   "t": 5.395386,
+   "p": 0.0,
+   "partial_r2": 0.016112,
+   "r2": 0.312563,
+   "n": 1680
+  },
+  "ratio": {
+   "coef": 0.020442,
+   "t": 4.582355,
+   "p": 5e-06,
+   "partial_r2": 0.01336,
+   "r2": 0.174254,
+   "n": 1680
+  }
+ },
+ "confidence_notes": [
+  "2610 MW in ring not in CEA generation (BALCO Korba power station",
+  "Korba Power Thermal Power Plant (Adani))"
+ ],
+ "coverage": {
+  "recent_valid_days": 224,
+  "ring_capacity_mw": 7050.0,
+  "unreported_capacity_mw": 2610.0,
+  "unreported_plants": [
+   "BALCO Korba power station",
+   "Korba Power Thermal Power Plant (Adani)"
+  ]
+ }
+}
