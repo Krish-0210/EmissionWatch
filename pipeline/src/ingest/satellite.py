@@ -16,8 +16,13 @@ x (valid share of the remaining pixel-days). A cluster gets background_flag=True
 median of this over all months is below BACKGROUND_MIN_VALID: its background then rests on
 little data.
 
+Daily mode (--daily) writes no2_daily.parquet: per cluster and day, ring_20km and background from
+that day's orbits, enhancement, valid_fraction (share of 20 km disk pixels with a valid
+retrieval) and background_valid_fraction (annulus area fraction x valid share).
+
 Usage (from pipeline/):
     python -m src.ingest.satellite [--start 2019-01] [--end 2026-08]
+    python -m src.ingest.satellite --daily [--start 2019-01-01] [--end YYYY-MM-DD]
 """
 
 import argparse
@@ -39,6 +44,8 @@ PIPELINE_DIR = Path(__file__).resolve().parents[2]
 PLANTS_PATH = PIPELINE_DIR / "config" / "plants.yaml"
 INDIA_CSV = PIPELINE_DIR / "config" / "all_coal_plants_india.csv"
 OUT_PATH = PIPELINE_DIR / "data" / "processed" / "no2_monthly.parquet"
+DAILY_OUT_PATH = PIPELINE_DIR / "data" / "processed" / "no2_daily.parquet"
+DAILY_PARTS_DIR = PIPELINE_DIR / "data" / "processed" / "no2_daily_parts"  # per-year raw records (resume)
 
 COLLECTION = "COPERNICUS/S5P/OFFL/L3_NO2"
 BAND = "tropospheric_NO2_column_number_density"
@@ -50,6 +57,8 @@ BACKGROUND_MIN_VALID = 0.3
 
 COLUMNS = ["month", "entity_type", "entity_id", "ring_10km", "ring_20km", "background",
            "enhancement", "valid_fraction", "background_valid_fraction", "background_flag", "overlapping"]
+DAILY_COLUMNS = ["date", "cluster", "ring_20km", "background", "enhancement", "valid_fraction",
+                 "background_valid_fraction"]
 
 
 def load_plants(path: Path = PLANTS_PATH) -> list[dict]:
@@ -210,14 +219,103 @@ def run(start: date, end: date | None = None, out_path: Path = OUT_PATH) -> pd.D
     return df
 
 
+def daily_image(collection: ee.ImageCollection, day: ee.Date) -> ee.Image:
+    """Bands: no2 (mean of the day's orbits, masked where none is valid) and valid (1/0 per pixel)."""
+    empty = ee.Image.constant(0).toFloat().rename(BAND).updateMask(0)
+    imgs = collection.filterDate(day, day.advance(1, "day")).select(BAND).map(lambda img: img.toFloat())
+    no2 = imgs.merge(ee.ImageCollection([empty])).mean().rename("no2")
+    return no2.addBands(no2.mask().gt(0).unmask(0).rename("valid"))
+
+
+def reduce_days(days: list[date], regions: ee.FeatureCollection, collection: ee.ImageCollection) -> list[dict]:
+    """Reduce every region for the given days in one request.
+
+    The days are stacked as bands (no2_i, valid_i) of one image and reduced once: a reduceRegions per
+    day trips EE's "Too many concurrent aggregations" limit. Band masks are per band, so each day's
+    mean uses only that day's valid pixels.
+    """
+    stack = ee.Image.cat([daily_image(collection, ee.Date(d.isoformat())).rename([f"no2_{i}", f"valid_{i}"])
+                          for i, d in enumerate(days)])
+    fc = stack.reduceRegions(regions, ee.Reducer.mean(), scale=SCALE_M).map(lambda f: f.setGeometry(None))
+    records = []
+    for f in fc.getInfo()["features"]:
+        p = f["properties"]
+        base = {k: p[k] for k in ("entity_type", "entity_id", "region") if k in p}
+        if "area_fraction" in p:
+            base["area_fraction"] = p["area_fraction"]
+        for i, d in enumerate(days):
+            records.append({**base, "date": d.isoformat(), "no2": p.get(f"no2_{i}"), "valid": p.get(f"valid_{i}")})
+    return records
+
+
+def to_daily_table(records: list[dict]) -> pd.DataFrame:
+    raw = pd.DataFrame(records)
+    wide = raw.pivot_table(index=["date", "entity_id"], columns="region", values="no2", aggfunc="first")
+    wide = wide.reindex(columns=["ring_20km", "background"]).reset_index()
+    ring = raw[raw.region == "ring_20km"][["date", "entity_id", "valid"]].rename(columns={"valid": "valid_fraction"})
+    bg = raw[raw.region == "background"].assign(background_valid_fraction=lambda d: d["area_fraction"] * d["valid"])
+    wide = (ring.merge(wide, on=["date", "entity_id"], how="left")
+            .merge(bg[["date", "entity_id", "background_valid_fraction"]], on=["date", "entity_id"], how="left"))
+    wide["enhancement"] = wide["ring_20km"] - wide["background"]
+    wide["date"] = pd.to_datetime(wide["date"])
+    wide = wide.rename(columns={"entity_id": "cluster"})
+    return wide[DAILY_COLUMNS].sort_values(["cluster", "date"]).reset_index(drop=True)
+
+
+def run_daily(start: date, end: date | None = None, out_path: Path = DAILY_OUT_PATH) -> pd.DataFrame:
+    """Daily ring_20km / background per cluster, one request per year (per month on failure), checkpointed per year."""
+    load_dotenv(PIPELINE_DIR.parent / ".env")
+    ee.Initialize(project=os.environ["GEE_PROJECT_ID"])
+
+    india = pd.read_csv(INDIA_CSV)
+    regions = (build_regions(load_plants(), list(zip(india["lon"], india["lat"])))
+               .filter(ee.Filter.eq("entity_type", "cluster")).filter(ee.Filter.neq("region", "ring_10km")))
+    collection = ee.ImageCollection(COLLECTION).filterBounds(regions.geometry().bounds())
+    if end is None:
+        last_ms = collection.aggregate_max("system:time_start").getInfo()
+        end = datetime.fromtimestamp(last_ms / 1000, tz=timezone.utc).date()
+    days = [d.date() for d in pd.date_range(start, end, freq="D")]
+    log.info("extracting %d days (%s .. %s)", len(days), days[0], days[-1])
+
+    # One request per year; per month if the year fails. Each finished year is checkpointed so reruns resume.
+    DAILY_PARTS_DIR.mkdir(parents=True, exist_ok=True)
+    parts = []
+    for year in sorted({d.year for d in days}):
+        batch = [d for d in days if d.year == year]
+        part = DAILY_PARTS_DIR / f"{year}_{batch[0]:%m%d}_{batch[-1]:%m%d}.parquet"
+        if not part.exists():
+            try:
+                records = with_retry(reduce_days, batch, regions, collection, attempts=2)
+            except Exception as e:
+                log.warning("%d as one batch failed (%s); retrying per month", year, e)
+                records = []
+                for m in sorted({d.month for d in batch}):
+                    records += with_retry(reduce_days, [d for d in batch if d.month == m], regions, collection,
+                                          attempts=6, wait=30)
+            pd.DataFrame(records).to_parquet(part, index=False)
+        parts.append(pd.read_parquet(part))
+        log.info("%d done (%d records)", year, len(parts[-1]))
+
+    df = to_daily_table(pd.concat(parts, ignore_index=True).to_dict("records"))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(out_path, index=False)
+    log.info("wrote %d rows to %s", len(df), out_path)
+    return df
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    month = lambda s: date.fromisoformat(s + "-01")
-    parser.add_argument("--start", type=month, default=date(2019, 1, 1))
-    parser.add_argument("--end", type=month, default=None, help="default: latest full month in the collection")
+    parser.add_argument("--daily", action="store_true", help="daily per-cluster values -> no2_daily.parquet")
+    parser.add_argument("--start", default="2019-01", help="YYYY-MM, or YYYY-MM-DD with --daily")
+    parser.add_argument("--end", default=None, help="default: latest full month (monthly) / latest day (--daily)")
     args = parser.parse_args()
-    run(args.start, args.end)
+    as_date = lambda s: date.fromisoformat(s if len(s) == 10 else s + "-01")
+    end = as_date(args.end) if args.end else None
+    if args.daily:
+        run_daily(as_date(args.start), end)
+    else:
+        run(as_date(args.start), end)
 
 
 if __name__ == "__main__":
