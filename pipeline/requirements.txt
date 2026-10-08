@@ -10,3 +10,4 @@ pyyaml
 xlrd
 pyarrow
 matplotlib
+statsmodels
