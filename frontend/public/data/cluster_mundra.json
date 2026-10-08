@@ -4,11 +4,11 @@
  "states": [
   "Gujarat"
  ],
- "lat": 22.819671,
- "lon": 69.541265,
+ "lat": 22.8197,
+ "lon": 69.5413,
  "capacity_mw": 8620,
  "n_plants": 2,
- "risk_score": 32.960015,
+ "risk_score": 32.96,
  "risk_level": "low",
  "confidence": "high",
  "headline": "Mundra is low risk: over the last 90 days NO₂ ran 0.3 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.4× the peer median per unit generated (high confidence).",
@@ -18,8 +18,8 @@
    "id": "adani-mundra-tpp",
    "name": "Adani Mundra TPP",
    "state": "Gujarat",
-   "lat": 22.823541,
-   "lon": 69.55443,
+   "lat": 22.8235,
+   "lon": 69.5544,
    "capacity_mw": 4620,
    "status": "operating"
   },
@@ -41,29 +41,29 @@
  "signals": {
   "persistent_excess": {
    "z": -0.268665,
-   "score": 39.409361
+   "score": 39.4094
   },
   "intensity_trend": {
-   "pct_per_year": -1.016795,
+   "pct_per_year": -1.01679,
    "t": -0.184044,
-   "score": 46.334029,
+   "score": 46.334,
    "yearly": [
     {
      "year": 2019,
      "coef": 0.138424,
-     "se": 0.075863,
+     "se": 0.0758629,
      "days": 274
     },
     {
      "year": 2020,
      "coef": 0.22688,
-     "se": 0.097872,
+     "se": 0.0978725,
      "days": 235
     },
     {
      "year": 2021,
      "coef": 0.122889,
-     "se": 0.036683,
+     "se": 0.0366826,
      "days": 293
     },
     {
@@ -75,47 +75,47 @@
     {
      "year": 2023,
      "coef": 0.260541,
-     "se": 0.038347,
+     "se": 0.0383469,
      "days": 285
     },
     {
      "year": 2024,
      "coef": 0.1123,
-     "se": 0.059193,
+     "se": 0.0591931,
      "days": 282
     },
     {
      "year": 2025,
      "coef": 0.15944,
-     "se": 0.048416,
+     "se": 0.0484157,
      "days": 271
     },
     {
      "year": 2026,
      "coef": 0.161551,
-     "se": 0.02921,
+     "se": 0.0292099,
      "days": 204
     }
    ]
   },
   "peer_intensity": {
    "ratio": 0.353678,
-   "score": 6.687308
+   "score": 6.68731
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.180931,
-   "t": 14.462009,
-   "p": 0.0,
+   "t": 14.462,
+   "p": 2.10561e-47,
    "partial_r2": 0.16306,
    "r2": 0.540411,
    "n": 2144
   },
   "ratio": {
-   "coef": 0.005359,
-   "t": 13.505691,
-   "p": 0.0,
+   "coef": 0.00535899,
+   "t": 13.5057,
+   "p": 1.44748e-41,
    "partial_r2": 0.142462,
    "r2": 0.484053,
    "n": 2104

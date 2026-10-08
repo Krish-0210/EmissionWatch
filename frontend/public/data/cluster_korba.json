@@ -4,11 +4,11 @@
  "states": [
   "Chhattisgarh"
  ],
- "lat": 22.389385,
- "lon": 82.695356,
+ "lat": 22.3894,
+ "lon": 82.6954,
  "capacity_mw": 4440,
  "n_plants": 3,
- "risk_score": 53.259694,
+ "risk_score": 53.2597,
  "risk_level": "medium",
  "confidence": "medium",
  "headline": "Korba is medium risk: over the last 90 days NO₂ ran 0.2 SD above what reported generation and weather predict, NO₂ per unit of electricity has been falling about 20% a year, and it is 2.2× the peer median per unit generated (medium confidence).",
@@ -18,8 +18,8 @@
    "id": "korba-stps",
    "name": "Korba STPS (NTPC)",
    "state": "Chhattisgarh",
-   "lat": 22.387422,
-   "lon": 82.681896,
+   "lat": 22.3874,
+   "lon": 82.6819,
    "capacity_mw": 2600,
    "status": "operating"
   },
@@ -27,8 +27,8 @@
    "id": "korba-west-tps",
    "name": "Korba-West TPS",
    "state": "Chhattisgarh",
-   "lat": 22.412536,
-   "lon": 82.682187,
+   "lat": 22.4125,
+   "lon": 82.6822,
    "capacity_mw": 1340,
    "status": "operating"
   },
@@ -36,8 +36,8 @@
    "id": "dspm-tps",
    "name": "DSPM TPS (Dr. Shyama Prasad Mukherjee)",
    "state": "Chhattisgarh",
-   "lat": 22.368196,
-   "lon": 82.721986,
+   "lat": 22.3682,
+   "lon": 82.722,
    "capacity_mw": 500,
    "status": "operating"
   }
@@ -50,16 +50,16 @@
  "signals": {
   "persistent_excess": {
    "z": 0.244669,
-   "score": 59.66438
+   "score": 59.6644
   },
   "intensity_trend": {
-   "pct_per_year": -19.550298,
+   "pct_per_year": -19.5503,
    "t": -2.93102,
    "score": 7.13909,
    "yearly": [
     {
      "year": 2019,
-     "coef": 2.326507,
+     "coef": 2.32651,
      "se": 0.484654,
      "days": 232
     },
@@ -83,7 +83,7 @@
     },
     {
      "year": 2023,
-     "coef": 1.430221,
+     "coef": 1.43022,
      "se": 0.433391,
      "days": 234
     },
@@ -109,22 +109,22 @@
   },
   "peer_intensity": {
    "ratio": 2.15298,
-   "score": 86.570926
+   "score": 86.5709
   }
  },
  "model": {
   "enhancement": {
-   "coef": 1.101401,
-   "t": 5.395386,
-   "p": 0.0,
-   "partial_r2": 0.016112,
+   "coef": 1.1014,
+   "t": 5.39539,
+   "p": 6.83763e-08,
+   "partial_r2": 0.0161116,
    "r2": 0.312563,
    "n": 1680
   },
   "ratio": {
-   "coef": 0.020442,
-   "t": 4.582355,
-   "p": 5e-06,
+   "coef": 0.0204422,
+   "t": 4.58235,
+   "p": 4.59769e-06,
    "partial_r2": 0.01336,
    "r2": 0.174254,
    "n": 1680

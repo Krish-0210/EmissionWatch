@@ -4,11 +4,11 @@
  "states": [
   "Tamil Nadu"
  ],
- "lat": 8.797727,
- "lon": 78.162514,
+ "lat": 8.79773,
+ "lon": 78.1625,
  "capacity_mw": 3775,
  "n_plants": 4,
- "risk_score": 14.791349,
+ "risk_score": 14.7913,
  "risk_level": "low",
  "confidence": "high",
  "headline": "Tuticorin is low risk: over the last 90 days NO₂ ran 0.9 SD below what reported generation and weather predict, NO₂ per unit of electricity has been falling about 17% a year, and it is 0.4× the peer median per unit generated (high confidence).",
@@ -18,8 +18,8 @@
    "id": "tuticorin-tps",
    "name": "Tuticorin TPS",
    "state": "Tamil Nadu",
-   "lat": 8.762518,
-   "lon": 78.175976,
+   "lat": 8.76252,
+   "lon": 78.176,
    "capacity_mw": 1050,
    "status": "operating"
   },
@@ -27,8 +27,8 @@
    "id": "ntpl-tuticorin",
    "name": "NTPL Tuticorin TPP",
    "state": "Tamil Nadu",
-   "lat": 8.760363,
-   "lon": 78.171083,
+   "lat": 8.76036,
+   "lon": 78.1711,
    "capacity_mw": 1000,
    "status": "operating"
   },
@@ -36,8 +36,8 @@
    "id": "sepc-tuticorin",
    "name": "SEPC Tuticorin (Tuticorin TPP St-IV)",
    "state": "Tamil Nadu",
-   "lat": 8.755311,
-   "lon": 78.158031,
+   "lat": 8.75531,
+   "lon": 78.158,
    "capacity_mw": 525,
    "status": "operating"
   },
@@ -45,8 +45,8 @@
    "id": "muthiara-tpp",
    "name": "Mutiara / Coastal Energen TPP",
    "state": "Tamil Nadu",
-   "lat": 8.912716,
-   "lon": 78.144965,
+   "lat": 8.91272,
+   "lon": 78.145,
    "capacity_mw": 1200,
    "status": "operating"
   }
@@ -59,53 +59,53 @@
  "signals": {
   "persistent_excess": {
    "z": -0.903654,
-   "score": 18.308956
+   "score": 18.309
   },
   "intensity_trend": {
-   "pct_per_year": -17.290979,
-   "t": -2.483197,
-   "score": 10.719234,
+   "pct_per_year": -17.291,
+   "t": -2.4832,
+   "score": 10.7192,
    "yearly": [
     {
      "year": 2019,
      "coef": 0.344969,
-     "se": 0.099332,
+     "se": 0.0993317,
      "days": 223
     },
     {
      "year": 2020,
      "coef": 0.206106,
-     "se": 0.068454,
+     "se": 0.0684538,
      "days": 174
     },
     {
      "year": 2021,
      "coef": 0.441343,
-     "se": 0.093499,
+     "se": 0.0934991,
      "days": 225
     },
     {
      "year": 2022,
      "coef": 0.253573,
-     "se": 0.081531,
+     "se": 0.0815307,
      "days": 246
     },
     {
      "year": 2023,
      "coef": 0.185531,
-     "se": 0.077395,
+     "se": 0.0773946,
      "days": 242
     },
     {
      "year": 2024,
-     "coef": 0.081837,
+     "coef": 0.0818375,
      "se": 0.113606,
      "days": 232
     },
     {
      "year": 2025,
-     "coef": 0.04953,
-     "se": 0.077516,
+     "coef": 0.0495295,
+     "se": 0.0775156,
      "days": 236
     },
     {
@@ -118,23 +118,23 @@
   },
   "peer_intensity": {
    "ratio": 0.440247,
-   "score": 11.828249
+   "score": 11.8282
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.225217,
-   "t": 8.576414,
-   "p": 0.0,
-   "partial_r2": 0.057464,
+   "t": 8.57641,
+   "p": 9.78769e-18,
+   "partial_r2": 0.0574636,
    "r2": 0.268016,
    "n": 1782
   },
   "ratio": {
-   "coef": 0.009977,
-   "t": 6.608687,
-   "p": 0.0,
-   "partial_r2": 0.039009,
+   "coef": 0.00997684,
+   "t": 6.60869,
+   "p": 3.87742e-11,
+   "partial_r2": 0.0390093,
    "r2": 0.216077,
    "n": 1740
   }

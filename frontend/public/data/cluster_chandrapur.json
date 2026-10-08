@@ -4,11 +4,11 @@
  "states": [
   "Maharashtra"
  ],
- "lat": 20.008444,
- "lon": 79.246717,
+ "lat": 20.0084,
+ "lon": 79.2467,
  "capacity_mw": 3520,
  "n_plants": 2,
- "risk_score": 85.695761,
+ "risk_score": 85.6958,
  "risk_level": "high",
  "confidence": "high",
  "headline": "Chandrapur is high risk: over the last 90 days NO₂ ran 1.5 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (high confidence).",
@@ -27,8 +27,8 @@
    "id": "dhariwal-tpp",
    "name": "Dhariwal TPP",
    "state": "Maharashtra",
-   "lat": 20.010588,
-   "lon": 79.203433,
+   "lat": 20.0106,
+   "lon": 79.2034,
    "capacity_mw": 600,
    "status": "operating"
   }
@@ -40,13 +40,13 @@
  },
  "signals": {
   "persistent_excess": {
-   "z": 1.464083,
-   "score": 92.841437
+   "z": 1.46408,
+   "score": 92.8414
   },
   "intensity_trend": {
-   "pct_per_year": 12.952886,
+   "pct_per_year": 12.9529,
    "t": 1.98798,
-   "score": 83.988612,
+   "score": 83.9886,
    "yearly": [
     {
      "year": 2019,
@@ -62,7 +62,7 @@
     },
     {
      "year": 2021,
-     "coef": 1.020054,
+     "coef": 1.02005,
      "se": 0.327667,
      "days": 223
     },
@@ -86,37 +86,37 @@
     },
     {
      "year": 2025,
-     "coef": 1.545806,
+     "coef": 1.54581,
      "se": 0.246812,
      "days": 226
     },
     {
      "year": 2026,
-     "coef": 1.391405,
+     "coef": 1.39141,
      "se": 0.32719,
      "days": 175
     }
    ]
   },
   "peer_intensity": {
-   "ratio": 1.532822,
-   "score": 73.111557
+   "ratio": 1.53282,
+   "score": 73.1116
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.784147,
-   "t": 7.950326,
-   "p": 0.0,
-   "partial_r2": 0.046801,
+   "t": 7.95033,
+   "p": 1.86021e-15,
+   "partial_r2": 0.0468013,
    "r2": 0.406489,
    "n": 1700
   },
   "ratio": {
-   "coef": 0.018365,
-   "t": 6.358011,
-   "p": 0.0,
-   "partial_r2": 0.028847,
+   "coef": 0.0183651,
+   "t": 6.35801,
+   "p": 2.04383e-10,
+   "partial_r2": 0.0288472,
    "r2": 0.306222,
    "n": 1699
   }

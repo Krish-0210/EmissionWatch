@@ -4,6 +4,8 @@ Contract: frontend/src/api.ts. Writes to pipeline/data/export/ and copies to fro
   clusters.json            all clusters: location, capacity, score, level, confidence, headline
   cluster_{id}.json        + plants, signals, model stats, confidence notes, coverage
   timeseries_{id}.json     monthly generation_mu, expected_no2, observed_no2, residual, valid_fraction
+  summary.json             pooled model, per-cluster generation coef/p, lockdown backtest, findings
+Also copies docs/figures/backtest.png to frontend/public/data/.
 
 expected/observed/residual are monthly means of the daily model (residuals_daily.parquet) over valid
 days, in µmol/m²; months without a valid day are null. valid_fraction is from no2_monthly.parquet.
@@ -33,10 +35,11 @@ PIPELINE_DIR = Path(__file__).resolve().parents[2]
 PROCESSED = PIPELINE_DIR / "data" / "processed"
 EXPORT_DIR = PIPELINE_DIR / "data" / "export"
 FRONTEND_DIR = PIPELINE_DIR.parent / "frontend" / "public" / "data"
+BACKTEST_PNG = PIPELINE_DIR.parent / "docs" / "figures" / "backtest.png"
 
 
 def clean(v):
-    """JSON-safe: NaN/NA -> None, numpy scalars -> python, floats rounded."""
+    """JSON-safe: NaN/NA -> None, numpy scalars -> python, floats to 6 significant digits (keeps tiny p-values)."""
     if isinstance(v, dict):
         return {k: clean(x) for k, x in v.items()}
     if isinstance(v, (list, tuple)):
@@ -46,7 +49,7 @@ def clean(v):
     if hasattr(v, "item"):
         v = v.item()
     if isinstance(v, float):
-        return None if math.isinf(v) else round(v, 6)
+        return None if math.isinf(v) else float(f"{v:.6g}")
     return v
 
 
@@ -69,6 +72,32 @@ def monthly_series(cluster: str, resid: pd.DataFrame, gen: pd.DataFrame, no2: pd
     months = pd.date_range(min(v.index.min(), g.index.min()), max(v.index.max(), m.index.max()), freq="MS")
     out = pd.concat([g.rename("generation_mu"), m, v.rename("valid_fraction")], axis=1, sort=True).reindex(months)
     return [{"month": f"{ts:%Y-%m}", **row} for ts, row in zip(out.index, out.to_dict("records"))]
+
+
+FINDINGS = [
+    "In clusters where generation fell sharply during the 2020 lockdown (Chandrapur, Ramagundam, Marwa), "
+    "satellite NO2 fell with it.",
+    "Where generation stayed flat, NO2 still fell, showing non-power sources also contribute; so risk is based on "
+    "sustained patterns, not absolute levels.",
+]
+
+
+def build_summary(res: pd.DataFrame) -> dict:
+    """Pooled model, per-cluster generation coefficients, lockdown backtest and headline findings."""
+    enh = res[res["target"] == "enhancement_umol"]
+    pooled = res[res["cluster"].str.startswith("POOLED")]
+    backtest = pd.read_csv(PROCESSED / "backtest.csv")
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "units": {"coef": "µmol/m² NO2 enhancement per MU/day (enhancement); ratio units per MU/day (ratio)",
+                  "backtest": "µmol/m², means over valid days of Apr 1 - May 31; generation in MU/day"},
+        "pooled_model": {r["target"].replace("_umol", ""): {k: r[k] for k in ("coef", "t", "p", "partial_r2", "r2")}
+                         | {"n": int(r["n"])} for r in pooled.to_dict("records")},
+        "clusters": [{"id": r["cluster"], "generation_coef": r["coef"], "p": r["p"]}
+                     for r in enh[~enh["cluster"].str.startswith("POOLED")].to_dict("records")],
+        "backtest": backtest.to_dict("records"),
+        "findings": FINDINGS,
+    }
 
 
 def run() -> list[Path]:
@@ -126,8 +155,11 @@ def run() -> list[Path]:
     write(EXPORT_DIR / "clusters.json", {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                                          "as_of": as_of, "clusters": summaries})
     written.append(EXPORT_DIR / "clusters.json")
+    write(EXPORT_DIR / "summary.json", build_summary(res))
+    written.append(EXPORT_DIR / "summary.json")
 
     FRONTEND_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(BACKTEST_PNG, FRONTEND_DIR / BACKTEST_PNG.name)
     for p in written:
         shutil.copy2(p, FRONTEND_DIR / p.name)
     return written

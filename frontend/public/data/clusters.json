@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-08T17:03:14+00:00",
+ "generated_at": "2026-10-08T18:04:48+00:00",
  "as_of": "2026-09-27",
  "clusters": [
   {
@@ -8,11 +8,11 @@
    "states": [
     "Maharashtra"
    ],
-   "lat": 20.008444,
-   "lon": 79.246717,
+   "lat": 20.0084,
+   "lon": 79.2467,
    "capacity_mw": 3520,
    "n_plants": 2,
-   "risk_score": 85.695761,
+   "risk_score": 85.6958,
    "risk_level": "high",
    "confidence": "high",
    "headline": "Chandrapur is high risk: over the last 90 days NO₂ ran 1.5 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (high confidence)."
@@ -23,11 +23,11 @@
    "states": [
     "Odisha"
    ],
-   "lat": 21.781935,
-   "lon": 83.928382,
+   "lat": 21.7819,
+   "lon": 83.9284,
    "capacity_mw": 6440,
    "n_plants": 4,
-   "risk_score": 70.370104,
+   "risk_score": 70.3701,
    "risk_level": "high",
    "confidence": "medium",
    "headline": "Jharsuguda is high risk: over the last 90 days NO₂ ran 1.2 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.3× the peer median per unit generated (medium confidence)."
@@ -38,11 +38,11 @@
    "states": [
     "Bihar"
    ],
-   "lat": 25.236903,
-   "lon": 87.265595,
+   "lat": 25.2369,
+   "lon": 87.2656,
    "capacity_mw": 2340,
    "n_plants": 1,
-   "risk_score": 25.994026,
+   "risk_score": 25.994,
    "risk_level": "low",
    "confidence": "high",
    "headline": "Kahalgaon is low risk: over the last 90 days NO₂ ran 1.8 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.4× the peer median per unit generated (high confidence)."
@@ -53,11 +53,11 @@
    "states": [
     "Chhattisgarh"
    ],
-   "lat": 22.389385,
-   "lon": 82.695356,
+   "lat": 22.3894,
+   "lon": 82.6954,
    "capacity_mw": 4440,
    "n_plants": 3,
-   "risk_score": 53.259694,
+   "risk_score": 53.2597,
    "risk_level": "medium",
    "confidence": "medium",
    "headline": "Korba is medium risk: over the last 90 days NO₂ ran 0.2 SD above what reported generation and weather predict, NO₂ per unit of electricity has been falling about 20% a year, and it is 2.2× the peer median per unit generated (medium confidence)."
@@ -68,11 +68,11 @@
    "states": [
     "Chhattisgarh"
    ],
-   "lat": 22.070801,
-   "lon": 82.602189,
+   "lat": 22.0708,
+   "lon": 82.6022,
    "capacity_mw": 1000,
    "n_plants": 1,
-   "risk_score": 57.366645,
+   "risk_score": 57.3666,
    "risk_level": "medium",
    "confidence": "low",
    "headline": "Marwa is medium risk: over the last 90 days NO₂ ran 0.1 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (low confidence)."
@@ -83,11 +83,11 @@
    "states": [
     "Gujarat"
    ],
-   "lat": 22.819671,
-   "lon": 69.541265,
+   "lat": 22.8197,
+   "lon": 69.5413,
    "capacity_mw": 8620,
    "n_plants": 2,
-   "risk_score": 32.960015,
+   "risk_score": 32.96,
    "risk_level": "low",
    "confidence": "high",
    "headline": "Mundra is low risk: over the last 90 days NO₂ ran 0.3 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.4× the peer median per unit generated (high confidence)."
@@ -98,11 +98,11 @@
    "states": [
     "Tamil Nadu"
    ],
-   "lat": 11.547541,
-   "lon": 79.436165,
+   "lat": 11.5475,
+   "lon": 79.4362,
    "capacity_mw": 3640,
    "n_plants": 4,
-   "risk_score": 68.908242,
+   "risk_score": 68.9082,
    "risk_level": "high",
    "confidence": "high",
    "headline": "Neyveli is high risk: over the last 90 days NO₂ ran 1.3 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.7× the peer median per unit generated (high confidence)."
@@ -113,11 +113,11 @@
    "states": [
     "Telangana"
    ],
-   "lat": 18.791339,
-   "lon": 79.51663,
+   "lat": 18.7913,
+   "lon": 79.5166,
    "capacity_mw": 5400,
    "n_plants": 2,
-   "risk_score": 15.051344,
+   "risk_score": 15.0513,
    "risk_level": "low",
    "confidence": "medium",
    "headline": "Ramagundam is low risk: over the last 90 days NO₂ ran 1.1 SD below what reported generation and weather predict, NO₂ per unit of electricity has been falling about 19% a year, and it is 0.6× the peer median per unit generated (medium confidence)."
@@ -129,11 +129,11 @@
     "Madhya Pradesh",
     "Uttar Pradesh"
    ],
-   "lat": 24.102144,
-   "lon": 82.730448,
+   "lat": 24.1021,
+   "lon": 82.7304,
    "capacity_mw": 17550,
    "n_plants": 6,
-   "risk_score": 66.544193,
+   "risk_score": 66.5442,
    "risk_level": "high",
    "confidence": "low",
    "headline": "Singrauli is high risk: over the last 90 days NO₂ ran 1.8 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.6× the peer median per unit generated (low confidence)."
@@ -144,11 +144,11 @@
    "states": [
     "Odisha"
    ],
-   "lat": 21.112056,
-   "lon": 85.02779,
+   "lat": 21.1121,
+   "lon": 85.0278,
    "capacity_mw": 4200,
    "n_plants": 2,
-   "risk_score": 91.706658,
+   "risk_score": 91.7067,
    "risk_level": "high",
    "confidence": "high",
    "headline": "Talcher is high risk: over the last 90 days NO₂ ran 3.0 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 2.0× the peer median per unit generated (high confidence)."
@@ -159,11 +159,11 @@
    "states": [
     "Tamil Nadu"
    ],
-   "lat": 8.797727,
-   "lon": 78.162514,
+   "lat": 8.79773,
+   "lon": 78.1625,
    "capacity_mw": 3775,
    "n_plants": 4,
-   "risk_score": 14.791349,
+   "risk_score": 14.7913,
    "risk_level": "low",
    "confidence": "high",
    "headline": "Tuticorin is low risk: over the last 90 days NO₂ ran 0.9 SD below what reported generation and weather predict, NO₂ per unit of electricity has been falling about 17% a year, and it is 0.4× the peer median per unit generated (high confidence)."

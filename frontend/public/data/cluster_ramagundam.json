@@ -4,11 +4,11 @@
  "states": [
   "Telangana"
  ],
- "lat": 18.791339,
- "lon": 79.51663,
+ "lat": 18.7913,
+ "lon": 79.5166,
  "capacity_mw": 5400,
  "n_plants": 2,
- "risk_score": 15.051344,
+ "risk_score": 15.0513,
  "risk_level": "low",
  "confidence": "medium",
  "headline": "Ramagundam is low risk: over the last 90 days NO₂ ran 1.1 SD below what reported generation and weather predict, NO₂ per unit of electricity has been falling about 19% a year, and it is 0.6× the peer median per unit generated (medium confidence).",
@@ -18,8 +18,8 @@
    "id": "ramagundam-stps",
    "name": "Ramagundam STPS (incl. Telangana STPP Ph-1)",
    "state": "Telangana",
-   "lat": 18.755622,
-   "lon": 79.462977,
+   "lat": 18.7556,
+   "lon": 79.463,
    "capacity_mw": 4200,
    "status": "operating"
   },
@@ -27,8 +27,8 @@
    "id": "singareni-tpp",
    "name": "Singareni TPP (Pegadapalli)",
    "state": "Telangana",
-   "lat": 18.827056,
-   "lon": 79.570284,
+   "lat": 18.8271,
+   "lon": 79.5703,
    "capacity_mw": 1200,
    "status": "operating"
   }
@@ -40,13 +40,13 @@
  },
  "signals": {
   "persistent_excess": {
-   "z": -1.108361,
-   "score": 13.385302
+   "z": -1.10836,
+   "score": 13.3853
   },
   "intensity_trend": {
-   "pct_per_year": -19.245466,
-   "t": -2.623976,
-   "score": 9.476208,
+   "pct_per_year": -19.2455,
+   "t": -2.62398,
+   "score": 9.47621,
    "yearly": [
     {
      "year": 2019,
@@ -100,23 +100,23 @@
   },
   "peer_intensity": {
    "ratio": 0.612323,
-   "score": 23.958564
+   "score": 23.9586
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.313246,
-   "t": 3.715072,
-   "p": 0.000203,
-   "partial_r2": 0.014226,
+   "t": 3.71507,
+   "p": 0.000203146,
+   "partial_r2": 0.0142258,
    "r2": 0.389052,
    "n": 1774
   },
   "ratio": {
-   "coef": 0.004753,
-   "t": 1.840509,
-   "p": 0.065694,
-   "partial_r2": 0.003515,
+   "coef": 0.00475304,
+   "t": 1.84051,
+   "p": 0.0656936,
+   "partial_r2": 0.00351477,
    "r2": 0.313411,
    "n": 1772
   }

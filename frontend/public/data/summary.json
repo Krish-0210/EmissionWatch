@@ -1,0 +1,256 @@
+{
+ "generated_at": "2026-10-08T18:04:48+00:00",
+ "units": {
+  "coef": "µmol/m² NO2 enhancement per MU/day (enhancement); ratio units per MU/day (ratio)",
+  "backtest": "µmol/m², means over valid days of Apr 1 - May 31; generation in MU/day"
+ },
+ "pooled_model": {
+  "enhancement": {
+   "coef": 0.324496,
+   "t": 12.1258,
+   "p": 7.7145e-34,
+   "partial_r2": 0.0149378,
+   "r2": 0.530758,
+   "n": 19183
+  },
+  "ratio": {
+   "coef": 0.00617094,
+   "t": 11.6338,
+   "p": 2.77389e-31,
+   "partial_r2": 0.0103984,
+   "r2": 0.360887,
+   "n": 19091
+  }
+ },
+ "clusters": [
+  {
+   "id": "chandrapur",
+   "generation_coef": 0.784147,
+   "p": 1.86021e-15
+  },
+  {
+   "id": "jharsuguda",
+   "generation_coef": 0.665251,
+   "p": 3.52505e-28
+  },
+  {
+   "id": "kahalgaon",
+   "generation_coef": 0.710284,
+   "p": 5.70316e-15
+  },
+  {
+   "id": "korba",
+   "generation_coef": 1.1014,
+   "p": 6.83763e-08
+  },
+  {
+   "id": "marwa",
+   "generation_coef": 0.772107,
+   "p": 0.021329
+  },
+  {
+   "id": "mundra",
+   "generation_coef": 0.180931,
+   "p": 2.10561e-47
+  },
+  {
+   "id": "neyveli",
+   "generation_coef": 0.35789,
+   "p": 6.73686e-11
+  },
+  {
+   "id": "ramagundam",
+   "generation_coef": 0.313246,
+   "p": 0.000203146
+  },
+  {
+   "id": "singrauli",
+   "generation_coef": 0.302538,
+   "p": 0.0137054
+  },
+  {
+   "id": "talcher",
+   "generation_coef": 1.04534,
+   "p": 2.98546e-11
+  },
+  {
+   "id": "tuticorin",
+   "generation_coef": 0.225217,
+   "p": 9.78769e-18
+  }
+ ],
+ "backtest": [
+  {
+   "cluster": "chandrapur",
+   "gen_2019": 63.6766,
+   "gen_2020": 46.4748,
+   "days_2019": 56,
+   "days_2020": 58,
+   "observed_2019": 53.8573,
+   "observed_2020": 39.7467,
+   "predicted_2020": 51.0435,
+   "gen_change_pct": -27.0143,
+   "observed_change_pct": -26.1999,
+   "predicted_change_pct": -5.22451,
+   "error": 11.2968
+  },
+  {
+   "cluster": "jharsuguda",
+   "gen_2019": 10.1105,
+   "gen_2020": 43.2372,
+   "days_2019": 57,
+   "days_2020": 53,
+   "observed_2019": 56.3829,
+   "observed_2020": 50.9758,
+   "predicted_2020": 63.3544,
+   "gen_change_pct": 327.647,
+   "observed_change_pct": -9.58987,
+   "predicted_change_pct": 12.3646,
+   "error": 12.3786
+  },
+  {
+   "cluster": "kahalgaon",
+   "gen_2019": 41.0303,
+   "gen_2020": 41.4144,
+   "days_2019": 50,
+   "days_2020": 47,
+   "observed_2019": 37.2291,
+   "observed_2020": 32.4988,
+   "predicted_2020": 35.9373,
+   "gen_change_pct": 0.936133,
+   "observed_change_pct": -12.7058,
+   "predicted_change_pct": -3.46976,
+   "error": 3.43851
+  },
+  {
+   "cluster": "korba",
+   "gen_2019": 90.3952,
+   "gen_2020": 97.5731,
+   "days_2019": 54,
+   "days_2020": 57,
+   "observed_2019": 125.126,
+   "observed_2020": 116.999,
+   "predicted_2020": 121.623,
+   "gen_change_pct": 7.94054,
+   "observed_change_pct": -6.49506,
+   "predicted_change_pct": -2.79931,
+   "error": 4.62434
+  },
+  {
+   "cluster": "marwa",
+   "gen_2019": 11.9536,
+   "gen_2020": 9.51033,
+   "days_2019": 58,
+   "days_2020": 57,
+   "observed_2019": 59.5352,
+   "observed_2020": 52.8192,
+   "predicted_2020": 46.1845,
+   "gen_change_pct": -20.4397,
+   "observed_change_pct": -11.2806,
+   "predicted_change_pct": -22.4248,
+   "error": -6.63471
+  },
+  {
+   "cluster": "mundra",
+   "gen_2019": 175.371,
+   "gen_2020": 116.553,
+   "days_2019": 60,
+   "days_2020": 60,
+   "observed_2019": 7.92658,
+   "observed_2020": 9.21285,
+   "predicted_2020": 7.68361,
+   "gen_change_pct": -33.5392,
+   "observed_change_pct": 16.2273,
+   "predicted_change_pct": -3.06528,
+   "error": -1.52924
+  },
+  {
+   "cluster": "neyveli",
+   "gen_2019": 56.778,
+   "gen_2020": 54.9213,
+   "days_2019": 58,
+   "days_2020": 54,
+   "observed_2019": 41.5096,
+   "observed_2020": 43.1562,
+   "predicted_2020": 42.3465,
+   "gen_change_pct": -3.27014,
+   "observed_change_pct": 3.96685,
+   "predicted_change_pct": 2.01611,
+   "error": -0.809744
+  },
+  {
+   "cluster": "ramagundam",
+   "gen_2019": 78.213,
+   "gen_2020": 58.6754,
+   "days_2019": 58,
+   "days_2020": 59,
+   "observed_2019": 66.1513,
+   "observed_2020": 44.5516,
+   "predicted_2020": 58.8157,
+   "gen_change_pct": -24.9799,
+   "observed_change_pct": -32.6519,
+   "predicted_change_pct": -11.0891,
+   "error": 14.2641
+  },
+  {
+   "cluster": "singrauli",
+   "gen_2019": 384.46,
+   "gen_2020": 364.722,
+   "days_2019": 54,
+   "days_2020": 58,
+   "observed_2019": 206.154,
+   "observed_2020": 207.6,
+   "predicted_2020": 223.281,
+   "gen_change_pct": -5.13388,
+   "observed_change_pct": 0.701425,
+   "predicted_change_pct": 8.3081,
+   "error": 15.6814
+  },
+  {
+   "cluster": "talcher",
+   "gen_2019": 85.7139,
+   "gen_2020": 85.9211,
+   "days_2019": 57,
+   "days_2020": 57,
+   "observed_2019": 74.6791,
+   "observed_2020": 57.4234,
+   "predicted_2020": 76.3309,
+   "gen_change_pct": 0.24175,
+   "observed_change_pct": -23.1064,
+   "predicted_change_pct": 2.21186,
+   "error": 18.9074
+  },
+  {
+   "cluster": "tuticorin",
+   "gen_2019": 34.8895,
+   "gen_2020": 32.4895,
+   "days_2019": 49,
+   "days_2020": 43,
+   "observed_2019": 18.0114,
+   "observed_2020": 13.1156,
+   "predicted_2020": 20.1834,
+   "gen_change_pct": -6.87886,
+   "observed_change_pct": -27.1816,
+   "predicted_change_pct": 12.0594,
+   "error": 7.06785
+  },
+  {
+   "cluster": "POOLED",
+   "gen_2019": 1032.59,
+   "gen_2020": 951.492,
+   "days_2019": 611,
+   "days_2020": 603,
+   "observed_2019": 67.582,
+   "observed_2020": 62.3611,
+   "predicted_2020": 70.8108,
+   "gen_change_pct": -7.85396,
+   "observed_change_pct": -7.7253,
+   "predicted_change_pct": 4.7776,
+   "error": 8.44971
+  }
+ ],
+ "findings": [
+  "In clusters where generation fell sharply during the 2020 lockdown (Chandrapur, Ramagundam, Marwa), satellite NO2 fell with it.",
+  "Where generation stayed flat, NO2 still fell, showing non-power sources also contribute; so risk is based on sustained patterns, not absolute levels."
+ ]
+}

@@ -4,11 +4,11 @@
  "states": [
   "Odisha"
  ],
- "lat": 21.781935,
- "lon": 83.928382,
+ "lat": 21.7819,
+ "lon": 83.9284,
  "capacity_mw": 6440,
  "n_plants": 4,
- "risk_score": 70.370104,
+ "risk_score": 70.3701,
  "risk_level": "high",
  "confidence": "medium",
  "headline": "Jharsuguda is high risk: over the last 90 days NO₂ ran 1.2 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.3× the peer median per unit generated (medium confidence).",
@@ -18,8 +18,8 @@
    "id": "sterlite-tpp",
    "name": "Sterlite / Vedanta TPP (Jharsuguda)",
    "state": "Odisha",
-   "lat": 21.815743,
-   "lon": 84.042036,
+   "lat": 21.8157,
+   "lon": 84.042,
    "capacity_mw": 2400,
    "status": "operating"
   },
@@ -27,8 +27,8 @@
    "id": "ib-valley-tps",
    "name": "IB Valley TPS",
    "state": "Odisha",
-   "lat": 21.690501,
-   "lon": 83.860111,
+   "lat": 21.6905,
+   "lon": 83.8601,
    "capacity_mw": 1740,
    "status": "operating"
   },
@@ -36,8 +36,8 @@
    "id": "darlipali-stps",
    "name": "Darlipali STPS",
    "state": "Odisha",
-   "lat": 21.963554,
-   "lon": 83.89187,
+   "lat": 21.9636,
+   "lon": 83.8919,
    "capacity_mw": 1600,
    "status": "operating"
   },
@@ -45,8 +45,8 @@
    "id": "utkal-tpp",
    "name": "Utkal TPP (Ind-Barath / JSW Energy Utkal)",
    "state": "Odisha",
-   "lat": 21.657942,
-   "lon": 83.919513,
+   "lat": 21.6579,
+   "lon": 83.9195,
    "capacity_mw": 700,
    "status": "operating"
   }
@@ -58,13 +58,13 @@
  },
  "signals": {
   "persistent_excess": {
-   "z": 1.159425,
-   "score": 87.685846
+   "z": 1.15942,
+   "score": 87.6858
   },
   "intensity_trend": {
-   "pct_per_year": -5.005458,
+   "pct_per_year": -5.00546,
    "t": -0.437388,
-   "score": 41.344423,
+   "score": 41.3444,
    "yearly": [
     {
      "year": 2019,
@@ -117,23 +117,23 @@
    ]
   },
   "peer_intensity": {
-   "ratio": 1.300409,
-   "score": 64.764303
+   "ratio": 1.30041,
+   "score": 64.7643
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.665251,
-   "t": 11.007275,
-   "p": 0.0,
-   "partial_r2": 0.090007,
+   "t": 11.0073,
+   "p": 3.52505e-28,
+   "partial_r2": 0.0900073,
    "r2": 0.396852,
    "n": 1657
   },
   "ratio": {
-   "coef": 0.005673,
-   "t": 3.925712,
-   "p": 8.6e-05,
+   "coef": 0.00567298,
+   "t": 3.92571,
+   "p": 8.64737e-05,
    "partial_r2": 0.012404,
    "r2": 0.219217,
    "n": 1657

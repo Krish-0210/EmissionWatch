@@ -4,11 +4,11 @@
  "states": [
   "Chhattisgarh"
  ],
- "lat": 22.070801,
- "lon": 82.602189,
+ "lat": 22.0708,
+ "lon": 82.6022,
  "capacity_mw": 1000,
  "n_plants": 1,
- "risk_score": 57.366645,
+ "risk_score": 57.3666,
  "risk_level": "medium",
  "confidence": "low",
  "headline": "Marwa is medium risk: over the last 90 days NO₂ ran 0.1 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (low confidence).",
@@ -18,8 +18,8 @@
    "id": "marwa-tps",
    "name": "Marwa TPS",
    "state": "Chhattisgarh",
-   "lat": 22.070801,
-   "lon": 82.602189,
+   "lat": 22.0708,
+   "lon": 82.6022,
    "capacity_mw": 1000,
    "status": "operating"
   }
@@ -31,13 +31,13 @@
  },
  "signals": {
   "persistent_excess": {
-   "z": -0.079183,
-   "score": 46.844362
+   "z": -0.0791828,
+   "score": 46.8444
   },
   "intensity_trend": {
-   "pct_per_year": 11.809113,
+   "pct_per_year": 11.8091,
    "t": 0.685352,
-   "score": 63.407894,
+   "score": 63.4079,
    "yearly": [
     {
      "year": 2019,
@@ -47,14 +47,14 @@
     },
     {
      "year": 2020,
-     "coef": -1.620085,
-     "se": 1.275183,
+     "coef": -1.62009,
+     "se": 1.27518,
      "days": 163
     },
     {
      "year": 2021,
      "coef": 0.438243,
-     "se": 1.089041,
+     "se": 1.08904,
      "days": 226
     },
     {
@@ -65,14 +65,14 @@
     },
     {
      "year": 2023,
-     "coef": 2.029036,
+     "coef": 2.02904,
      "se": 0.952582,
      "days": 244
     },
     {
      "year": 2024,
      "coef": 0.852844,
-     "se": 1.270191,
+     "se": 1.27019,
      "days": 215
     },
     {
@@ -84,31 +84,31 @@
     {
      "year": 2026,
      "coef": -0.185951,
-     "se": 1.122469,
+     "se": 1.12247,
      "days": 175
     }
    ]
   },
   "peer_intensity": {
-   "ratio": 1.509287,
-   "score": 72.369962
+   "ratio": 1.50929,
+   "score": 72.37
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.772107,
-   "t": 2.302109,
+   "t": 2.30211,
    "p": 0.021329,
-   "partial_r2": 0.005289,
+   "partial_r2": 0.00528919,
    "r2": 0.226275,
    "n": 1742
   },
   "ratio": {
-   "coef": 0.005342,
+   "coef": 0.00534199,
    "t": 1.20865,
    "p": 0.226797,
-   "partial_r2": 0.001192,
-   "r2": 0.065626,
+   "partial_r2": 0.00119171,
+   "r2": 0.0656265,
    "n": 1741
   }
  },

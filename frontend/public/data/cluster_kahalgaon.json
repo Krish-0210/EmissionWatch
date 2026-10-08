@@ -4,11 +4,11 @@
  "states": [
   "Bihar"
  ],
- "lat": 25.236903,
- "lon": 87.265595,
+ "lat": 25.2369,
+ "lon": 87.2656,
  "capacity_mw": 2340,
  "n_plants": 1,
- "risk_score": 25.994026,
+ "risk_score": 25.994,
  "risk_level": "low",
  "confidence": "high",
  "headline": "Kahalgaon is low risk: over the last 90 days NO₂ ran 1.8 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.4× the peer median per unit generated (high confidence).",
@@ -18,8 +18,8 @@
    "id": "kahalgaon-stps",
    "name": "Kahalgaon STPS",
    "state": "Bihar",
-   "lat": 25.236903,
-   "lon": 87.265595,
+   "lat": 25.2369,
+   "lon": 87.2656,
    "capacity_mw": 2340,
    "status": "operating"
   }
@@ -31,13 +31,13 @@
  },
  "signals": {
   "persistent_excess": {
-   "z": -1.824308,
-   "score": 3.405278
+   "z": -1.82431,
+   "score": 3.40528
   },
   "intensity_trend": {
-   "pct_per_year": -7.137366,
-   "t": -1.109124,
-   "score": 28.959709,
+   "pct_per_year": -7.13737,
+   "t": -1.10912,
+   "score": 28.9597,
    "yearly": [
     {
      "year": 2019,
@@ -53,7 +53,7 @@
     },
     {
      "year": 2021,
-     "coef": 1.148378,
+     "coef": 1.14838,
      "se": 0.251734,
      "days": 246
     },
@@ -90,24 +90,24 @@
    ]
   },
   "peer_intensity": {
-   "ratio": 1.388438,
-   "score": 68.205839
+   "ratio": 1.38844,
+   "score": 68.2058
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.710284,
-   "t": 7.810345,
-   "p": 0.0,
-   "partial_r2": 0.039834,
+   "t": 7.81035,
+   "p": 5.70316e-15,
+   "partial_r2": 0.0398345,
    "r2": 0.28062,
    "n": 1781
   },
   "ratio": {
-   "coef": 0.017963,
-   "t": 6.347793,
-   "p": 0.0,
-   "partial_r2": 0.028348,
+   "coef": 0.0179625,
+   "t": 6.34779,
+   "p": 2.18426e-10,
+   "partial_r2": 0.0283485,
    "r2": 0.219059,
    "n": 1781
   }

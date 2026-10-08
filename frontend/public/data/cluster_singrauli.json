@@ -5,11 +5,11 @@
   "Madhya Pradesh",
   "Uttar Pradesh"
  ],
- "lat": 24.102144,
- "lon": 82.730448,
+ "lat": 24.1021,
+ "lon": 82.7304,
  "capacity_mw": 17550,
  "n_plants": 6,
- "risk_score": 66.544193,
+ "risk_score": 66.5442,
  "risk_level": "high",
  "confidence": "low",
  "headline": "Singrauli is high risk: over the last 90 days NO₂ ran 1.8 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.6× the peer median per unit generated (low confidence).",
@@ -28,8 +28,8 @@
    "id": "sasan-umtpp",
    "name": "Sasan UMTPP",
    "state": "Madhya Pradesh",
-   "lat": 23.977523,
-   "lon": 82.626473,
+   "lat": 23.9775,
+   "lon": 82.6265,
    "capacity_mw": 3960,
    "status": "operating"
   },
@@ -37,8 +37,8 @@
    "id": "singrauli-stps",
    "name": "Singrauli STPS",
    "state": "Uttar Pradesh",
-   "lat": 24.104212,
-   "lon": 82.706355,
+   "lat": 24.1042,
+   "lon": 82.7064,
    "capacity_mw": 2000,
    "status": "operating"
   },
@@ -55,8 +55,8 @@
    "id": "anpara-tps",
    "name": "Anpara TPS",
    "state": "Uttar Pradesh",
-   "lat": 24.202043,
-   "lon": 82.789128,
+   "lat": 24.202,
+   "lon": 82.7891,
    "capacity_mw": 2630,
    "status": "operating"
   },
@@ -64,8 +64,8 @@
    "id": "anpara-c-tps",
    "name": "Anpara C TPS",
    "state": "Uttar Pradesh",
-   "lat": 24.203788,
-   "lon": 82.79733,
+   "lat": 24.2038,
+   "lon": 82.7973,
    "capacity_mw": 1200,
    "status": "operating"
   }
@@ -77,13 +77,13 @@
  },
  "signals": {
   "persistent_excess": {
-   "z": 1.786832,
-   "score": 96.30177
+   "z": 1.78683,
+   "score": 96.3018
   },
   "intensity_trend": {
-   "pct_per_year": 1.065236,
-   "t": 0.057422,
-   "score": 51.145243,
+   "pct_per_year": 1.06524,
+   "t": 0.0574219,
+   "score": 51.1452,
    "yearly": [
     {
      "year": 2019,
@@ -111,7 +111,7 @@
     },
     {
      "year": 2023,
-     "coef": -0.001704,
+     "coef": -0.00170396,
      "se": 0.45768,
      "days": 252
     },
@@ -137,15 +137,15 @@
   },
   "peer_intensity": {
    "ratio": 0.59139,
-   "score": 22.42799
+   "score": 22.428
   }
  },
  "model": {
   "enhancement": {
    "coef": 0.302538,
-   "t": 2.464892,
-   "p": 0.013705,
-   "partial_r2": 0.003676,
+   "t": 2.46489,
+   "p": 0.0137054,
+   "partial_r2": 0.00367617,
    "r2": 0.343383,
    "n": 1807
   },
@@ -153,7 +153,7 @@
    "coef": 0.002361,
    "t": 0.852946,
    "p": 0.393689,
-   "partial_r2": 0.000473,
+   "partial_r2": 0.000473035,
    "r2": 0.227368,
    "n": 1807
   }
