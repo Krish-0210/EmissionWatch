@@ -8,6 +8,7 @@ import HomeStory from '../components/HomeStory'
 import { ScrollTrigger } from '../lib/gsap'
 import { useIsMobile, useReducedMotion } from '../lib/motion'
 import { stepFor } from '../lib/story'
+import { webglOk } from '../lib/webgl'
 import { useAsync } from '../lib/useAsync'
 import type { GlobeControl } from '../three/GlobeScene'
 import './home.css'
@@ -53,15 +54,6 @@ const SOURCES = [
   'Global Energy Monitor',
 ]
 
-function webglOk() {
-  try {
-    const c = document.createElement('canvas')
-    return !!(c.getContext('webgl2') || c.getContext('webgl'))
-  } catch {
-    return false
-  }
-}
-
 export default function Home() {
   const clusters = useAsync(fetchClusters, [])
   const summary = useAsync(fetchSummary, [])
@@ -79,16 +71,25 @@ export default function Home() {
   const [ready3d, setReady3d] = useState(false)
   const onReady = useCallback(() => setReady3d(true), [])
 
-  // Load the 3D scene after first paint, when the browser is idle.
+  // The 3D scene (and the WebGL probe, which can block for a while on first GPU use) loads on
+  // the first sign of intent (pointer, scroll, touch, key) or after 5 s; the poster shows until then.
   useEffect(() => {
-    if (reduced || !webglOk()) return
-    const go = () => setMount3d(true)
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(go, { timeout: 1200 })
-      return () => window.cancelIdleCallback(id)
+    if (reduced) return
+    const events = ['pointermove', 'pointerdown', 'wheel', 'scroll', 'touchstart', 'keydown'] as const
+    let done = false
+    const go = () => {
+      if (done) return
+      done = true
+      cleanup()
+      if (webglOk()) setMount3d(true)
     }
-    const id = setTimeout(go, 400)
-    return () => clearTimeout(id)
+    const id = setTimeout(go, 5000)
+    events.forEach((e) => window.addEventListener(e, go, { passive: true, once: true }))
+    function cleanup() {
+      clearTimeout(id)
+      events.forEach((e) => window.removeEventListener(e, go))
+    }
+    return cleanup
   }, [reduced])
 
   // Scroll progress through the pinned stage.

@@ -112,7 +112,7 @@ const rimShader = {
     varying vec3 vN; varying vec3 vV;
     void main() {
       float f = 1.0 - abs(dot(vN, vV));
-      float a = pow(f, 4.0) * 0.45 * uStrength;
+      float a = pow(f, 6.0) * 0.32 * uStrength;
       gl_FragColor = vec4(uColor * 1.2, a);
     }`,
 }

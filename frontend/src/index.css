@@ -75,7 +75,8 @@ h1, h2, h3, h4 { margin: 0 0 0.5em; font-weight: 400; }
 .container { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); position: relative; }
 .section { padding: clamp(72px, 12vw, 160px) 0; position: relative; }
 .section-tight { padding: clamp(48px, 7vw, 96px) 0; position: relative; }
-.grid { display: grid; gap: 16px; }
+.grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.grid > * { min-width: 0; }
 .grid-3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
 .grid-2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); }
 .stack-sm > * + * { margin-top: 8px; }
@@ -110,6 +111,8 @@ h1, h2, h3, h4 { margin: 0 0 0.5em; font-weight: 400; }
   will-change: transform;
 }
 .layer { position: relative; z-index: 1; }
+/* Clip giant background words without creating a scroll container (keeps position: sticky working). */
+main, .footer { overflow-x: clip; }
 
 /* ---------- Controls ---------- */
 .pill {

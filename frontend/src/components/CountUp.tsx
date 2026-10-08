@@ -42,7 +42,8 @@ export default function CountUp({ value, decimals = 0, duration = 1600, pad = 0,
   }, [go, value, duration])
 
   return (
-    <span ref={ref} className={`mono ${className ?? ''}`} aria-label={`${prefix}${format(value, decimals, 0)}${suffix}`}>
+    <span ref={ref} className={`mono ${className ?? ''}`}>
+      <span className="sr-only">{`${prefix}${format(value, decimals, 0)}${suffix}`}</span>
       <span aria-hidden="true">
         {prefix}
         {format(shown, decimals, pad)}

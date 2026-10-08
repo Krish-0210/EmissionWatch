@@ -10,6 +10,7 @@ import Markdown from '../components/Markdown'
 import { fmt, fmtInt, fmtP, RISK_COLOR } from '../lib/format'
 import { useInView, useIsMobile, useReducedMotion } from '../lib/motion'
 import { useAsync } from '../lib/useAsync'
+import { webglOk } from '../lib/webgl'
 import './cluster.css'
 
 const RingsCanvas = lazy(() => import('../three/RingsCanvas'))
@@ -62,7 +63,7 @@ function MethodRings({ months }: { months?: MonthPoint[] }) {
       <div className="micro">The method, in space</div>
       <h3>Rings around the cluster</h3>
       <div className="rings-stage">
-        {reduced ? (
+        {reduced || !webglOk() ? (
           <RingsPoster />
         ) : (
           <Suspense fallback={<RingsPoster />}>{months && <RingsCanvas count={count} lite={mobile} />}</Suspense>
@@ -76,7 +77,7 @@ function MethodRings({ months }: { months?: MonthPoint[] }) {
       <p className="muted small" style={{ marginTop: 10 }}>
         Particle density follows this cluster’s mean NO₂ enhancement:{' '}
         <span className="mono text">{fmt(mean)} µmol/m²</span> over {obs.length} months with valid data.{' '}
-        {!reduced && <span className="micro">Drag to rotate</span>}
+        {!reduced && webglOk() && <span className="micro">Drag to rotate</span>}
       </p>
     </div>
   )
