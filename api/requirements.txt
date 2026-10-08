@@ -1,1 +1,2 @@
+# Lambda runtime (python3.12) already provides boto3; listed for local runs.
 boto3
