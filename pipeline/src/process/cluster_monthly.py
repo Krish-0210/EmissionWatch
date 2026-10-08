@@ -2,7 +2,8 @@
 
 Writes data/processed/cluster_monthly.parquet. For each cluster it prints the Pearson
 and Spearman correlation between generation_mu and enhancement, and saves a chart to
-docs/figures/. Months used: valid_fraction >= MIN_VALID with generation present.
+docs/figures/. Months used: valid_fraction >= MIN_VALID and daily reports for >= 90% of the
+month's days (generation_mu is a monthly sum).
 The combined Apr+May 2020 row covers two months of generation, so it is kept in the
 table (with the two months' NO2 averaged) but left out of the correlation.
 
@@ -26,6 +27,7 @@ PROCESSED = PIPELINE_DIR / "data" / "processed"
 FIG_DIR = PIPELINE_DIR.parent / "docs" / "figures"
 OUT_PATH = PROCESSED / "cluster_monthly.parquet"
 MIN_VALID = 0.5
+MIN_DAYS_SHARE = 0.9  # generation_mu is a sum, so months with missing daily reports are understated
 
 GEN_COLOR, NO2_COLOR = "#2a78d6", "#eb6834"  # categorical slots 1-2 of the reference palette
 INK, INK_2, GRID = "#0b0b0b", "#52514e", "#e4e3df"
@@ -38,14 +40,21 @@ def build() -> pd.DataFrame:
     no2 = (no2[no2["entity_type"] == "cluster"]
            .drop(columns=["entity_type", "overlapping"]).rename(columns={"entity_id": "cluster"}))
 
+    # background_flag is a per-cluster constant; set aside so the averaging below leaves it alone.
+    flags = no2.groupby("cluster")["background_flag"].first() if "background_flag" in no2 else None
+    no2 = no2.drop(columns=["background_flag"], errors="ignore")
+
     # Satellite months matching the combined Apr+May 2020 generation row: average them onto April.
     gap = no2["month"].isin(pd.to_datetime(["2020-04-01", "2020-05-01"]))
     gap_mean = no2[gap].groupby("cluster").mean(numeric_only=True).reset_index().assign(month=pd.Timestamp("2020-04-01"))
     no2 = pd.concat([no2[~gap], gap_mean], ignore_index=True)
+    if flags is not None:
+        no2["background_flag"] = no2["cluster"].map(flags).astype("boolean")
 
     df = no2.merge(gen, on=["month", "cluster"], how="outer")
     df["combined_period"] = df["combined_period"].astype("boolean").fillna(False)
-    df["used_in_corr"] = ((df["valid_fraction"] >= MIN_VALID) & df["generation_mu"].notna()
+    complete = df["days_reported"] >= MIN_DAYS_SHARE * df["month"].dt.days_in_month
+    df["used_in_corr"] = ((df["valid_fraction"] >= MIN_VALID) & complete & df["generation_mu"].notna()
                           & df["enhancement"].notna() & ~df["combined_period"])
     return df.sort_values(["cluster", "month"]).reset_index(drop=True)
 
@@ -54,7 +63,9 @@ def correlations(df: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for cluster, g in df.groupby("cluster"):
         used = g[g["used_in_corr"]]
-        low = g[(g["valid_fraction"] < MIN_VALID) & g["generation_mu"].notna() & ~g["combined_period"]]
+        has_gen = g["generation_mu"].notna() & ~g["combined_period"]
+        low = g[(g["valid_fraction"] < MIN_VALID) & has_gen]
+        incomplete = g[has_gen & (g["days_reported"] < MIN_DAYS_SHARE * g["month"].dt.days_in_month)]
         rows.append({
             "cluster": cluster,
             "months_used": len(used),
@@ -63,6 +74,7 @@ def correlations(df: pd.DataFrame) -> pd.DataFrame:
             "spearman": used["generation_mu"].rank().corr(used["enhancement"].rank()),
             "excluded_low_valid": len(low),
             "excluded_months": ", ".join(low["month"].dt.strftime("%Y-%m")),
+            "excluded_incomplete": len(incomplete),
         })
     return pd.DataFrame(rows)
 
