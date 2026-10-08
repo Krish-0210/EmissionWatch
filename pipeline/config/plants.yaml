@@ -1,11 +1,134 @@
 # Coal plant registry. One entry per plant; plants sharing a Sentinel-5P pixel share a cluster.
+#
+# lat/lon and capacity_mw: Global Energy Monitor (GEM) wiki, the public page for the
+# Global Coal Plant Tracker (coord_source). capacity_mw is operating capacity and
+# matches the monitored capacity in CEA DGR2.
+# cea_names: exact plant-row spellings in CEA DGR2 (Subreport-2). Checked against
+# sample reports from 2019-01 through 2026-10; the coal plant names did not change.
+# fgd_status / scr_status: installed | under_construction | not_installed | null (unknown).
+# Not yet sourced, so all null for now.
+# cluster: singrauli = Singrauli/Sonbhadra belt (MP/UP border); korba = Korba coalfield.
+# Marwa is ~35 km from the nearest Korba plant (DSPM), which exceeds the 25 km rule, so it has its own cluster.
 plants:
-  - id: ""            # unique slug, e.g. "vindhyachal-stps"
-    name: ""
-    state: ""
-    lat: 0.0
-    lon: 0.0
-    capacity_mw: 0
-    cluster: ""       # cluster id for plants within ~5 km of each other
-    fgd_status: ""    # installed | under_construction | not_installed | unknown
-    scr_status: ""    # installed | under_construction | not_installed | unknown
+  - id: vindhyachal-stps
+    name: Vindhyachal STPS
+    cea_names: ["VINDHYACHAL STPS"]
+    state: Madhya Pradesh
+    lat: 24.0983
+    lon: 82.6719
+    capacity_mw: 4760
+    cluster: singrauli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Vindhyachal_power_station
+
+  - id: sasan-umtpp
+    name: Sasan UMTPP
+    cea_names: ["SASAN UMTPP"]
+    state: Madhya Pradesh
+    lat: 23.9775233
+    lon: 82.6264733
+    capacity_mw: 3960
+    cluster: singrauli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Sasan_Ultra_Mega_Power_Project
+
+  - id: singrauli-stps
+    name: Singrauli STPS
+    cea_names: ["SINGRAULI STPS"]
+    state: Uttar Pradesh
+    lat: 24.1042119
+    lon: 82.7063552
+    capacity_mw: 2000
+    cluster: singrauli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Singrauli_Super_Thermal_Power_Station
+
+  - id: rihand-stps
+    name: Rihand STPS
+    cea_names: ["RIHAND STPS"]
+    state: Uttar Pradesh
+    lat: 24.027
+    lon: 82.7915
+    capacity_mw: 3000
+    cluster: singrauli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Rihand_power_station
+
+  # CEA's "ANPARA TPS" covers Anpara A+B (1630 MW) and Anpara D (1000 MW, 24.196262, 82.806342,
+  # https://www.gem.wiki/Anpara-D_power_station), about 2 km apart. Coordinates are for A+B.
+  - id: anpara-tps
+    name: Anpara TPS
+    cea_names: ["ANPARA TPS"]
+    state: Uttar Pradesh
+    lat: 24.202043
+    lon: 82.789128
+    capacity_mw: 2630
+    cluster: singrauli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Anpara_power_station
+
+  - id: anpara-c-tps
+    name: Anpara C TPS
+    cea_names: ["ANPARA C TPS"]
+    state: Uttar Pradesh
+    lat: 24.203788
+    lon: 82.79733
+    capacity_mw: 1200
+    cluster: singrauli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Anpara-C_power_station
+
+  - id: korba-stps
+    name: Korba STPS (NTPC)
+    cea_names: ["KORBA STPS"]
+    state: Chhattisgarh
+    lat: 22.3874221
+    lon: 82.6818961
+    capacity_mw: 2600
+    cluster: korba
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Korba_Super_Thermal_Power_Station_(NTPC)
+
+  # GEM: Hasdeo Thermal Power Station, a.k.a. HTPS / Korba West.
+  - id: korba-west-tps
+    name: Korba-West TPS
+    cea_names: ["KORBA-WEST TPS"]
+    state: Chhattisgarh
+    lat: 22.412536
+    lon: 82.682187
+    capacity_mw: 1340
+    cluster: korba
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Hasdeo_Thermal_Power_Station
+
+  - id: marwa-tps
+    name: Marwa TPS
+    cea_names: ["MARWA TPS"]
+    state: Chhattisgarh
+    lat: 22.070801
+    lon: 82.602189
+    capacity_mw: 1000
+    cluster: marwa
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Marwa_power_station
+
+  - id: dspm-tps
+    name: DSPM TPS (Dr. Shyama Prasad Mukherjee)
+    cea_names: ["DSPM TPS"]
+    state: Chhattisgarh
+    lat: 22.368196
+    lon: 82.721986
+    capacity_mw: 500
+    cluster: korba
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Dr._Shyama_Prasad_Mukherjee_Thermal_Power_Station
