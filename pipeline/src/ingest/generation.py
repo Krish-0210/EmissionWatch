@@ -37,8 +37,9 @@ USER_AGENT = "Mozilla/5.0 (EmissionWatch research pipeline)"
 # Old CSPGCL Korba East units (since retired). Never map them to Korba STPS (NTPC).
 EXCLUDED_NAMES = {"KORBA-II", "KORBA-III"}
 
+NUMERIC = ["monitored_capacity_mw", "planned_mu", "actual_mu", "actual_fy_to_date_mu", "outage_mw"]
 COLUMNS = [
-    "date", "plant_id", "unit", "monitored_capacity_mw", "planned_mu", "actual_mu",
+    "date", "plant_id", "cea_name", "unit", "monitored_capacity_mw", "planned_mu", "actual_mu",
     "actual_fy_to_date_mu", "outage_mw", "outage_reason",
 ]
 
@@ -166,11 +167,12 @@ def parse_file(path: Path, name_map: dict) -> list[dict]:
     def label(r):
         return next((_norm(sh.cell_value(r, c)) for c in range(1, label_end) if _norm(sh.cell_value(r, c))), "")
 
-    def record(r, plant_id, unit):
+    def record(r, plant_id, cea_name, unit):
         reason = _norm(sh.cell_value(r, cols["remarks"]))
         return {
             "date": report_date,
             "plant_id": plant_id,
+            "cea_name": cea_name,
             "unit": unit,
             "monitored_capacity_mw": _num(sh.cell_value(r, cols["capacity"])),
             "planned_mu": _num(sh.cell_value(r, cols["planned"])),
@@ -182,7 +184,7 @@ def parse_file(path: Path, name_map: dict) -> list[dict]:
 
     rows, seen = [], set()
     region = state = sector = plant_type = None
-    current = None  # plant_id of the registry plant whose unit rows follow
+    current = None  # (plant_id, cea_name) of the registry plant whose unit rows follow
     for r in range(start, sh.nrows):
         name = _norm(sh.cell_value(r, 0))
         if not name or name in ("REGION TOTAL", "STATE TOTAL"):
@@ -198,9 +200,9 @@ def parse_file(path: Path, name_map: dict) -> list[dict]:
             plant_type, current = label(r), None
         elif name == "Unit":
             if current:
-                rec = record(r, current, label(r) or None)
+                rec = record(r, *current, label(r) or None)
                 prev = rows[-1]
-                if prev["plant_id"] == current and prev["unit"] is not None and prev["unit"] == rec["unit"]:
+                if prev["cea_name"] == rec["cea_name"] and prev["unit"] is not None and prev["unit"] == rec["unit"]:
                     # A long remark wraps onto a repeated Unit row with duplicated numbers.
                     if rec["outage_reason"]:
                         prev["outage_reason"] = " ".join(filter(None, [prev["outage_reason"], rec["outage_reason"]]))
@@ -210,13 +212,37 @@ def parse_file(path: Path, name_map: dict) -> list[dict]:
             # A plant row. Only thermal plants from the registry count.
             current = None
             if name in name_map and name not in EXCLUDED_NAMES and plant_type == "THERMAL":
-                current = name_map[name]
-                if current in seen:
-                    raise ValueError(f"{path.name}: {current} appears twice")
-                seen.add(current)
-                rows.append(record(r, current, None))
+                current = (name_map[name], name)
+                if name in seen:
+                    raise ValueError(f"{path.name}: {name} appears twice")
+                seen.add(name)
+                rows.append(record(r, *current, None))
                 log.debug("%s %s / %s / %s / %s", current, region, state, sector, plant_type)
-    return rows
+    return _merge_totals(rows)
+
+
+def _merge_totals(rows: list[dict]) -> list[dict]:
+    """Sum plant-total rows when a plant is reported as several CEA rows (e.g. Adani Mundra after 2019).
+
+    Unit rows are kept as they are; (cea_name, unit) identifies a unit.
+    """
+    totals: dict[str, dict] = {}
+    out = []
+    for row in rows:
+        if row["unit"] is not None:
+            out.append(row)
+            continue
+        merged = totals.get(row["plant_id"])
+        if merged is None:
+            totals[row["plant_id"]] = merged = dict(row)
+            out.append(merged)
+            continue
+        merged["cea_name"] = f'{merged["cea_name"]} + {row["cea_name"]}'
+        for col in NUMERIC:
+            if row[col] is not None:
+                merged[col] = (merged[col] or 0.0) + row[col]
+        merged["outage_reason"] = None
+    return out
 
 
 def parse_all(raw_dir: Path = RAW_DIR, plants_path: Path = PLANTS_PATH) -> pd.DataFrame:
@@ -229,7 +255,10 @@ def parse_all(raw_dir: Path = RAW_DIR, plants_path: Path = PLANTS_PATH) -> pd.Da
             log.warning("skipping %s: %s", path.name, e)
     df = pd.DataFrame(rows, columns=COLUMNS)
     df["date"] = pd.to_datetime(df["date"])
-    return df.sort_values(["date", "plant_id", "unit"], na_position="first").reset_index(drop=True)
+    # Plant total first, then units grouped by CEA row.
+    order = df.assign(_is_unit=df["unit"].notna())
+    return (order.sort_values(["date", "plant_id", "_is_unit", "cea_name", "unit"])
+            .drop(columns="_is_unit").reset_index(drop=True))
 
 
 def save(df: pd.DataFrame, out_path: Path = PROCESSED_PATH) -> Path:

@@ -7,6 +7,8 @@
 # sample reports from 2019-01 through 2026-10; the coal plant names did not change.
 # fgd_status / scr_status: installed | under_construction | not_installed | null (unknown).
 # Not yet sourced, so all null for now.
+# status: GEM unit status (operating | retired). Retired plants stay so that their historical generation
+# counts; cluster centroids use operating plants only.
 # cluster: singrauli = Singrauli/Sonbhadra belt (MP/UP border); korba = Korba coalfield.
 # Marwa is ~35 km from the nearest Korba plant (DSPM), which exceeds the 25 km rule, so it has its own cluster.
 plants:
@@ -17,6 +19,7 @@ plants:
     lat: 24.0983
     lon: 82.6719
     capacity_mw: 4760
+    status: operating
     cluster: singrauli
     fgd_status: null
     scr_status: null
@@ -29,6 +32,7 @@ plants:
     lat: 23.9775233
     lon: 82.6264733
     capacity_mw: 3960
+    status: operating
     cluster: singrauli
     fgd_status: null
     scr_status: null
@@ -41,6 +45,7 @@ plants:
     lat: 24.1042119
     lon: 82.7063552
     capacity_mw: 2000
+    status: operating
     cluster: singrauli
     fgd_status: null
     scr_status: null
@@ -53,6 +58,7 @@ plants:
     lat: 24.027
     lon: 82.7915
     capacity_mw: 3000
+    status: operating
     cluster: singrauli
     fgd_status: null
     scr_status: null
@@ -67,6 +73,7 @@ plants:
     lat: 24.202043
     lon: 82.789128
     capacity_mw: 2630
+    status: operating
     cluster: singrauli
     fgd_status: null
     scr_status: null
@@ -79,6 +86,7 @@ plants:
     lat: 24.203788
     lon: 82.79733
     capacity_mw: 1200
+    status: operating
     cluster: singrauli
     fgd_status: null
     scr_status: null
@@ -91,6 +99,7 @@ plants:
     lat: 22.3874221
     lon: 82.6818961
     capacity_mw: 2600
+    status: operating
     cluster: korba
     fgd_status: null
     scr_status: null
@@ -104,6 +113,7 @@ plants:
     lat: 22.412536
     lon: 82.682187
     capacity_mw: 1340
+    status: operating
     cluster: korba
     fgd_status: null
     scr_status: null
@@ -116,6 +126,7 @@ plants:
     lat: 22.070801
     lon: 82.602189
     capacity_mw: 1000
+    status: operating
     cluster: marwa
     fgd_status: null
     scr_status: null
@@ -128,7 +139,336 @@ plants:
     lat: 22.368196
     lon: 82.721986
     capacity_mw: 500
+    status: operating
     cluster: korba
     fgd_status: null
     scr_status: null
     coord_source: https://www.gem.wiki/Dr._Shyama_Prasad_Mukherjee_Thermal_Power_Station
+
+  # ===== Expansion clusters (added 2026-10-08) =====
+  # Source: GEM Global Coal Plant Tracker (January 2026 release), via api.globalenergymonitor.org.
+  # lat/lon are the capacity-weighted mean of GEM unit coordinates (units of a plant lie within 0.02 deg);
+  # capacity_mw is the GEM total for units with the given status. cea_names were checked against the
+  # DGR2 reports of 2019-01-15 and 2026-10-06. Each cluster centroid is >= 100 km from every other.
+  # Rejected: Raigarh/Tamnar (61-88 km from Korba, Marwa, Jharsuguda), Farakka (82 km from Kahalgaon).
+
+  # --- talcher (Odisha). Not in DGR2, so not modelled: NALCO Angul smelter CPP (1200 MW, 30 km) and
+  # JSPL Angul steel CPP (810 MW, 24 km); Kamalanga TPS (1050 MW) is 32 km out. All are excluded from the background.
+
+  - id: talcher-stps
+    name: Talcher STPS (Kaniha)
+    cea_names: ["TALCHER STPS"]
+    state: Odisha
+    lat: 21.097067
+    lon: 85.075027
+    capacity_mw: 3000
+    status: operating
+    cluster: talcher
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Talcher_Kaniha_Super_Thermal_Power_Station
+
+  - id: derang-tpp
+    name: Derang TPP (JITPL Angul)
+    cea_names: ["DERANG TPP"]
+    state: Odisha
+    lat: 21.127044
+    lon: 84.980552
+    capacity_mw: 1200
+    status: operating
+    cluster: talcher
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Angul_power_station
+
+  - id: talcher-old-tps
+    name: Talcher (Old) TPS
+    cea_names: ["TALCHER (OLD) TPS"]
+    state: Odisha
+    lat: 20.911061
+    lon: 85.207241
+    capacity_mw: 460
+    status: retired
+    cluster: talcher
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Talcher_power_station
+
+  # --- jharsuguda (Odisha). Large captive capacity here is NOT in DGR2 and so not modelled: Vedanta
+  # Jharsuguda CPP (1215 MW, 3 km) and Aditya Aluminium CPP (900 MW, 9 km). Expect NO2 not explained by
+  # reported generation. CEA monitors only part of Sterlite's 2400 MW (1200 MW in 2019, 600 MW in 2026).
+
+  - id: sterlite-tpp
+    name: Sterlite / Vedanta TPP (Jharsuguda)
+    cea_names: ["STERLITE TPP", "VEDANTA TPP"]
+    state: Odisha
+    lat: 21.815743
+    lon: 84.042036
+    capacity_mw: 2400
+    status: operating
+    cluster: jharsuguda
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Jharsuguda_Sterlite_power_station
+
+  - id: ib-valley-tps
+    name: IB Valley TPS
+    cea_names: ["IB VALLEY TPS"]
+    state: Odisha
+    lat: 21.690501
+    lon: 83.860111
+    capacity_mw: 1740
+    status: operating
+    cluster: jharsuguda
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Ib_Valley_Thermal_Power_Station
+
+  - id: darlipali-stps
+    name: Darlipali STPS
+    cea_names: ["DARLIPALI STPS"]
+    state: Odisha
+    lat: 21.963554
+    lon: 83.89187
+    capacity_mw: 1600
+    status: operating
+    cluster: jharsuguda
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Darlipali_power_station
+
+  - id: utkal-tpp
+    name: Utkal TPP (Ind-Barath / JSW Energy Utkal)
+    cea_names: ["UTKAL TPP (IND BARATH)", "JSW Energy Utkal Limited"]
+    state: Odisha
+    lat: 21.657942
+    lon: 83.919513
+    capacity_mw: 700
+    status: operating
+    cluster: jharsuguda
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Jharsuguda_Ind-Barath_power_station
+
+  # --- chandrapur (Maharashtra)
+
+  - id: chandrapur-stps
+    name: Chandrapur STPS
+    cea_names: ["CHANDRAPUR(MAHARASHTRA) STPS"]
+    state: Maharashtra
+    lat: 20.0063
+    lon: 79.29
+    capacity_mw: 2920
+    status: operating
+    cluster: chandrapur
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Chandrapur_Thermal_Power_Station
+
+  - id: dhariwal-tpp
+    name: Dhariwal TPP
+    cea_names: ["DHARIWAL TPP"]
+    state: Maharashtra
+    lat: 20.010588
+    lon: 79.203433
+    capacity_mw: 600
+    status: operating
+    cluster: chandrapur
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Dhariwal_power_station
+
+  # --- mundra (Gujarat). In 2019 CEA reports Adani Mundra as one row; by 2021 it is two rows (renamed again by 2024),
+  # which the parser sums.
+
+  - id: adani-mundra-tpp
+    name: Adani Mundra TPP
+    cea_names: ["MUNDRA TPS", "MUNDRA TPS-I & II", "MUNDRA TPS-III", "ADANI POWER LIMITED MUNDRA TPP - I & II", "ADANI POWER LIMITED MUNDRA TPP - III"]
+    state: Gujarat
+    lat: 22.823541
+    lon: 69.55443
+    capacity_mw: 4620
+    status: operating
+    cluster: mundra
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Mundra_Thermal_Power_Project_(Adani)
+
+  - id: mundra-umtpp
+    name: Mundra UMTPP (Tata)
+    cea_names: ["MUNDRA UMTPP"]
+    state: Gujarat
+    lat: 22.8158
+    lon: 69.5281
+    capacity_mw: 4000
+    status: operating
+    cluster: mundra
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Tata_Mundra_Ultra_Mega_Power_Project
+
+  # --- ramagundam (Telangana). GEM's Ramagundam includes Stage IV (Telangana STPP Ph-1, 2x800 MW),
+  # which CEA reports as a separate row (in the 2026 report, not in 2019); the parser sums the two rows.
+
+  - id: ramagundam-stps
+    name: Ramagundam STPS (incl. Telangana STPP Ph-1)
+    cea_names: ["RAMAGUNDEM STPS", "TELANGANA STPP PH-1"]
+    state: Telangana
+    lat: 18.755622
+    lon: 79.462977
+    capacity_mw: 4200
+    status: operating
+    cluster: ramagundam
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Ramagundam_power_station
+
+  - id: singareni-tpp
+    name: Singareni TPP (Pegadapalli)
+    cea_names: ["SINGARENI TPP"]
+    state: Telangana
+    lat: 18.827056
+    lon: 79.570284
+    capacity_mw: 1200
+    status: operating
+    cluster: ramagundam
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Pegadapalli_(Jaipur_Mandal)_power_station
+
+  # --- kahalgaon (Bihar). Farakka STPS (2100 MW) is 82 km away and fails the 100 km rule, so it is not a cluster.
+
+  - id: kahalgaon-stps
+    name: Kahalgaon STPS
+    cea_names: ["KAHALGAON TPS"]
+    state: Bihar
+    lat: 25.236903
+    lon: 87.265595
+    capacity_mw: 2340
+    status: operating
+    cluster: kahalgaon
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Kahalgaon_Super_Thermal_Power_Plant
+
+  # --- neyveli (Tamil Nadu). Lignite-fired. Neyveli TPS-I (600 MW, GEM: retired) is in the 2019 report but
+  # not in 2026. Neyveli New TPP shows 0 MW monitored capacity in Jan 2019.
+
+  - id: neyveli-tps-ii
+    name: Neyveli TPS-II (incl. expansion)
+    cea_names: ["NEYVELI TPS-II", "NEYVELI TPS-II EXP"]
+    state: Tamil Nadu
+    lat: 11.556527
+    lon: 79.441365
+    capacity_mw: 1970
+    status: operating
+    cluster: neyveli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Neyveli_Thermal_Power_Station_II
+
+  - id: neyveli-new-tpp
+    name: Neyveli New TPP
+    cea_names: ["NEYVELI NEW TPP"]
+    state: Tamil Nadu
+    lat: 11.547055
+    lon: 79.44289
+    capacity_mw: 1000
+    status: operating
+    cluster: neyveli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/New_Neyveli_Thermal_Power_Station
+
+  - id: neyveli-tps-i-ext
+    name: Neyveli TPS-I Expansion
+    cea_names: ["NEYVELI ( EXT) TPS"]
+    state: Tamil Nadu
+    lat: 11.546482
+    lon: 79.444503
+    capacity_mw: 420
+    status: operating
+    cluster: neyveli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Neyveli_Thermal_Power_Station_I
+
+  - id: neyveli-tps-i
+    name: Neyveli TPS-I
+    cea_names: ["NEYVELI TPS- I"]
+    state: Tamil Nadu
+    lat: 11.592515
+    lon: 79.473851
+    capacity_mw: 600
+    status: retired
+    cluster: neyveli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Neyveli_Thermal_Power_Station_I
+
+  - id: neyveli-zero
+    name: Neyveli TPS (Zero) (ST-CMS)
+    cea_names: ["NEYVELI TPS(Z)"]
+    state: Tamil Nadu
+    lat: 11.5401
+    lon: 79.4159
+    capacity_mw: 250
+    status: operating
+    cluster: neyveli
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Neyveli_Zero_power_station
+
+  # --- tuticorin (Tamil Nadu). SEPC (Tuticorin TPP St-IV) is in the 2026 report but not in 2019.
+
+  - id: tuticorin-tps
+    name: Tuticorin TPS
+    cea_names: ["TUTICORIN TPS"]
+    state: Tamil Nadu
+    lat: 8.762518
+    lon: 78.175976
+    capacity_mw: 1050
+    status: operating
+    cluster: tuticorin
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Tuticorin_Thermal_Power_Station
+
+  - id: ntpl-tuticorin
+    name: NTPL Tuticorin TPP
+    cea_names: ["TUTICORIN (JV) TPP", "NTPL TUTICORIN TPP"]
+    state: Tamil Nadu
+    lat: 8.760363
+    lon: 78.171083
+    capacity_mw: 1000
+    status: operating
+    cluster: tuticorin
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Tuticorin_NTPL_power_station
+
+  - id: sepc-tuticorin
+    name: SEPC Tuticorin (Tuticorin TPP St-IV)
+    cea_names: ["TUTICORIN TPP ST-IV"]
+    state: Tamil Nadu
+    lat: 8.755311
+    lon: 78.158031
+    capacity_mw: 525
+    status: operating
+    cluster: tuticorin
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/SEPC_Tuticorin_power_station
+
+  - id: muthiara-tpp
+    name: Mutiara / Coastal Energen TPP
+    cea_names: ["MUTHIARA TPP"]
+    state: Tamil Nadu
+    lat: 8.912716
+    lon: 78.144965
+    capacity_mw: 1200
+    status: operating
+    cluster: tuticorin
+    fgd_status: null
+    scr_status: null
+    coord_source: https://www.gem.wiki/Mutiara_Coastal_Energen_Thermal_Power_Plant
