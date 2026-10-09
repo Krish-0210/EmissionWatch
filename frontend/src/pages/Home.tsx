@@ -1,12 +1,15 @@
-import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
 import BigWord from '../components/BigWord'
 import CountUp from '../components/CountUp'
+import { IconTile, type IconName } from '../components/Icons'
+import { InspectorScene } from '../components/Illustrations'
 import GlobePoster from '../components/GlobePoster'
 import HomeStory from '../components/HomeStory'
 import Intro, { shouldPlayIntro } from '../components/Intro'
-import { Words } from '../components/PageHero'
+import { Divider, Ticker, Words, type TickerItem } from '../components/PageHero'
+import { fmt, fmtInt, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
 import { useIsMobile, useReducedMotion } from '../lib/motion'
 import { stepFor, type RegisterDrive } from '../lib/story'
@@ -17,31 +20,37 @@ import './home.css'
 
 const GlobeCanvas = lazy(() => import('../three/GlobeCanvas'))
 
-const PROBLEMS = [
+const PROBLEMS: { title: string; body: string; icon: IconName }[] = [
   {
+    icon: 'doc',
     title: 'Self-reported data',
     body: 'Coal plants report their own generation and emissions. Independent checks on the ground are rare and slow.',
   },
   {
+    icon: 'person',
     title: 'Too many plants, too few inspectors',
     body: 'India runs over 200 GW of coal capacity. Regulators need a way to decide where to look first.',
   },
   {
+    icon: 'cloud',
     title: 'Pollution people breathe',
     body: 'Nitrogen dioxide (NO₂) from coal combustion harms lungs and forms smog and fine particles downwind.',
   },
 ]
 
-const AUDIENCES = [
+const AUDIENCES: { title: string; body: string; icon: IconName }[] = [
   {
+    icon: 'shield',
     title: 'Regulators',
     body: 'A ranked list of clusters where an inspection is most likely to find something, with a written brief for each.',
   },
   {
+    icon: 'pin',
     title: 'Citizens',
     body: 'Find the coal plants near you and see, in plain language, whether satellite data matches what they report.',
   },
   {
+    icon: 'chart',
     title: 'Researchers',
     body: 'Open method, model statistics and limits. Every number traces back to public data and open code.',
   },
@@ -138,6 +147,20 @@ export default function Home() {
   }, [])
 
   const years = months?.length ? `${months[0].month.slice(0, 4)}–${months[months.length - 1].month.slice(0, 4)}` : '2019–2026'
+  const ticker: TickerItem[] = useMemo(() => {
+    const c = clusters.data, s = summary.data
+    if (!c || !s) return []
+    const top = [...c.clusters].sort((a, b) => b.risk_score - a.risk_score)
+    const e = s.pooled_model.enhancement
+    return [
+      { label: 'Data as of', value: c.as_of },
+      { label: 'Highest audit risk', value: `${top[0].name} ${Math.round(top[0].risk_score)}`, color: RISK_COLOR[top[0].risk_level] },
+      { label: 'High-risk clusters', value: String(c.clusters.filter((x) => x.risk_level === 'high').length), color: RISK_COLOR.high },
+      { label: 'Plants · capacity', value: `${c.clusters.reduce((a, x) => a + x.n_plants, 0)} · ${fmtInt(c.clusters.reduce((a, x) => a + x.capacity_mw, 0))} MW` },
+      { label: 'Pooled effect', value: `${fmt(e.coef, 2)} µmol/m² per MU/day · t ${fmt(e.t, 1)}` },
+      { label: 'Cluster-days analysed', value: fmtInt(e.n) },
+    ]
+  }, [clusters.data, summary.data])
 
   return (
     <>
@@ -183,16 +206,17 @@ export default function Home() {
         </div>
       </div>
 
-      <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} />
+      <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} ticker={ticker} />
       {!introDone && <Intro control={control} clusters={clusters.data} summary={summary.data} reduced={reduced} onDone={endIntro} />}
     </>
   )
 }
 
 // Static sections below the stage; memoised so step changes in the story don't re-render them.
-const HomeSections = memo(function HomeSections({ clusterCount, years }: { clusterCount: number; years: string }) {
+const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }: { clusterCount: number; years: string; ticker: TickerItem[] }) {
   return (
     <>
+      <Ticker items={ticker} />
       <section className="section">
         <BigWord style={{ top: '0.1em', right: '-0.05em' }}>01</BigWord>
         <div className="container layer">
@@ -200,12 +224,13 @@ const HomeSections = memo(function HomeSections({ clusterCount, years }: { clust
           <h2 className="display d-lg reveal" style={{ '--d': '80ms', marginTop: 14 } as React.CSSProperties}>
             Emissions oversight <span className="dim">runs on trust.</span>
           </h2>
-          <div className="rule draw" style={{ margin: '40px 0' }} />
-          <div className="grid grid-3">
+          <Divider />
+          <div className="grid grid-3 spot-group">
             {PROBLEMS.map((x, i) => (
-              <div className="card reveal" key={x.title} style={{ '--d': `${i * 110}ms` } as React.CSSProperties}>
-                <div className="micro" style={{ marginBottom: 18 }}>
-                  0{i + 1}
+              <div className="card tilt reveal" key={x.title} style={{ '--d': `${i * 110}ms` } as React.CSSProperties}>
+                <div className="row between" style={{ marginBottom: 18 }}>
+                  <IconTile name={x.icon} tone={i === 2 ? 'ember' : 'signal'} />
+                  <span className="micro">0{i + 1}</span>
                 </div>
                 <h3>{x.title}</h3>
                 <p className="muted">{x.body}</p>
@@ -222,15 +247,18 @@ const HomeSections = memo(function HomeSections({ clusterCount, years }: { clust
           <h2 className="display d-lg reveal" style={{ '--d': '80ms', marginTop: 14 } as React.CSSProperties}>
             Built for the people <span className="dim">who act on it.</span>
           </h2>
-          <div className="rule draw" style={{ margin: '40px 0' }} />
-          <div className="audience">
-            {AUDIENCES.map((a, i) => (
-              <div className="audience-row reveal" key={a.title} style={{ '--d': `${i * 110}ms` } as React.CSSProperties}>
-                <span className="micro mono">0{i + 1}</span>
-                <h3 className="display d-sm">{a.title}</h3>
-                <p className="muted">{a.body}</p>
-              </div>
-            ))}
+          <Divider />
+          <div className="audience-wrap">
+            <div className="audience">
+              {AUDIENCES.map((a, i) => (
+                <div className="audience-row reveal" key={a.title} style={{ '--d': `${i * 110}ms` } as React.CSSProperties}>
+                  <IconTile name={a.icon} />
+                  <h3 className="display d-sm">{a.title}</h3>
+                  <p className="muted">{a.body}</p>
+                </div>
+              ))}
+            </div>
+            <InspectorScene className="audience-il reveal" label="An inspector with a clipboard reviewing a brief" />
           </div>
         </div>
       </section>

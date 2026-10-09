@@ -91,7 +91,7 @@ export function InspectorScene({ className = '', label }: SceneProps) {
   return (
     <svg viewBox="0 0 400 320" className={`il ${className}`} {...a11y(label)}>
       <defs>
-        <radialGradient id="il-spot" cx="50%" cy="40%" r="60%">
+        <radialGradient id="il-spot" cx="50%" cy="45%" r="46%">
           <stop offset="0" stopColor="#7ce8d8" stopOpacity="0.12" />
           <stop offset="1" stopColor="#7ce8d8" stopOpacity="0" />
         </radialGradient>

@@ -86,14 +86,17 @@
 
 /* ---------- Sections ---------- */
 .audience { display: grid; }
-.audience-row { display: grid; grid-template-columns: 60px minmax(0, 1fr) minmax(0, 1.4fr); gap: 24px; align-items: baseline; padding: 28px 0; border-bottom: 1px solid var(--border); }
+.audience-wrap { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.8fr); gap: 40px; align-items: center; }
+.audience-il { max-width: 380px; justify-self: center; }
+@media (max-width: 960px) { .audience-wrap { grid-template-columns: 1fr; } .audience-il { max-width: 300px; } }
+.audience-row { display: grid; grid-template-columns: 60px minmax(0, 1fr) minmax(0, 1.4fr); gap: 24px; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--border); }
 .audience-row h3 { margin: 0; }
 .audience-row p { margin: 0; }
 @media (max-width: 767px) { .audience-row { grid-template-columns: 1fr; gap: 8px; } }
 
 .numbers { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(14, 18, 23, 0.4); }
 .numbers-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.numbers-grid .num { display: block; font-size: clamp(28px, 3.6vw, 52px); color: var(--text); line-height: 1.1; margin-bottom: 8px; font-family: var(--font-mono); font-weight: 400; }
+.numbers-grid .num { display: block; white-space: nowrap; font-size: clamp(24px, 3vw, 46px); color: var(--text); line-height: 1.1; margin-bottom: 8px; font-family: var(--font-mono); font-weight: 400; }
 @media (max-width: 860px) { .numbers-grid { grid-template-columns: repeat(2, 1fr); } }
 
 .honest { border-left: 2px solid var(--ember); padding: 8px 0 8px clamp(18px, 3vw, 40px); }
