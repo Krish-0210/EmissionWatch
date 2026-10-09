@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-08T18:04:48+00:00",
+ "generated_at": "2026-10-09T16:23:02+00:00",
  "units": {
   "coef": "µmol/m² NO2 enhancement per MU/day (enhancement); ratio units per MU/day (ratio)",
   "backtest": "µmol/m², means over valid days of Apr 1 - May 31; generation in MU/day"

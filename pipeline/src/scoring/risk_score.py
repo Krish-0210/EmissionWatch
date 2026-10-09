@@ -130,7 +130,7 @@ def confidence(row: pd.Series) -> tuple[str, str]:
     if row["recent_days"] < MIN_RECENT_DAYS:
         issues.append(f"only {row['recent_days']} valid days in the last 365")
     if row["unreported_share"] > UNREPORTED_MAX:
-        issues.append(f"{row['unreported_mw']:.0f} MW in ring not in CEA generation ({row['unreported_plants']})")
+        issues.append(f"{row['unreported_mw']:.0f} MW in ring not in CEA generation ({row['unreported_plants'].replace('; ', ', ')})")
     level = ["high", "medium", "low"][min(len(issues), 2)]
     return level, "; ".join(issues)
 
