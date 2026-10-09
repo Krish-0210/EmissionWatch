@@ -83,7 +83,7 @@ export default function PageHero({ eyebrow, title, dim, lede, word, visual, tick
             </div>
           )}
           {children && (
-            <div className="row phero-actions reveal" style={{ '--d': '560ms' } as CSSProperties}>
+            <div className="phero-actions reveal" style={{ '--d': '560ms' } as CSSProperties}>
               {children}
             </div>
           )}
