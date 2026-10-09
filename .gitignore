@@ -54,3 +54,6 @@ docs/reference/frames/
 
 # Playwright screenshots (frontend/scripts/screens.mjs)
 docs/reference/screens/
+
+# Trionn reference study (recordings, screenshots, audio captures)
+docs/reference/trionn/
