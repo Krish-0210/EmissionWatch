@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MutableRefObject, type RefObject } from 'react'
+import { useEffect, useRef, type KeyboardEvent, type MutableRefObject, type RefObject } from 'react'
 import type { ClusterSummary, MonthPoint, SummaryFile } from '../api'
 import { CONF_LABEL, RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { easeOut, span } from '../lib/motion'
@@ -81,9 +81,10 @@ interface Props {
   focus: ClusterSummary
   summary?: SummaryFile
   months?: MonthPoint[]
+  go: (step: number) => void // scroll to a step
 }
 
-export default function HomeStory({ register, progress, step, clusters, focus, summary, months }: Props) {
+export default function HomeStory({ register, progress, step, clusters, focus, summary, months, go }: Props) {
   const plants = clusters.reduce((a, c) => a + c.n_plants, 0)
   const mw = clusters.reduce((a, c) => a + c.capacity_mw, 0)
   const years = months?.length ? Number(months[months.length - 1].month.slice(0, 4)) - Number(months[0].month.slice(0, 4)) + 1 : 0
@@ -92,9 +93,23 @@ export default function HomeStory({ register, progress, step, clusters, focus, s
   const no2 = useRef<SVGPathElement>(null)
   const arc = useRef<SVGCircleElement>(null)
   const score = focus.risk_score
+  const bar = useRef<HTMLElement>(null)
+
+  // Arrow keys move between steps (roving tabindex); Enter/Space click the focused chip.
+  const onChipKey = (e: KeyboardEvent<HTMLOListElement>) => {
+    const k = e.key
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(k)) return
+    e.preventDefault()
+    const btns = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('button'))
+    const cur = Math.max(0, btns.indexOf(document.activeElement as HTMLButtonElement))
+    const next = k === 'Home' ? 0 : k === 'End' ? 3 : Math.min(3, Math.max(0, cur + (k === 'ArrowLeft' || k === 'ArrowUp' ? -1 : 1)))
+    btns[next]?.focus()
+    go(next)
+  }
 
   useEffect(() => {
     const apply = (p: number) => {
+      bar.current?.style.setProperty('transform', `scaleX(${span(p, STEP_AT[0], 1).toFixed(4)})`)
       const draw = easeOut(local(p, 2))
       gen.current?.style.setProperty('stroke-dashoffset', (1 - draw).toFixed(4))
       no2.current?.style.setProperty('stroke-dashoffset', (1 - span(draw, 0.15, 1)).toFixed(4))
@@ -108,15 +123,39 @@ export default function HomeStory({ register, progress, step, clusters, focus, s
   return (
     <div className="story" aria-live="polite">
       <div className="story-top container">
-        <ol className="row story-chips" aria-label="Story steps">
-          {STEPS.map((s, i) => (
-            <li key={s.id} className={`chip ${i === step ? 'on' : i < step ? 'done' : ''}`}>
-              {s.id} {s.label}
-            </li>
-          ))}
-        </ol>
-        <div className="micro story-count">
-          <span className="text mono">{String(Math.max(0, step + 1)).padStart(2, '0')}</span> / 04
+        <nav className="story-nav" aria-label="Story steps">
+          <ol className="row story-chips" onKeyDown={onChipKey}>
+            {STEPS.map((s, i) => (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  className={`chip story-chip ${i === step ? 'on' : i < step ? 'done' : ''}`}
+                  aria-current={i === step ? 'step' : undefined}
+                  tabIndex={i === Math.max(0, step) ? 0 : -1}
+                  onClick={() => go(i)}
+                >
+                  {s.id} {s.label}
+                </button>
+              </li>
+            ))}
+          </ol>
+          <div className="story-progress" aria-hidden="true">
+            <i ref={bar} />
+            {STEP_AT.map((a, i) => (
+              <b key={i} style={{ left: `${(span(a, STEP_AT[0], 1) * 100).toFixed(2)}%` }} className={i <= step ? 'on' : ''} />
+            ))}
+          </div>
+        </nav>
+        <div className="story-count">
+          <button type="button" className="story-arrow" aria-label="Previous step" disabled={step <= 0} onClick={() => go(step - 1)}>
+            ←
+          </button>
+          <button type="button" className="micro story-count-n" aria-label={`Step ${step + 1} of 4, go to next step`} onClick={() => go((step + 1) % 4)}>
+            <span className="text mono">{String(Math.max(0, step + 1)).padStart(2, '0')}</span> / 04
+          </button>
+          <button type="button" className="story-arrow" aria-label="Next step" disabled={step >= 3} onClick={() => go(step + 1)}>
+            →
+          </button>
         </div>
       </div>
 

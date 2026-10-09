@@ -13,7 +13,9 @@ import { Divider, Ticker, Words, type TickerItem } from '../components/PageHero'
 import { fmt, fmtInt, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
 import { useIsMobile, useReducedMotion } from '../lib/motion'
-import { stepFor, type RegisterDrive } from '../lib/story'
+import { useBackdropTone } from '../lib/backdrop'
+import { scrollToY } from '../lib/scroll'
+import { STEP_AT, stepFor, type RegisterDrive } from '../lib/story'
 import { webglOk } from '../lib/webgl'
 import { useAsync } from '../lib/useAsync'
 import type { GlobeControl } from '../three/GlobeScene'
@@ -150,6 +152,19 @@ export default function Home() {
     return () => st.kill()
   }, [])
 
+  // Background glow follows the story step (Score = the top cluster's risk colour).
+  useBackdropTone('step', step >= 0 ? String(step) : undefined)
+  useBackdropTone('tone', focus?.risk_level)
+
+  // Story chips / arrows: scroll to ~70% through the step's range, where its animation has played.
+  const goStep = useCallback((i: number) => {
+    const el = stage.current
+    if (!el || i < 0 || i > 3) return
+    const a = STEP_AT[i], b = STEP_AT[i + 1] ?? 1
+    const top = el.getBoundingClientRect().top + window.scrollY
+    scrollToY(top + (a + 0.72 * (b - a)) * (el.offsetHeight - window.innerHeight), 1.2)
+  }, [])
+
   const years = months?.length ? `${months[0].month.slice(0, 4)}–${months[months.length - 1].month.slice(0, 4)}` : '2019–2026'
   const ticker: TickerItem[] = useMemo(() => {
     const c = clusters.data, s = summary.data
@@ -205,7 +220,7 @@ export default function Home() {
           </div>
 
           {clusters.data && focus && step >= 0 && (
-            <HomeStory register={register} progress={control} step={step} clusters={clusters.data.clusters} focus={focus} summary={summary.data} months={months} />
+            <HomeStory register={register} progress={control} step={step} clusters={clusters.data.clusters} focus={focus} summary={summary.data} months={months} go={goStep} />
           )}
         </div>
       </div>

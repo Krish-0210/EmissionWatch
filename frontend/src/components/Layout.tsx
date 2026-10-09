@@ -2,6 +2,7 @@ import Lenis from 'lenis'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { backdropFor } from '../lib/backdrop'
+import { setLenis } from '../lib/scroll'
 import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useInteractions } from '../lib/interactions'
 import { prefersReducedMotion } from '../lib/motion'
@@ -28,7 +29,7 @@ function GitHubIcon() {
   )
 }
 
-let lenis: Lenis | null = null
+let lenis: Lenis | null = null // mirrored in lib/scroll for page-level scrollTo
 
 
 // Smooth scroll on desktop with motion allowed; touch keeps native scrolling. Lenis runs inside
@@ -41,6 +42,7 @@ function useSmoothScroll() {
     if (prefersReducedMotion() || window.matchMedia('(pointer: coarse)').matches) return () => window.removeEventListener('load', refresh)
     lenis = new Lenis({ lerp: 0.1, smoothWheel: true, syncTouch: false, wheelMultiplier: 0.9, autoRaf: false })
     lenis.on('scroll', ScrollTrigger.update)
+    setLenis(lenis)
     const tick = (t: number) => lenis?.raf(t * 1000)
     gsap.ticker.add(tick, false, true)
     gsap.ticker.lagSmoothing(0)
@@ -49,6 +51,7 @@ function useSmoothScroll() {
       gsap.ticker.remove(tick)
       lenis?.destroy()
       lenis = null
+      setLenis(null)
     }
   }, [])
 }

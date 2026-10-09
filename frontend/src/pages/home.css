@@ -35,9 +35,25 @@
 /* Story overlay */
 .story { position: absolute; inset: 0; z-index: 3; pointer-events: none; padding-top: calc(var(--nav-h) + 24px); }
 .story-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.story-top { align-items: flex-start; }
+.story-nav { pointer-events: auto; display: grid; gap: 10px; }
 .story-chips { list-style: none; margin: 0; padding: 0; gap: 8px; }
-.story-count { font-size: 12px; }
+.story-chip { cursor: pointer; height: 32px; padding: 0 14px; }
+.story-chip:hover { color: var(--text); border-color: var(--signal); }
+.story-chip.on:hover { color: var(--signal-ink); }
+.story-chip:focus-visible { outline-offset: 2px; }
+/* Thin progress rail under the chips, with a tick at each step start */
+.story-progress { position: relative; height: 2px; background: rgba(42, 51, 61, 0.7); border-radius: 2px; }
+.story-progress i { position: absolute; inset: 0; background: linear-gradient(90deg, var(--signal), #b7f5ec); transform-origin: left; transform: scaleX(0); border-radius: 2px; box-shadow: 0 0 10px rgba(124, 232, 216, 0.6); }
+.story-progress b { position: absolute; top: -3px; width: 2px; height: 8px; margin-left: -1px; background: var(--border-2); transition: background 0.4s; }
+.story-progress b.on { background: var(--signal); }
+.story-count { pointer-events: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; }
+.story-count-n { background: none; border: 0; cursor: pointer; padding: 6px 8px; border-radius: 8px; }
+.story-count-n:hover .text { color: var(--signal); }
 .story-count .text { font-size: 18px; }
+.story-arrow { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border-2); background: rgba(14, 18, 23, 0.7); color: var(--text); cursor: pointer; font-family: var(--font-mono); transition: border-color 0.25s, color 0.25s, opacity 0.25s; }
+.story-arrow:hover:not(:disabled) { border-color: var(--signal); color: var(--signal); }
+.story-arrow:disabled { opacity: 0.3; cursor: default; }
 .story-panels { position: absolute; left: 0; right: 0; bottom: 8vh; }
 .story-panel {
   position: absolute; left: var(--gutter); bottom: 0; width: min(460px, calc(100% - 2 * var(--gutter)));
@@ -74,7 +90,7 @@
   .stage-vignette { background: linear-gradient(0deg, rgba(7, 9, 12, 0.95) 0%, rgba(7, 9, 12, 0.5) 45%, rgba(7, 9, 12, 0.2) 100%); }
   .hero { justify-content: flex-start; padding-top: calc(var(--nav-h) + 40px); }
   .hero-lede { margin: 20px 0 24px; font-size: 15px; }
-  .story-chips .chip:not(.on) { display: none; }
+  .story-chips li:has(.chip:not(.on)) { display: none; }
   .story-panels { bottom: 3vh; }
   .story-panel { padding: 18px; }
   .story-stats { gap: 20px; }
