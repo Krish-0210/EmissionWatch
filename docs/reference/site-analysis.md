@@ -172,3 +172,32 @@ Colours: text #d8d8d8 on #0c0c0c / #040508; light sections #c3c3c3 → #fff grad
 - The blind-strip is a single motif reused for section breaks, page transitions and an image treatment.
 - Sound is opt-in, quiet (bed ≈ −43 dBFS), sample-accurate on hover, and the loudest moment is the release.
 - Mobile: hero hold and most hover effects are absent; the content still reads.
+
+## 6. What PanoptiCoal built (own implementation, 2026-10-10)
+
+| Trionn effect type | PanoptiCoal version | Where | Code |
+|---|---|---|---|
+| I click-and-hold blast | "Hold to scan deeper": the hero tilts in 3D, zooms to the pointer and shakes; headings split into red/teal fringes; a scanning lens opens with the TROPOMI pixel grid and NO₂ hotspot cells flaring; fracture lines, glass splinters, warp streaks, an arc at full charge; the 3D globe's plumes flare and its camera dives. Release: flash, chromatic shockwave, sparks, shards reassemble, spring back with overshoot. Rising tension tone → sub-bass blast + crackle | Home stage, every page hero, cluster header (desktop, not reduced motion) | HoldFX.tsx, lib/hold.ts, GlobeScene (uHold), lib/sound.ts |
+| A1–A9 loader | Viewfinder boot beat (crosshairs converge and spring into a frame, frame traces clockwise, eye revealed through scan stripes, rolling counter, OBSERVE · COMPARE · FLAG), then the existing particles → orbit rings → globe; sound hint + accents | Home (fresh load) | Intro.tsx, styles/intro.css |
+| D1 cursor | Ring follower with link / button / view / drag / text states, hold progress ring, first-visit HOLD TO SCAN hint (Trionn keeps the native cursor; ours keeps it too and adds the ring) | all pages, desktop | Cursor.tsx |
+| A8, B1, B2 char blur | Headings reveal letter by letter out of a blur, random order; hero last word rotates space / orbit / 824 km up | all headings | MaskLines.tsx (fx="blur") |
+| B5 char swap | Nav and footer links swap letters through a blur | nav, footer | SwapText.tsx |
+| B6 CTA letters | Scramble/decoding: eyebrow labels decode on first view, mono buttons on hover | all pages | lib/scramble.ts |
+| B4 marquee | Two rows, opposite directions, scroll- and velocity-driven with skew | Home, How It Works, Limits | Marquee.tsx, lib/velocity.ts |
+| B3 scrubbed paragraph | Statement whose words light up with scroll | Home | ScrubText.tsx |
+| B7 counter roll | Digit reels | Home figures | RollNumber.tsx |
+| B8 clock | IST clock + Sentinel-5P overpass time | footer | Footer.tsx |
+| C1 underline CTA | Mono label, far arrow that leaves right / re-enters left, hairline collapses and redraws | hero, footer, Near Me, Limits | .ulink (styles/fx.css) |
+| C2 pill | Fill grows from the pointer's entry point, magnetic pull, arrow loop | all pills | lib/interactions.ts, fx.css |
+| C4 sound toggle | Equaliser bars / crossed speaker, saved, keyboard accessible | nav + intro | SoundToggle.tsx |
+| E images | Clip reveal behind a scan line, RGB-split glitch on hover, parallax on hero visuals, scan sweep across cards, tilt | page heroes, illustrations, cards | fx.css, PageHero.tsx |
+| F1 blind strips | Uneven strips grow out of order into the next section's colour (scrubbed) | before every footer; around the Home cluster strip | Blinds.tsx |
+| F4 horizontal pinned strip | The 11 clusters ranked; vertical scroll drives it sideways, cards lean with speed, counter + progress line | Home | ClusterStrip.tsx |
+| F progress | Page progress line under the nav | all pages | Layout.tsx |
+| G page transition | Strips close out of order (whoosh), viewfinder card names the destination, strips open upward; back/forward = reveal | all internal links | PageTransition.tsx |
+| H1–H3 footer | Closing headline + CTAs, scan-line WATCHING wordmark that ripples and plays minor-pentatonic plucks when swept, pointer glow | all pages | Footer.tsx, ScanWord.tsx |
+| §3 sound | All synthesised (no files): orbit drone bed with telemetry blips, hover ticks, scan chirp, whoosh, hold tension, blast, plucks; limiter | global | lib/sound.ts |
+
+Not reproduced: E1 hover-to-play video, E2 image swap, E4 image tunnel, E8 photo pile, E9 3D ribbon carousel, E10
+puppets, E11 orbiting planets (PanoptiCoal has no photo/video assets and the globe already carries the 3D), H3 WebGL
+smoke (a pointer-following glow instead), voice clips. F8 velocity skew was added although Trionn does not use it.
