@@ -216,3 +216,40 @@ main p a:not(.pill):not(.ulink):hover, .lede a:hover, main li a:not(.pill):not(.
   .clip-reveal.reveal { clip-path: none; }
   .phero-visual.clip-reveal.in::after, .phero-visual:hover > *, svg.il:hover, .card.tilt.lit::after, a.card.lit::after { animation: none; }
 }
+
+/* ---------- Blind strips (components/Blinds.tsx) ---------- */
+.blinds { --blind: #040609; display: flex; flex-direction: column; height: clamp(150px, 24vh, 260px); position: relative; z-index: 1; pointer-events: none; margin-top: -1px; }
+.blinds i { flex: var(--h) 1 0; display: block; background: var(--blind); transform-origin: 50% 100%; transform: scaleY(0.035); will-change: transform;
+  box-shadow: inset 0 1px 0 rgba(124, 232, 216, 0.16); }
+.blinds.rev i { transform-origin: 50% 0; transform: scaleY(1); box-shadow: inset 0 -1px 0 rgba(124, 232, 216, 0.16); }
+.blinds.to-footer { margin-bottom: -1px; }
+.footer { background: #040609; border-top: 0; }
+
+/* ---------- Scroll progress (nav) ---------- */
+.nav { position: sticky; }
+.scroll-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; overflow: hidden; }
+.scroll-progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--signal), #d8fff8 70%, var(--ember)); transform-origin: 0 50%; transform: scaleX(0); box-shadow: 0 0 10px rgba(124, 232, 216, 0.6); }
+
+/* ---------- Cluster strip (components/ClusterStrip.tsx) ---------- */
+.cstrip { position: relative; background: #040609; padding: clamp(40px, 6vh, 72px) 0 clamp(40px, 6vh, 64px); overflow: hidden; }
+.cstrip.pinned { height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+.cs-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: clamp(24px, 4vh, 44px); }
+.cs-meter { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; letter-spacing: 0.08em; white-space: nowrap; }
+.cs-meter > span:first-child { color: var(--signal); font-size: 22px; }
+.cs-bar { position: relative; width: clamp(80px, 12vw, 180px); height: 1px; background: var(--border-2); overflow: hidden; }
+.cs-bar span { position: absolute; inset: 0; background: var(--signal); transform-origin: 0 50%; transform: scaleX(0); }
+.cs-viewport { overflow: hidden; }
+.cstrip:not(.pinned) .cs-viewport { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.cs-lean { will-change: transform; }
+.cs-track { display: flex; gap: 18px; width: max-content; padding: 6px max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); will-change: transform; }
+.cs-card { width: clamp(260px, 24vw, 340px); min-height: clamp(300px, 46vh, 400px); display: flex; flex-direction: column; gap: 10px; color: var(--text); text-decoration: none; scroll-snap-align: start; }
+.cs-card:hover { color: var(--text); }
+.cs-top { display: flex; align-items: center; justify-content: space-between; }
+.cs-rank { color: var(--muted); font-size: 13px; }
+.cs-score { font-size: clamp(56px, 6vw, 92px); line-height: 0.9; letter-spacing: -0.04em; color: var(--c); margin-top: auto; text-shadow: 0 0 40px color-mix(in srgb, var(--c) 35%, transparent); }
+.cs-score small { font-size: 0.22em; color: var(--muted); margin-left: 6px; letter-spacing: 0.04em; }
+.cs-name { font-size: clamp(24px, 2.2vw, 32px); margin: 4px 0 0; letter-spacing: -0.04em; }
+.cs-line { margin: 4px 0 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cs-conf { margin-top: 6px; }
+@media (max-width: 767px) { .cs-head { flex-direction: column; align-items: flex-start; } .cs-card { width: 78vw; } }
+.cs-head { width: 100%; }

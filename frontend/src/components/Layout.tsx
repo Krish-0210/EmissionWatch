@@ -9,6 +9,7 @@ import { prefersReducedMotion } from '../lib/motion'
 import { scramble } from '../lib/scramble'
 import Backdrop from './Backdrop'
 import BigWord from './BigWord'
+import Blinds from './Blinds'
 import Cursor from './Cursor'
 import HoldFX from './HoldFX'
 import SoundToggle from './SoundToggle'
@@ -148,12 +149,32 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
   }, [root, key])
 }
 
+// Thin bar under the nav: how far down the page you are.
+function useScrollProgress(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    let last = -1
+    const tick = () => {
+      const el = ref.current
+      if (!el) return
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+      if (Math.abs(p - last) < 0.0005) return
+      last = p
+      el.style.transform = `scaleX(${p.toFixed(4)})`
+    }
+    gsap.ticker.add(tick)
+    return () => gsap.ticker.remove(tick)
+  }, [ref])
+}
+
 export default function Layout() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const main = useRef<HTMLElement>(null)
   useSmoothScroll()
+  const progress = useRef<HTMLElement>(null)
+  useScrollProgress(progress)
   useInteractions()
   useRevealAndParallax(main, pathname)
 
@@ -221,12 +242,16 @@ export default function Layout() {
             </Link>
           </nav>
         </div>
+        <div className="scroll-progress" aria-hidden="true">
+          <i ref={progress} />
+        </div>
       </header>
       <main id="main" ref={main}>
         <div className="page" key={pathname}>
           <Outlet />
         </div>
       </main>
+      <Blinds className="to-footer" />
       <footer className="footer">
         <BigWord speed={0.05}>Watching</BigWord>
         <div className="container layer footer-grid">

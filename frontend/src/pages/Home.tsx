@@ -1,7 +1,9 @@
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
+import { fetchClusters, fetchSummary, fetchTimeseries, type ClusterSummary } from '../api'
 import BigWord from '../components/BigWord'
+import Blinds from '../components/Blinds'
+import ClusterStrip from '../components/ClusterStrip'
 import Marquee from '../components/Marquee'
 import RollNumber from '../components/RollNumber'
 import ScrubText from '../components/ScrubText'
@@ -301,14 +303,14 @@ export default function Home() {
         </div>
       </div>
 
-      <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} ticker={ticker} />
+      <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} ticker={ticker} clusters={clusters.data?.clusters} />
       {introOn && <Intro key={introKey} clusters={clusters.data} summary={summary.data} reduced={reduced} ready={ready3d || noGl} onBeat={onBeat} />}
     </>
   )
 }
 
 // Static sections below the stage; memoised so step changes in the story don't re-render them.
-const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }: { clusterCount: number; years: string; ticker: TickerItem[] }) {
+const HomeSections = memo(function HomeSections({ clusterCount, years, ticker, clusters }: { clusterCount: number; years: string; ticker: TickerItem[]; clusters?: ClusterSummary[] }) {
   return (
     <>
       <Ticker items={ticker} />
@@ -396,6 +398,9 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
         </div>
       </section>
 
+      <Blinds />
+      {clusters && <ClusterStrip clusters={clusters} />}
+      <Blinds reverse />
       <section className="section">
         <BigWord style={{ top: '0.1em', right: '-0.05em' }}>03</BigWord>
         <div className="container layer">
