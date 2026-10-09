@@ -32,14 +32,23 @@ export function SatellitePlantScene({ className = '', label }: SceneProps) {
         </radialGradient>
         <linearGradient id="il-ground" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#111821" />
-          <stop offset="1" stopColor="#07090c" />
+          <stop offset="1" stopColor="#07090c" stopOpacity="0" />
         </linearGradient>
+        <radialGradient id="il-fade-g" cx="50%" cy="80%" r="55%">
+          <stop offset="0.55" stopColor="#fff" />
+          <stop offset="1" stopColor="#000" />
+        </radialGradient>
+        <mask id="il-fade" maskUnits="userSpaceOnUse" x="-20" y="0" width="520" height="340">
+          <rect x="-20" y="0" width="520" height="340" fill="url(#il-fade-g)" />
+        </mask>
       </defs>
       <Stars />
       <path d="M-10 120 Q 240 -40 490 120" className="il-orbit" />
       {/* Ground: the curve of the Earth */}
-      <path d="M-20 262 Q 240 214 500 262 V330 H-20 Z" fill="url(#il-ground)" />
-      <path d="M-20 262 Q 240 214 500 262" className="il-horizon" />
+      <g mask="url(#il-fade)">
+        <path d="M-20 262 Q 240 214 500 262 V330 H-20 Z" fill="url(#il-ground)" />
+        <path d="M-20 262 Q 240 214 500 262" className="il-horizon" />
+      </g>
       {/* Scan cone from the satellite to the 20 km ring */}
       <path d="M352 82 L176 250 L300 250 Z" fill="url(#il-cone)" className="il-cone" />
       {/* Measurement rings */}

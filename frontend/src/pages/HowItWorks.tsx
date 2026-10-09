@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import type { BacktestRow, SummaryFile } from '../api'
-import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
-import BigWord from '../components/BigWord'
+import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import type { BacktestRow, ClusterDetail, SummaryFile, TimeseriesFile } from '../api'
+import { fetchCluster, fetchClusters, fetchSummary, fetchTimeseries, peekClusters, peekSummary } from '../api'
 import CountUp from '../components/CountUp'
+import { IconTile, type IconName } from '../components/Icons'
+import { SatellitePlantScene } from '../components/Illustrations'
 import MethodScene from '../components/MethodScene'
+import NaiveVsModel from '../components/NaiveVsModel'
+import PageHero, { Divider, type TickerItem } from '../components/PageHero'
 import { fmt, fmtP, fmtPct, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
 import { setText, useInView, useReducedMotion } from '../lib/motion'
@@ -55,6 +58,8 @@ const STEPS = [
   },
 ]
 
+const STEP_ICONS: IconName[] = ['plant', 'satellite', 'layers', 'wind', 'chart', 'shield']
+
 const SOURCES = [
   ['Central Electricity Authority (CEA)', 'Daily generation report (DGR) per plant and unit'],
   ['National Power Portal', 'Public archive of the CEA daily reports'],
@@ -64,52 +69,107 @@ const SOURCES = [
   ['Global Energy Monitor', 'Plant locations and capacity, including plants not in CEA reports'],
 ]
 
+const GEN = '#2a78d6'
+// Clusters the findings name: generation fell sharply and NO2 fell with it.
+const FELL_WITH = ['chandrapur', 'ramagundam', 'marwa']
+const EXCEPTION = 'mundra'
+const CLIP = 50 // % axis limit; larger changes are drawn to the edge and labelled
+
+function BtTip({ active, payload }: { active?: boolean; payload?: { payload: BacktestRow & { name: string } }[] }) {
+  const r = payload?.[0]?.payload
+  if (!active || !r) return null
+  return (
+    <div className="ctip">
+      <div className="ctip-head micro">{r.name} · Apr–May 2020 vs 2019</div>
+      <dl>
+        <dt><i style={{ background: GEN }} />Generation</dt>
+        <dd className="mono">{fmtPct(r.gen_change_pct)}</dd>
+        <dt><i style={{ background: NO2 }} />Observed NO₂</dt>
+        <dd className="mono">{fmtPct(r.observed_change_pct)}</dd>
+        <dt><i style={{ background: PREDICTED }} />Predicted NO₂</dt>
+        <dd className="mono">{fmtPct(r.predicted_change_pct)}</dd>
+        <dt>Days (2019 / 2020)</dt>
+        <dd className="mono">{r.days_2019} / {r.days_2020}</dd>
+      </dl>
+    </div>
+  )
+}
+
 function BacktestChart({ rows, names }: { rows: BacktestRow[]; names: Record<string, string> }) {
   const ref = useRef<HTMLDivElement>(null)
   const show = useInView(ref)
   const reduced = useReducedMotion()
+  const [focus, setFocus] = useState(true)
   const data = rows
     .filter((r) => r.cluster !== 'POOLED')
-    .map((r) => ({ ...r, name: names[r.cluster] ?? r.cluster }))
-    .sort((a, b) => a.observed_change_pct - b.observed_change_pct)
+    .map((r) => ({ ...r, name: names[r.cluster] ?? r.cluster, gen: Math.max(-CLIP, Math.min(CLIP, r.gen_change_pct)) }))
+    .sort((a, b) => a.gen_change_pct - b.gen_change_pct)
+  const op = (id: string) => (!focus || FELL_WITH.includes(id) || id === EXCEPTION ? 1 : 0.22)
+  const fell = data.filter((r) => FELL_WITH.includes(r.cluster))
+  const ex = data.find((r) => r.cluster === EXCEPTION)
+  const off = data.filter((r) => Math.abs(r.gen_change_pct) > CLIP)
   return (
-    <div className="card reveal" ref={ref}>
-      <div className="micro">Backtest · Apr–May 2020 vs Apr–May 2019</div>
-      <h3>2020 lockdown: NO₂ change, observed vs predicted</h3>
+    <div className="card reveal bt-card" ref={ref}>
+      <div className="row between" style={{ alignItems: 'flex-start' }}>
+        <div>
+          <div className="micro">Backtest · Apr–May 2020 vs Apr–May 2019</div>
+          <h3>2020 lockdown: generation, observed and predicted NO₂</h3>
+        </div>
+        <button type="button" className={`fchip ripple${focus ? ' on' : ''}`} aria-pressed={focus} onClick={() => setFocus((f) => !f)}>
+          Highlight the findings
+        </button>
+      </div>
       <p className="muted small">
         The model was refitted without Mar–Jun 2020 and asked to predict the lockdown from reported generation and
-        weather alone.
+        weather alone. Sorted by the change in reported generation.
       </p>
       <div className="chart-legend">
-        <span>
-          <i className="sq" style={{ background: NO2 }} />
-          Observed
-        </span>
-        <span>
-          <i className="sq" style={{ background: PREDICTED }} />
-          Predicted
-        </span>
+        <span><i className="sq" style={{ background: GEN }} />Generation</span>
+        <span><i className="sq" style={{ background: NO2 }} />Observed NO₂</span>
+        <span><i className="sq" style={{ background: PREDICTED }} />Predicted NO₂</span>
       </div>
-      <div style={{ height: 360, margin: '0 -6px' }}>
+      <div style={{ height: 380, margin: '0 -6px' }}>
         {show && (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 44 }} barGap={2}>
+            <BarChart data={data} margin={{ top: 18, right: 8, left: 0, bottom: 44 }} barGap={1} barCategoryGap="18%">
               <CartesianGrid stroke="#1c232b" vertical={false} />
               <XAxis dataKey="name" tick={AXIS} interval={0} angle={-35} textAnchor="end" stroke="#1c232b" />
-              <YAxis tick={AXIS} width={44} tickFormatter={(v: number) => `${v}%`} stroke="#1c232b" />
+              <YAxis tick={AXIS} width={44} domain={[-CLIP, CLIP]} ticks={[-50, -25, 0, 25, 50]} tickFormatter={(v: number) => `${v}%`} stroke="#1c232b" />
               <ReferenceLine y={0} stroke="#2a333d" />
-              <Tooltip
-                contentStyle={{ background: '#0e1217', border: '1px solid #2a333d', borderRadius: 10, fontSize: 13 }}
-                labelStyle={{ color: '#8a96a3' }}
-                itemStyle={{ color: '#e8edf2' }}
-                formatter={(v, n) => [fmtPct(v as number), n]}
-                cursor={{ fill: 'rgba(124,232,216,0.05)' }}
-              />
-              <Bar dataKey="observed_change_pct" name="Observed" fill={NO2} radius={[2, 2, 2, 2]} isAnimationActive={!reduced} animationDuration={1200} />
-              <Bar dataKey="predicted_change_pct" name="Predicted" fill={PREDICTED} radius={[2, 2, 2, 2]} isAnimationActive={!reduced} animationDuration={1200} animationBegin={250} />
+              <Tooltip content={<BtTip />} cursor={{ fill: 'rgba(124,232,216,0.05)' }} />
+              {(['gen', 'observed_change_pct', 'predicted_change_pct'] as const).map((k, j) => (
+                <Bar key={k} dataKey={k} name={k} fill={[GEN, NO2, PREDICTED][j]} radius={[2, 2, 2, 2]} isAnimationActive={!reduced} animationDuration={1100} animationBegin={j * 180}>
+                  {data.map((r) => (
+                    <Cell key={r.cluster} fillOpacity={op(r.cluster)} stroke={focus && r.cluster === EXCEPTION ? '#e8edf2' : undefined} strokeWidth={1} />
+                  ))}
+                </Bar>
+              ))}
             </BarChart>
           </ResponsiveContainer>
         )}
+      </div>
+      <div className="bt-notes">
+        <p className="small">
+          <span className="bt-tag">Fell together</span>
+          {fell.map((r, i) => (
+            <span key={r.cluster}>
+              {i ? '; ' : ''}
+              {r.name}: generation {fmtPct(r.gen_change_pct)}, NO₂ {fmtPct(r.observed_change_pct)}
+            </span>
+          ))}
+          .
+        </p>
+        {ex && (
+          <p className="small">
+            <span className="bt-tag ember">Exception</span>
+            {ex.name}: generation {fmtPct(ex.gen_change_pct)}, yet NO₂ {fmtPct(ex.observed_change_pct)}: here NO₂ did not follow reported generation.
+          </p>
+        )}
+        {off.map((r) => (
+          <p key={r.cluster} className="micro">
+            {r.name} generation {fmtPct(r.gen_change_pct)} is off this scale ({r.days_2019} days in 2019, {r.days_2020} in 2020).
+          </p>
+        ))}
       </div>
     </div>
   )
@@ -216,12 +276,42 @@ function Results({ s, names }: { s: SummaryFile; names: Record<string, string> }
 }
 
 export default function HowItWorks() {
-  const summary = useAsync(fetchSummary, [])
-  const clusters = useAsync(fetchClusters, [])
+  const summary = useAsync(fetchSummary, [], peekSummary)
+  const clusters = useAsync(fetchClusters, [], peekClusters)
   const list = clusters.data?.clusters ?? []
   const names: Record<string, string> = Object.fromEntries(list.map((c) => [c.id, c.name]))
   const focus = [...list].sort((a, b) => b.risk_score - a.risk_score)[0]
   const ts = useAsync(() => (focus ? fetchTimeseries(focus.id) : Promise.resolve(undefined)), [focus?.id])
+  // All 11 cluster files and series for the raw-vs-model comparison.
+  const [all, setAll] = useState<{ details: ClusterDetail[]; series: Record<string, TimeseriesFile> }>()
+  const ids = list.map((c) => c.id).join(',')
+  useEffect(() => {
+    if (!ids) return
+    let live = true
+    const idl = ids.split(',')
+    Promise.all([Promise.all(idl.map(fetchCluster)), Promise.all(idl.map(fetchTimeseries))]).then(
+      ([details, series]) => live && setAll({ details, series: Object.fromEntries(series.map((t) => [t.id, t])) }),
+      () => undefined,
+    )
+    return () => {
+      live = false
+    }
+  }, [ids])
+  const ticker: TickerItem[] = useMemo(() => {
+    const s = summary.data
+    if (!s) return []
+    const e = s.pooled_model.enhancement
+    const pb = s.backtest.find((r) => r.cluster === 'POOLED')
+    const over = s.backtest.filter((r) => r.cluster !== 'POOLED' && r.error > 0).length
+    return [
+      { label: 'Pooled effect', value: `${fmt(e.coef, 2)} µmol/m² per MU/day` },
+      { label: 't-statistic', value: fmt(e.t, 1) },
+      { label: 'Cluster-days', value: e.n.toLocaleString('en-IN') },
+      { label: 'Partial R²', value: fmt(e.partial_r2, 3) },
+      ...(pb ? [{ label: 'Lockdown 2020 pooled NO₂', value: `${fmt(pb.observed_2020)} observed · ${fmt(pb.predicted_2020)} predicted` }] : []),
+      { label: 'Model over-predicted', value: `${over} of ${s.backtest.length - 1} clusters`, color: '#ff8a3d' },
+    ]
+  }, [summary.data])
 
   const stage = useRef<HTMLDivElement>(null)
   // Scroll progress goes to refs and DOM; React re-renders only when the step changes.
@@ -258,19 +348,15 @@ export default function HowItWorks() {
 
   return (
     <>
-      <section className="section-tight hiw-intro">
-        <BigWord style={{ top: '0.05em', right: '-0.04em' }}>Method</BigWord>
-        <div className="container layer">
-          <div className="micro signal reveal">How it works</div>
-          <h1 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 18px' } as CSSProperties}>
-            From smokestack <span className="dim">to score.</span>
-          </h1>
-          <p className="lede reveal" style={{ '--d': '160ms' } as CSSProperties}>
-            We check whether the NO₂ seen from space around each coal plant cluster matches the electricity the plants
-            report generating, after allowing for weather and season. Scroll to rebuild the method.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="How it works"
+        title="From smokestack"
+        dim="to score."
+        lede="We check whether the NO₂ seen from space around each coal plant cluster matches the electricity the plants report generating, after allowing for weather and season. Scroll to rebuild the method."
+        word="Method"
+        visual={<SatellitePlantScene label="A satellite scanning a coal plant, with measurement rings on the ground" />}
+        ticker={ticker}
+      />
 
       <div className="hiw-stage" ref={stage}>
         <div className="hiw-sticky">
@@ -300,8 +386,11 @@ export default function HowItWorks() {
             <div className="hiw-text" aria-live="polite">
               {STEPS.map((s, i) => (
                 <div key={s.chip} className={`hiw-step ${i === step ? 'on' : ''}`} aria-hidden={i !== step}>
-                  <div className="micro signal">
-                    0{i + 1} / 06 · {s.chip}
+                  <div className="hiw-step-head">
+                    <IconTile name={STEP_ICONS[i]} tone={i === 5 ? 'ember' : 'signal'} />
+                    <div className="micro signal">
+                      0{i + 1} / 06 · {s.chip}
+                    </div>
                   </div>
                   <h2 className="display d-md">{s.title}</h2>
                   {s.body.map((b) => (
@@ -335,6 +424,17 @@ export default function HowItWorks() {
             thin, or plants in the area are missing from the reports. See <Link to="/limits">Limits</Link>.
           </p>
         </div>
+      </section>
+
+      <section className="container section-tight">
+        <div className="micro signal reveal">Why the model, not a simple correlation</div>
+        <h2 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 28px' } as CSSProperties}>
+          Weather hides <span className="dim">the signal.</span>
+        </h2>
+        <div className="reveal" style={{ '--d': '160ms' } as CSSProperties}>
+          {all ? <NaiveVsModel details={all.details} series={all.series} /> : <div className="loading micro">Loading the 11 clusters…</div>}
+        </div>
+        <Divider />
       </section>
 
       <section className="container section-tight">
