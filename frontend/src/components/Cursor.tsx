@@ -14,7 +14,7 @@ import { useMediaQuery, useReducedMotion } from '../lib/motion'
 // the target, GSAP's ticker lerps and writes transforms.
 const LINK = 'a[href]'
 const BUTTON = 'button, [role="button"], [role="tab"], .pill, .fchip, select, summary'
-const VIEW = '[data-cursor="view"], [data-cursor="open"], .card, .phero-visual, .il'
+const VIEW = '[data-cursor="view"], [data-cursor="open"], .card.tilt, a.card, .phero-visual, .il'
 const DRAG = '[data-cursor="drag"], .leaflet-container, .stage-visual canvas'
 const TEXT = 'input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable]'
 const CIRC = 2 * Math.PI * 30
@@ -29,6 +29,7 @@ function stateFor(t: Element | null): { s: State; label: string; zone: boolean }
   const drag = t.closest(DRAG)
   if (drag && !t.closest('.leaflet-control, .leaflet-popup, ' + BUTTON)) return { s: 'drag', label: 'Drag', zone }
   if (t.closest(BUTTON)) return { s: 'button', label: '', zone: false }
+  if (t.closest('.recharts-wrapper, .chart-card')) return { s: 'default', label: '', zone }
   const view = t.closest<HTMLElement>(VIEW)
   if (view) {
     const link = t.closest(LINK)

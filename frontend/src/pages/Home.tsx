@@ -368,7 +368,7 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
                 </div>
               ))}
             </div>
-            <InspectorScene className="audience-il reveal" label="An inspector with a clipboard reviewing a brief" />
+            <InspectorScene className="audience-il reveal clip-reveal" label="An inspector with a clipboard reviewing a brief" />
           </div>
         </div>
       </section>
@@ -410,7 +410,7 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
               comes with a confidence level and the reasons behind it. <Link to="/limits">See the limits</Link>.
             </p>
           </div>
-          <MagnifierScene className="honest-il reveal" label="A magnifier over a coal plant's plume, showing satellite pixels with one cell flagged for audit" />
+          <MagnifierScene className="honest-il reveal clip-reveal" label="A magnifier over a coal plant's plume, showing satellite pixels with one cell flagged for audit" />
           </div>
         </div>
       </section>

@@ -89,7 +89,7 @@ export default function PageHero({ eyebrow, title, dim, lede, word, visual, tick
             </div>
           )}
         </div>
-        <div className="phero-visual reveal" style={{ '--d': '200ms' } as CSSProperties}>
+        <div className="phero-visual reveal clip-reveal" data-parallax="0.06" style={{ '--d': '200ms' } as CSSProperties}>
           {visual}
         </div>
       </div>
