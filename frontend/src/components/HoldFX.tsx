@@ -109,12 +109,12 @@ export default function HoldFX() {
   const cv = useRef<HTMLCanvasElement>(null)
   const readout = useRef<HTMLDivElement>(null)
   const depth = useRef<HTMLSpanElement>(null)
+  const vig = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const canvas = cv.current, ro = readout.current
-    if (!fine || reduced || !canvas || !ro) return
+    const canvas = cv.current, ro = readout.current, vg = vig.current
+    if (!fine || reduced || !canvas || !ro || !vg) return
     const ctx = canvas.getContext('2d')!
-    const root = document.documentElement
     let W = 0, H = 0, dpr = 1
     let phase: 'idle' | 'armed' | 'hold' | 'release' = 'idle'
     let armTimer = 0
@@ -122,6 +122,7 @@ export default function HoldFX() {
     let startT = 0, relT = 0, relLevel = 0
     let ox = 0, oy = 0 // transform origin (viewport) = where the hold started
     let geo: Geo | null = null
+    let zoneEl: HTMLElement | null = null
     let targets: { el: HTMLElement; left: number; top: number }[] = []
     let rel = { rz: 0, rx: 0, ry: 0, s: 0, tx: 0, ty: 0 }
     let lastCa = -1
@@ -133,17 +134,17 @@ export default function HoldFX() {
     const size = () => {
       W = window.innerWidth
       H = window.innerHeight
-      dpr = Math.min(window.devicePixelRatio || 1, 1.25)
+      dpr = 1 // thin lines and glows only; full DPR costs fill rate on integrated GPUs
       canvas.width = Math.round(W * dpr)
       canvas.height = Math.round(H * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
 
     const setCa = (px: number) => {
-      const q = Math.round(px * 2) / 2
+      const q = Math.round(px) // whole pixels: each change repaints the headings
       if (q === lastCa) return
       lastCa = q
-      root.style.setProperty('--ca', `${q}px`)
+      zoneEl?.style.setProperty('--ca', `${q}px`)
     }
 
     const applyDom = (rz: number, rx: number, ry: number, s: number, tx: number, ty: number) => {
@@ -159,8 +160,8 @@ export default function HoldFX() {
         t.el.style.willChange = ''
       }
       targets = []
-      root.classList.remove('holding')
-      root.style.removeProperty('--ca')
+      zoneEl?.classList.remove('holding')
+      zoneEl?.style.removeProperty('--ca')
       lastCa = -1
     }
 
@@ -172,19 +173,20 @@ export default function HoldFX() {
       holdState.holding = true
       holdState.level = 0
       geo = makeGeo(ox, oy, (Math.random() * 1e9) | 0)
-      targets = ['.proto-banner', '.nav', '#main', '.footer']
-        .map((s) => document.querySelector<HTMLElement>(s))
+      // Tilt the hold zone (a viewport-sized hero) and the nav, not the whole tall page: promoting
+      // the full page to a transformed layer cost a ~200 ms frame on integrated GPUs.
+      targets = [zoneEl, document.querySelector<HTMLElement>('.nav'), document.querySelector<HTMLElement>('.proto-banner')]
         .filter((el): el is HTMLElement => !!el)
         .map((el) => {
           const b = el.getBoundingClientRect()
           el.style.willChange = 'transform'
           return { el, left: b.left, top: b.top }
         })
-      root.classList.add('holding')
+      zoneEl?.classList.add('holding')
       window.getSelection()?.removeAllRanges()
-      size()
       canvas.style.display = 'block'
       ro.style.display = 'block'
+      vg.style.display = 'block'
       sound.holdStart()
       gsap.ticker.add(frame)
     }
@@ -193,7 +195,7 @@ export default function HoldFX() {
       if (phase === 'armed') {
         window.clearTimeout(armTimer)
         phase = 'idle'
-        root.classList.remove('hold-armed')
+        zoneEl?.classList.remove('hold-armed')
         return
       }
       if (phase !== 'hold') return
@@ -203,7 +205,7 @@ export default function HoldFX() {
       holdState.holding = false
       holdState.blastAt = relT
       holdState.blastLevel = relLevel
-      root.classList.remove('hold-armed')
+      zoneEl?.classList.remove('hold-armed')
       if (relLevel >= 0.12) sound.holdRelease(relLevel)
       else sound.holdCancel()
       if (relLevel > 0.5) markHoldSeen()
@@ -248,6 +250,9 @@ export default function HoldFX() {
         if (depth.current) depth.current.textContent = String(Math.round(level * 100)).padStart(3, '0')
         ro.style.transform = `translate3d(${(x - 70 - 46 * level).toFixed(1)}px, ${(y + 56 + 40 * level).toFixed(1)}px, 0) translateX(-100%)`
         ro.style.opacity = String(clamp01(level * 4))
+        // Vignette pulling focus to the pointer (a CSS layer: opacity + position only)
+        vg.style.opacity = (0.75 * level).toFixed(3)
+        vg.style.transform = `translate3d(${(x - W).toFixed(0)}px, ${(y - H).toFixed(0)}px, 0)`
         return
       }
       if (phase === 'release') {
@@ -263,10 +268,12 @@ export default function HoldFX() {
         setCa(4.5 * L * Math.max(0, k) + 6 * L * Math.exp(-10 * ts))
         drawRelease(g, L, ox, oy, u, ts)
         ro.style.opacity = String(clamp01(1 - u * 4))
+        vg.style.opacity = (0.75 * L * (1 - clamp01(u * 3))).toFixed(3)
         if (u >= 1) {
           ctx.clearRect(0, 0, W, H)
           canvas.style.display = 'none'
           ro.style.display = 'none'
+          vg.style.display = 'none'
           clearDom()
           holdState.level = 0
           phase = 'idle'
@@ -276,12 +283,6 @@ export default function HoldFX() {
     }
 
     const drawHold = (g: Geo, level: number, x: number, y: number, tt: number, now: number) => {
-      // Vignette pulling focus to the pointer
-      const vg = ctx.createRadialGradient(x, y, 80, x, y, Math.max(W, H) * 0.9)
-      vg.addColorStop(0, 'rgba(2,4,6,0)')
-      vg.addColorStop(1, `rgba(2,4,6,${(0.62 * level).toFixed(3)})`)
-      ctx.fillStyle = vg
-      ctx.fillRect(0, 0, W, H)
       // Warp streaks rushing outward
       const maxR = Math.hypot(W, H)
       ctx.lineWidth = 1
@@ -495,7 +496,8 @@ export default function HoldFX() {
       const t = e.target as Element | null
       if (!t?.closest?.('[data-hold]') || t.closest(HOLD_EXCLUDE)) return
       phase = 'armed'
-      root.classList.add('hold-armed')
+      zoneEl = t.closest<HTMLElement>('[data-hold]')
+      zoneEl?.classList.add('hold-armed')
       downX = holdState.x = e.clientX
       downY = holdState.y = e.clientY
       armTimer = window.setTimeout(() => {
@@ -509,7 +511,7 @@ export default function HoldFX() {
       if (phase === 'armed' && Math.hypot(e.clientX - downX, e.clientY - downY) > 8) {
         window.clearTimeout(armTimer)
         phase = 'idle'
-        root.classList.remove('hold-armed')
+        zoneEl?.classList.remove('hold-armed')
       }
     }
     const up = () => release()
@@ -534,6 +536,7 @@ export default function HoldFX() {
     window.addEventListener('click', click, true)
     document.addEventListener('visibilitychange', hide)
     window.addEventListener('resize', size)
+    size()
     return () => {
       window.clearTimeout(armTimer)
       gsap.ticker.remove(frame)
@@ -548,7 +551,7 @@ export default function HoldFX() {
       window.removeEventListener('resize', size)
       if (phase === 'hold') sound.holdCancel()
       clearDom()
-      root.classList.remove('hold-armed')
+      zoneEl?.classList.remove('hold-armed')
       holdState.holding = false
       holdState.level = 0
     }
@@ -557,6 +560,7 @@ export default function HoldFX() {
   if (!fine || reduced) return null
   return (
     <>
+      <div ref={vig} className="hold-vignette" aria-hidden="true" />
       <canvas ref={cv} className="holdfx" aria-hidden="true" />
       <div ref={readout} className="hold-readout" aria-hidden="true">
         <span className="hr-k">Scan depth</span> <span ref={depth}>000</span>%

@@ -1,5 +1,5 @@
 // Click-and-hold check: hint, hold build-up and release frames + frame-time stats during the hold,
-// on Home and one inner page. Screens go to docs/reference/screens/hold-*.png (gitignored).
+// on Home and one inner page (after a first click has unlocked audio). Screens go to docs/reference/screens/hold-*.png (gitignored).
 //   node scripts/check-hold.mjs [baseUrl] [--page=/map]
 import { mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
@@ -25,7 +25,11 @@ page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
 for (const [id, path] of pages) {
   await page.goto(base + path, { waitUntil: 'networkidle' })
   await page.evaluate(() => localStorage.removeItem('pc-hold-seen'))
-  await sleep(2500)
+  await sleep(1500)
+  // A first click elsewhere unlocks audio (opening the audio device is a one-time ~100-200 ms task),
+  // so the numbers below are the steady state of a hold.
+  await page.mouse.click(700, 3)
+  await sleep(1200)
   const zone = await page.locator('[data-hold]').first().boundingBox()
   const x = Math.round(zone.x + zone.width * (id === 'home' ? 0.66 : 0.75)), y = Math.round(zone.y + Math.min(zone.height, 900 - zone.y) * 0.5)
   await page.mouse.move(x - 40, y - 30)

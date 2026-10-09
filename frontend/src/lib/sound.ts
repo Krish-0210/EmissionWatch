@@ -52,9 +52,9 @@ function crackleBuffer(ctx: BaseAudioContext, seconds: number) {
   for (let c = 0; c < 2; c++) {
     const d = b.getChannelData(c)
     for (let i = 0; i < d.length; i++) {
-      const t = i / d.length
-      if (Math.random() < 0.004 * Math.pow(1 - t, 2.2)) {
-        const a = (0.4 + Math.random() * 0.6) * Math.pow(1 - t, 1.5)
+      const u = 1 - i / d.length
+      if (Math.random() < 0.004 * u * u) {
+        const a = (0.4 + Math.random() * 0.6) * u * Math.sqrt(u)
         const len = 6 + Math.floor(Math.random() * 40)
         for (let k = 0; k < len && i + k < d.length; k++) d[i + k] += (Math.random() * 2 - 1) * a * (1 - k / len)
       }
@@ -67,9 +67,11 @@ function crackleBuffer(ctx: BaseAudioContext, seconds: number) {
 function reverbIR(ctx: BaseAudioContext, seconds: number, decay: number) {
   const n = Math.floor(ctx.sampleRate * seconds)
   const b = ctx.createBuffer(2, n, ctx.sampleRate)
+  const k = Math.exp(-decay / n) // e^-decay over the length: smooth exponential tail
   for (let c = 0; c < 2; c++) {
     const d = b.getChannelData(c)
-    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay)
+    let g = 1
+    for (let i = 0; i < n; i++, g *= k) d[i] = (Math.random() * 2 - 1) * g
   }
   return b
 }
@@ -201,7 +203,6 @@ class SoundEngine {
     this.mix.connect(limiter).connect(this.master).connect(ctx.destination)
     // Reverb send (blast, blips)
     this.verb = ctx.createConvolver()
-    this.verb.buffer = reverbIR(ctx, 2.8, 3.2)
     this.verbIn = ctx.createGain()
     this.verbIn.gain.value = 0.35
     this.verbIn.connect(this.verb).connect(this.mix)
@@ -219,7 +220,16 @@ class SoundEngine {
     delay.connect(damp).connect(fb).connect(delay)
     damp.connect(this.mix)
     this.noise = noiseBuffer(ctx, 2, false)
-    this.crackle = crackleBuffer(ctx, 1.6)
+    this.crackle = ctx.createBuffer(2, 1, ctx.sampleRate) // filled at idle
+    // The reverb impulse and the crackle tail are generated off the gesture, at idle time.
+    const idle = (fn: () => void) => {
+      if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(fn, { timeout: 1500 })
+      else setTimeout(fn, 200)
+    }
+    idle(() => {
+      this.verb.buffer = reverbIR(ctx, 2.6, 4.2)
+      idle(() => (this.crackle = crackleBuffer(ctx, 1.6)))
+    })
     this.bedOut = ctx.createGain()
     this.bedOut.gain.value = 0
     this.bedOut.connect(this.mix)
@@ -655,8 +665,11 @@ export const sound = new SoundEngine()
 // First gesture anywhere unlocks audio (if the preference is on). Sound switches
 // ([data-sound-toggle]) handle their own press: before any gesture it starts the sound, after it toggles.
 if (typeof window !== 'undefined') {
+  // Deferred a tick: opening the audio device (~100 ms the first time) then falls outside the input
+  // event, e.g. inside a hold's 140 ms arming delay, instead of stalling a visible frame. The page's
+  // user activation is sticky, so the context may still start.
   const first = (e: Event) => {
-    if (!(e.target as Element | null)?.closest?.('[data-sound-toggle]')) sound.unlock()
+    if (!(e.target as Element | null)?.closest?.('[data-sound-toggle]')) window.setTimeout(() => sound.unlock(), 0)
   }
   window.addEventListener('pointerdown', first, { capture: true, passive: true })
   window.addEventListener('keydown', first, { capture: true })

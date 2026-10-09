@@ -33,11 +33,11 @@
 }
 .hold-readout .hr-k { color: var(--muted); }
 .hold-readout .hr-sub { display: block; margin-top: 4px; font-size: 9.5px; color: var(--ember); letter-spacing: 0.12em; }
-html.hold-armed, html.hold-armed * { user-select: none !important; -webkit-user-select: none !important; }
-html.holding .display, html.holding h1, html.holding h2, html.holding .wordmark {
+/* Classes live on the hold zone, not <html>: a document-wide class change restyled the whole page. */
+.hold-armed, .hold-armed * { user-select: none !important; -webkit-user-select: none !important; }
+.holding .display, .holding h1, .holding h2 {
   text-shadow: var(--ca, 0px) 0 rgba(255, 90, 60, 0.6), calc(var(--ca, 0px) * -1) 0 rgba(124, 232, 216, 0.6);
 }
-html.holding { overflow-x: clip; }
 
 /* ---------- Cursor (components/Cursor.tsx) ---------- */
 .cursor { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 4000; opacity: 0; transition: opacity 0.3s; }
@@ -80,7 +80,7 @@ html.holding { overflow-x: clip; }
 @keyframes c-blink { 50% { opacity: 0.2; } }
 .cursor.zone .c-hint { opacity: 1; }
 .cursor.holding .c-hint { opacity: 0; }
-html.holding .globe-tip, html.holding .orbit-chip { opacity: 0 !important; transition: opacity 0.2s; }
+.holding .globe-tip, .holding .orbit-chip { opacity: 0 !important; transition: opacity 0.2s; }
 .hold-readout { text-align: right; }
 
 /* ---------- Char blur reveal (MaskLines fx="blur"): random order, line by line ---------- */
@@ -282,3 +282,7 @@ main p a:not(.pill):not(.ulink):hover, .lede a:hover, main li a:not(.pill):not(.
 .scanword { position: relative; z-index: 1; margin-top: 18px; width: 100%; touch-action: pan-y; }
 .scanword canvas { display: block; width: 100%; }
 .footer a.pill, .footer a.pill:hover { color: var(--signal-ink); } .footer a.ulink { color: var(--text); } .footer a.ulink:hover { color: var(--signal); }
+.hold-vignette { position: fixed; left: 0; top: 0; width: 200vw; height: 200vh; pointer-events: none; z-index: 2890; display: none; opacity: 0; will-change: transform, opacity;
+  background: radial-gradient(circle at 50% 50%, rgba(2, 4, 6, 0) 0, rgba(2, 4, 6, 0) 9vmax, rgba(2, 4, 6, 0.85) 75vmax); }
+/* Hold zones are pre-promoted on desktop so starting a hold creates no new layer (no hitch). */
+@media (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference) { [data-hold] { will-change: transform; } }
