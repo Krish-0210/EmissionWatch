@@ -104,7 +104,7 @@
 .ticker:hover .ticker-track { animation-play-state: paused; }
 .ticker-item { display: inline-flex; align-items: center; gap: 10px; padding: 13px 26px; white-space: nowrap;
   font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.ticker-item b { color: var(--text); font-weight: 500; }
+.ticker-item b { color: var(--text); font-weight: 500; text-transform: none; letter-spacing: 0.06em; }
 .ticker-item i { width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--signal)); box-shadow: 0 0 8px var(--c, var(--signal)); }
 @keyframes ticker { to { transform: translate3d(-50%, 0, 0); } }
 
