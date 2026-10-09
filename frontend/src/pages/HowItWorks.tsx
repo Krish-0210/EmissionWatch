@@ -11,6 +11,7 @@ import MethodScene from '../components/MethodScene'
 import NaiveVsModel from '../components/NaiveVsModel'
 import PageHero, { Divider, type TickerItem } from '../components/PageHero'
 import PipelineNodes, { type PipeStep } from '../components/PipelineNodes'
+import SectionHead from '../components/SectionHead'
 import { fmt, fmtInt, fmtP, fmtPct, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
 import { setText, useInView, useReducedMotion } from '../lib/motion'
@@ -209,7 +210,7 @@ function Results({ s, names }: { s: SummaryFile; names: Record<string, string> }
   const coefs = [...s.clusters].sort((a, b) => b.generation_coef - a.generation_coef)
   return (
     <>
-      <div className="micro signal reveal">Results</div>
+      <SectionHead n="02" label="Results" />
       <h2 className="display d-lg mask" style={{ margin: '14px 0 36px' }}>
         <MaskLines lines={['What the data', 'shows.']} delay={80} />
       </h2>
@@ -467,7 +468,7 @@ export default function HowItWorks() {
       </section>
 
       <section className="container section-tight">
-        <div className="micro signal reveal">Why the model, not a simple correlation</div>
+        <SectionHead n="01" label="Why the model, not a simple correlation" />
         <h2 className="display d-lg mask" style={{ margin: '14px 0 28px' }}>
           <MaskLines lines={['Weather hides', 'the signal.']} delay={80} />
         </h2>
@@ -483,8 +484,8 @@ export default function HowItWorks() {
       </section>
 
       <section className="container section-tight">
-        <div className="micro reveal" style={{ marginBottom: 16 }}>
-          Data sources
+        <div style={{ marginBottom: 16 }}>
+          <SectionHead n="03" label="Data sources" />
         </div>
         <div className="rule draw" />
         <dl className="sources-list">

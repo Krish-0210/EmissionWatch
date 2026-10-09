@@ -199,3 +199,11 @@
   .mlines .ml > span { translate: none; }
   .blur-in { filter: none; translate: none; }
 }
+
+/* ---------- Section monogram (components/SectionHead.tsx) ---------- */
+.sec-head { display: flex; align-items: center; gap: 16px; }
+.sec-num { font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 3.6vw, 52px); line-height: 1; letter-spacing: -0.02em;
+  color: transparent; -webkit-text-stroke: 1px rgba(124, 232, 216, 0.6); background: linear-gradient(180deg, rgba(124, 232, 216, 0.22), transparent 75%);
+  -webkit-background-clip: text; background-clip: text; }
+.sec-head.ember .sec-num { -webkit-text-stroke-color: rgba(255, 138, 61, 0.6); background-image: linear-gradient(180deg, rgba(255, 138, 61, 0.22), transparent 75%); }
+.sec-head .micro { padding-left: 16px; border-left: 1px solid var(--border-2); }

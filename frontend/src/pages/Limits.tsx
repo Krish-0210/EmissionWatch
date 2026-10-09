@@ -5,6 +5,7 @@ import Icon, { IconTile, type IconName } from '../components/Icons'
 import LimitArt from '../components/LimitArt'
 import PageHero, { Divider, type TickerItem } from '../components/PageHero'
 import MaskLines from '../components/MaskLines'
+import SectionHead from '../components/SectionHead'
 import { fmt } from '../lib/format'
 import { useInView } from '../lib/motion'
 import { useAsync } from '../lib/useAsync'
@@ -170,6 +171,9 @@ export default function Limits() {
       />
 
       <section className="container section-tight">
+        <div style={{ marginBottom: 28 }}>
+          <SectionHead n="01" label="Six limits of this method" tone="ember" />
+        </div>
         <div className="limits-grid spot-group">
           {LIMITS.map((l, i) => (
             <article className="card limit tilt reveal" data-tilt="4" key={l.title} style={{ '--d': `${(i % 3) * 110}ms` } as CSSProperties}>
@@ -184,7 +188,7 @@ export default function Limits() {
       </section>
 
       <section className="container section-tight">
-        <div className="micro signal reveal">Related work</div>
+        <SectionHead n="02" label="Related work" />
         <h2 className="display d-lg mask" style={{ margin: '14px 0 28px' }}>
           <MaskLines lines={['Others watch too.', 'Here is what we add.']} delay={80} />
         </h2>
