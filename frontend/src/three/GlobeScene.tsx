@@ -1,5 +1,6 @@
 // R3F idiom: three.js objects and control refs are mutated inside useFrame.
 /* oxlint-disable react/immutability */
+import { holdBusy, holdState } from '../lib/hold'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, type MutableRefObject } from 'react'
 import * as THREE from 'three'
@@ -296,7 +297,7 @@ function Atmosphere({ strength }: { strength: MutableRefObject<number> }) {
 /* ---------- Plumes: rising ember particles at cluster coordinates; the hovered one flares ---------- */
 const plumeShader = {
   vertexShader: /* glsl */ `
-    uniform float uTime; uniform float uScale; uniform float uPx; uniform float uHover;
+    uniform float uTime; uniform float uScale; uniform float uPx; uniform float uHover; uniform float uHold;
     attribute vec3 aNormal; attribute vec3 aTangent; attribute float aSeed; attribute float aHeight; attribute float aBright; attribute float aCluster;
     varying float vA;
     void main() {
@@ -304,14 +305,14 @@ const plumeShader = {
       float t = fract(uTime * (0.05 + 0.05 * fract(aSeed * 7.13)) + aSeed);
       vec3 bit = cross(aNormal, aTangent);
       float ang = aSeed * 43.0 + uTime * 0.4;
-      float h = aHeight * (1.0 + 0.6 * hot);
+      float h = aHeight * (1.0 + 0.6 * hot) * (1.0 + 2.4 * uHold);
       float spread = (0.004 + 0.035 * t) * h * 4.0;
       vec3 p = position + aNormal * (t * h * uScale)
              + (aTangent * cos(ang) + bit * sin(ang)) * spread * uScale;
       vec4 mv = modelViewMatrix * vec4(p, 1.0);
       gl_Position = projectionMatrix * mv;
-      gl_PointSize = clamp(uPx * (0.6 + aBright) * (1.0 + 0.5 * hot) * (1.0 - 0.5 * t) / -mv.z, 1.0, 18.0);
-      vA = smoothstep(0.0, 0.08, t) * (1.0 - t) * (0.3 + 0.7 * aBright) * (1.0 + 0.8 * hot);
+      gl_PointSize = clamp(uPx * (0.6 + aBright) * (1.0 + 0.5 * hot) * (1.0 + 0.9 * uHold) * (1.0 - 0.5 * t) / -mv.z, 1.0, 22.0);
+      vA = smoothstep(0.0, 0.08, t) * (1.0 - t) * (0.3 + 0.7 * aBright) * (1.0 + 0.8 * hot) * (1.0 + 1.4 * uHold);
     }`,
   fragmentShader: /* glsl */ `
     uniform vec3 uColor; varying float vA;
@@ -355,9 +356,12 @@ function Plumes({ clusters, total, scale, control }: { clusters: ClusterSummary[
     return g
   }, [clusters, total])
   useEffect(() => () => geo.dispose(), [geo])
-  const uniforms = useMemo(() => ({ uTime: { value: 0 }, uScale: { value: 1 }, uPx: { value: 9 }, uHover: { value: -1 }, uColor: { value: EMBER } }), [])
+  const uniforms = useMemo(() => ({ uTime: { value: 0 }, uScale: { value: 1 }, uPx: { value: 9 }, uHover: { value: -1 }, uHold: { value: 0 }, uColor: { value: EMBER } }), [])
   useFrame((_, dt) => {
-    uniforms.uTime.value += Math.min(dt, 0.1)
+    // Hold to scan: plumes flare (taller, bigger, brighter) and rise faster; the release pulses them.
+    const blast = holdState.blastAt ? Math.exp(-((performance.now() - holdState.blastAt) / 1000) * 4) * holdState.blastLevel : 0
+    uniforms.uHold.value = Math.min(1.4, holdState.level + 0.8 * blast)
+    uniforms.uTime.value += Math.min(dt, 0.1) * (1 + 2.5 * holdState.level)
     uniforms.uScale.value = scale.current
     uniforms.uPx.value = 9 * gl.getPixelRatio()
     uniforms.uHover.value = control.current.hover ?? -1
@@ -717,7 +721,7 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
       const k = Math.min(1, dt * 3.2)
       free.current.yaw += wrapAngle(f.yaw - 0.25 - free.current.yaw) * k
       free.current.pitch += (f.pitch * 0.8 - free.current.pitch) * k
-    } else if (!c.dragging && d1 < 0.02 && (c.hover ?? -1) < 0) free.current.yaw += dt * 0.07 // holds still under a tooltip
+    } else if (!c.dragging && d1 < 0.02 && (c.hover ?? -1) < 0) free.current.yaw += dt * (0.07 + 0.35 * holdState.level) // holds still under a tooltip
     free.current.yaw += c.dragYaw
     free.current.pitch = THREE.MathUtils.clamp(free.current.pitch + c.dragPitch, -0.9, 0.9)
     c.dragYaw = 0
@@ -732,18 +736,22 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
     // Camera: hero -> India -> oblique close-up over the cluster (altitude ~0.075 ≈ 480 km).
     const d0 = heroDist(narrow)
     const off = heroOffset(narrow)
-    const dist = THREE.MathUtils.lerp(THREE.MathUtils.lerp(d0, 2.05, d1), 1.085, d2)
+    // Hold to scan: the camera dives toward the globe and shakes; the release kicks it back out.
+    const hl = holdState.level
+    const kick = holdState.blastAt ? Math.exp(-((performance.now() - holdState.blastAt) / 1000) * 5) * holdState.blastLevel : 0
+    const dist = THREE.MathUtils.lerp(THREE.MathUtils.lerp(d0, 2.05, d1), 1.085, d2) * (1 - 0.16 * hl * (1 - 0.8 * d2) + 0.06 * kick)
     const g = globe.current
     if (g) {
       g.rotation.set(pitch, yaw, 0, 'XYZ')
       g.position.set(off.x * (1 - d1), off.y * (1 - d1), 0)
     }
-    tmp.cam.set(s.mx * 0.12 * (1 - d1), -s.my * 0.08 * (1 - d1) - 0.05 * d2, dist)
+    const shake = 0.006 * hl * hl
+    tmp.cam.set(s.mx * 0.12 * (1 - d1) + shake * Math.sin(s.clock * 53), -s.my * 0.08 * (1 - d1) - 0.05 * d2 + shake * Math.sin(s.clock * 61 + 1), dist)
     tmp.target.set(0, 0, THREE.MathUtils.lerp(0, 1, d2))
     camera.position.copy(tmp.cam)
     camera.lookAt(tmp.target)
 
-    no2India.current = 0.85 + 0.15 * d1
+    no2India.current = 0.85 + 0.15 * d1 + 0.45 * hl + 0.4 * kick
     no2World.current = 0.6 * (1 - 0.5 * d2)
     grid.current = 1 - d2
     cloudOp.current = 0.2 * (1 - 0.7 * d1)
@@ -751,7 +759,7 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
     plumeScale.current = THREE.MathUtils.lerp(1, 0.09, d2)
     ringReveal.current = span(p, 0.42, 0.6)
     satFade.current = (1 - d2) * span(s.intro, 0.4, 1)
-    haloStrength.current = 1 - d2
+    haloStrength.current = 1 - d2 + 0.7 * hl + 0.8 * kick
 
     // Screen positions of the clusters for hover and click (hero only).
     const pins = c.pins
@@ -772,7 +780,7 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
     // Keep rendering while the globe auto-rotates (hero), is dragged, or scroll/parallax/intro is still settling.
     const settling =
       Math.abs(c.progress - s.p) > 1e-4 || Math.abs(c.mouseX - s.mx) > 1e-3 || Math.abs(c.mouseY - s.my) > 1e-3 || Math.abs((c.intro ?? 1) - s.intro) > 1e-3
-    c.active = d1 < 0.02 || c.dragging || settling || scanAge < 4.5
+    c.active = d1 < 0.02 || c.dragging || settling || scanAge < 4.5 || holdBusy()
   })
 
   return (

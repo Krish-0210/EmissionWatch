@@ -249,7 +249,7 @@ export default function Home() {
   return (
     <>
       <div ref={stage} className="stage">
-        <div className="stage-sticky">
+        <div className="stage-sticky" data-hold>
           <div className={`stage-visual${ready3d ? ' ready' : ''}${landed ? '' : ' hold'}`}>
             <GlobePoster />
             {mount3d && clusters.data && focus && (

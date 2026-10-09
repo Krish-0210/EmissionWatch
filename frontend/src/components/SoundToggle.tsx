@@ -1,12 +1,5 @@
-import { useSyncExternalStore } from 'react'
 import { sound } from '../lib/sound'
-
-export const useSoundOn = () =>
-  useSyncExternalStore(
-    (fn) => sound.subscribe(fn),
-    () => sound.enabled,
-    () => false,
-  )
+import { useSoundOn } from '../lib/useSound'
 
 // Nav sound switch: animated equaliser bars when on, a crossed speaker when off. A real button
 // (keyboard and screen-reader friendly); the choice is saved in localStorage by lib/sound.

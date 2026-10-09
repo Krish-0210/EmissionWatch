@@ -9,6 +9,7 @@ import { prefersReducedMotion } from '../lib/motion'
 import Backdrop from './Backdrop'
 import BigWord from './BigWord'
 import Cursor from './Cursor'
+import HoldFX from './HoldFX'
 import SoundToggle from './SoundToggle'
 import { Wordmark } from './Logo'
 
@@ -168,6 +169,7 @@ export default function Layout() {
         Skip to content
       </a>
       <Cursor />
+      <HoldFX />
       <Backdrop variant={backdropFor(pathname)} />
       <div className="proto-banner" role="note">
         <span className="micro">

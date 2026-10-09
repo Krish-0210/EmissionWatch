@@ -69,7 +69,7 @@ interface Props {
 // Page-specific animated banner: text left, live visual right, giant faded word behind, stats ticker below.
 export default function PageHero({ eyebrow, title, dim, lede, word, visual, ticker, children, titleClass = 'd-lg' }: Props) {
   return (
-    <header className="phero">
+    <header className="phero" data-hold>
       <BigWord speed={0.1}>{word}</BigWord>
       <div className="container layer phero-grid">
         <div className="trig">

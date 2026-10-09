@@ -230,17 +230,6 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
 .page { animation: page-in 380ms var(--ease-out) both; }
 @keyframes page-in { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(1.01); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 
-/* ---------- Cursor follower ---------- */
-/* Outer element only translates (written by JS); the inner ring scales on hover. Transform/opacity only. */
-.cursor { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 4000; opacity: 0; transition: opacity 0.3s; will-change: transform; }
-.cursor i {
-  position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%;
-  border: 1px solid rgba(124, 232, 216, 0.6); background: rgba(124, 232, 216, 0);
-  transition: transform 0.25s var(--ease-out), background-color 0.25s;
-}
-.cursor.on { opacity: 1; }
-.cursor.hot i { transform: scale(1.85); background: rgba(124, 232, 216, 0.08); }
-
 /* ---------- Footer ---------- */
 .footer { border-top: 1px solid var(--border); padding: 56px 0 40px; position: relative; overflow: hidden; }
 .footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 32px; }

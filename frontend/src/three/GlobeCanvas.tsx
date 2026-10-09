@@ -1,3 +1,4 @@
+import { holdBusy } from '../lib/hold'
 import { PerformanceMonitor } from '@react-three/drei'
 import { advance, Canvas, useThree } from '@react-three/fiber'
 import { memo, useEffect, useRef, useState, type MutableRefObject } from 'react'
@@ -32,7 +33,7 @@ function Driver({ control, live, onFirstFrame }: { control: MutableRefObject<Glo
   useEffect(() => {
     const tick = (time: number) => {
       const c = control.current
-      if (!live.current || !(dirty.current || (c.active && !c.paused))) return
+      if (!live.current || !(dirty.current || (c.active && !c.paused) || holdBusy())) return
       dirty.current = false
       advance(time, true, get())
       if (first.current) {

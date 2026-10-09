@@ -490,7 +490,7 @@ export default function ClusterPage() {
 
   return (
     <div className="cluster" style={{ '--risk': RISK_COLOR[c.risk_level] } as CSSProperties}>
-      <header className="cluster-head">
+      <header className="cluster-head" data-hold>
         <BigWord style={{ top: '0.02em', left: '-0.03em' }} speed={0.08}>
           {c.name}
         </BigWord>
