@@ -5,6 +5,7 @@ import Icon, { IconTile, type IconName } from '../components/Icons'
 import LimitArt from '../components/LimitArt'
 import PageHero, { Divider, type TickerItem } from '../components/PageHero'
 import MaskLines from '../components/MaskLines'
+import Marquee from '../components/Marquee'
 import SectionHead from '../components/SectionHead'
 import { fmt } from '../lib/format'
 import { useInView } from '../lib/motion'
@@ -186,6 +187,8 @@ export default function Limits() {
         </div>
         <Divider />
       </section>
+
+      <Marquee label="Screening, not a verdict" rows={[{ words: ['Screening', 'Not a verdict'] }, { words: ['Audit', 'Then verify'], outline: true }]} />
 
       <section className="container section-tight">
         <SectionHead n="02" label="Related work" />

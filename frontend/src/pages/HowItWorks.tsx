@@ -11,6 +11,7 @@ import MethodScene from '../components/MethodScene'
 import NaiveVsModel from '../components/NaiveVsModel'
 import PageHero, { Divider, type TickerItem } from '../components/PageHero'
 import PipelineNodes, { type PipeStep } from '../components/PipelineNodes'
+import Marquee from '../components/Marquee'
 import SectionHead from '../components/SectionHead'
 import { fmt, fmtInt, fmtP, fmtPct, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
@@ -477,6 +478,11 @@ export default function HowItWorks() {
         </div>
         <Divider />
       </section>
+
+      <Marquee
+        label="Plant, rings, background, weather, residuals, score"
+        rows={[{ words: ['Plant', 'Rings', 'Background'] }, { words: ['Weather', 'Residuals', 'Score'], outline: true }]}
+      />
 
       <section className="container section-tight">
         {summary.error && <div className="alert err">Could not load results: {summary.error}</div>}

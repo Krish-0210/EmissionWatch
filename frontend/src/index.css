@@ -227,7 +227,8 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
 }
 
 /* ---------- Page transition ---------- */
-.page { animation: page-in 380ms var(--ease-out) both; }
+/* backwards, not both: a held identity transform/blur(0) would make .page a containing block and break fixed pins */
+.page { animation: page-in 380ms var(--ease-out) backwards; }
 @keyframes page-in { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(1.01); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 
 /* ---------- Footer ---------- */

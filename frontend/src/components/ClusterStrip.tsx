@@ -100,7 +100,7 @@ export default function ClusterStrip({ clusters }: { clusters: ClusterSummary[] 
               </div>
               <h3 className="cs-name">{c.name}</h3>
               <div className="micro">
-                {c.states.join(' · ')} · {c.n_plants} plants · {fmtInt(c.capacity_mw)} MW
+                {c.states.join(' · ')} · {c.n_plants} {c.n_plants === 1 ? 'plant' : 'plants'} · {fmtInt(c.capacity_mw)} MW
               </div>
               <p className="muted small cs-line">{c.headline}</p>
               <div className="micro cs-conf">Confidence {c.confidence}</div>
