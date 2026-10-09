@@ -46,3 +46,8 @@ Thumbs.db
 
 # Local assistant notes
 CLAUDE.md
+
+# Reference videos and extracted frames (docs/reference/)
+docs/reference/*.mp4
+docs/reference/*.mov
+docs/reference/frames/
