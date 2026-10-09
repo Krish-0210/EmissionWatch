@@ -1,6 +1,5 @@
 import { PerformanceMonitor } from '@react-three/drei'
 import { advance, Canvas, useThree } from '@react-three/fiber'
-import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import { memo, useEffect, useRef, useState, type MutableRefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RISK_COLOR, RISK_LABEL } from '../lib/format'
@@ -16,13 +15,12 @@ interface Props {
   onReady?: () => void
 }
 
-// Few cores or little memory: never try bloom.
-const lowEnd = () => (navigator.hardwareConcurrency || 8) <= 4 || ((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 4
 
 // Renders from GSAP's ticker (the same loop that drives Lenis and ScrollTrigger), and only when
 // the scene reports motion (auto-rotate, drag, scroll or parallax still settling), it is on
-// screen and the tab is visible.
-function Driver({ control, live }: { control: MutableRefObject<GlobeControl>; live: MutableRefObject<boolean> }) {
+// screen, the tab is visible and the intro is not holding it. onFirstFrame fires after the first
+// render (programs linked), which is when the intro starts its clock.
+function Driver({ control, live, onFirstFrame }: { control: MutableRefObject<GlobeControl>; live: MutableRefObject<boolean>; onFirstFrame?: () => void }) {
   const get = useThree((s) => s.get)
   const size = useThree((s) => s.size)
   const dpr = useThree((s) => s.viewport.dpr)
@@ -30,11 +28,19 @@ function Driver({ control, live }: { control: MutableRefObject<GlobeControl>; li
   useEffect(() => {
     dirty.current = true
   }, [size, dpr])
+  const first = useRef(onFirstFrame)
   useEffect(() => {
     const tick = (time: number) => {
-      if (!live.current || !(dirty.current || control.current.active)) return
+      const c = control.current
+      if (!live.current || !(dirty.current || (c.active && !c.paused))) return
       dirty.current = false
       advance(time, true, get())
+      if (first.current) {
+        const f = first.current
+        first.current = undefined
+        // One more frame for the GPU to finish, then report.
+        requestAnimationFrame(() => requestAnimationFrame(f))
+      }
     }
     gsap.ticker.add(tick)
     return () => gsap.ticker.remove(tick)
@@ -42,7 +48,7 @@ function Driver({ control, live }: { control: MutableRefObject<GlobeControl>; li
   return null
 }
 
-// Canvas host: adaptive DPR and bloom, stops rendering when off-screen or hidden, handles drag + parallax.
+// Canvas host: adaptive DPR, stops rendering when off-screen or hidden, handles drag + parallax.
 function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const live = useRef(true)
@@ -50,9 +56,6 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
   // Start one step below the cap; PerformanceMonitor raises it if frames stay fast.
   const [initialDpr] = useState(() => Math.max(1, maxDpr - 0.25))
   const [dpr, setDpr] = useState(initialDpr)
-  // Bloom: desktop only, switched on once the frame rate proves steady, off for good if it drops.
-  const [bloom, setBloom] = useState(false)
-  const bloomTried = useRef(lite || lowEnd())
   const ceiling = useRef(maxDpr)
 
   useEffect(() => {
@@ -74,18 +77,23 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
     }
   }, [])
 
-  // Hover a plume: tooltip with name, risk and score; click (not drag) opens the cluster page.
+  // Plume tooltip: mouse hover, a tap (touch: tap again to open), or the hero's scan button. Click
+  // (not drag) or a second tap opens the cluster page. The tip follows its pin on GSAP's ticker.
   const navigate = useNavigate()
   const tip = useRef<HTMLDivElement>(null)
-  const [hoverId, setHoverId] = useState<string>()
-  const hovered = clusters.find((c) => c.id === hoverId)
+  const [shown, setShown] = useState<{ id: string; how: 'mouse' | 'tap' | 'scan' }>()
+  const hovered = clusters.find((c) => c.id === shown?.id)
   useEffect(() => {
     const el = host.current
     if (!el) return
     let lastX = 0, lastY = 0, downX = 0, downY = 0, down = false, hot = -1
-    const pick = (x: number, y: number) => {
+    let pinned: { idx: number; until: number; how: 'tap' | 'scan' } | null = null
+    let cur = -1, curHow = ''
+    let scanSeen = 0
+    const hero = () => control.current.progress <= 0.1
+    const pick = (x: number, y: number, r: number) => {
       const pins = control.current.pins ?? []
-      let best = -1, bestD = 24 * 24
+      let best = -1, bestD = r * r
       pins.forEach((p, i) => {
         if (!p.vis) return
         const d = (p.x - x) ** 2 + (p.y - y) ** 2
@@ -96,21 +104,37 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
       })
       return best
     }
-    const setHot = (i: number) => {
-      if (i !== hot) {
-        hot = i
-        control.current.hover = i
-        setHoverId(i >= 0 ? clusters[i].id : undefined)
-        if (!down) el.style.cursor = i >= 0 ? 'pointer' : ''
+    const sync = () => {
+      const now = performance.now()
+      const scan = control.current.scan
+      if (scan && scan.t !== scanSeen) {
+        scanSeen = scan.t
+        pinned = { idx: scan.idx, until: scan.t + 4200, how: 'scan' }
       }
+      if (pinned && (now > pinned.until || !hero())) pinned = null
+      // A scan's tooltip appears once the beam has reached the ground.
+      const pin = pinned && !(pinned.how === 'scan' && now - (control.current.scan?.t ?? 0) < 1300) ? pinned : null
+      const i = hot >= 0 ? hot : pin ? pin.idx : -1
+      const how = hot >= 0 ? 'mouse' : pin ? pin.how : ''
       const p = control.current.pins?.[i]
-      if (i >= 0 && p && tip.current) tip.current.style.transform = `translate3d(${p.x.toFixed(0)}px, ${p.y.toFixed(0)}px, 0)`
+      const vis = i >= 0 && !!p && p.vis
+      const idx = vis ? i : -1
+      if (idx !== cur || how !== curHow) {
+        cur = idx
+        curHow = how
+        control.current.hover = idx
+        setShown(idx >= 0 ? { id: clusters[idx].id, how: how as 'mouse' | 'tap' | 'scan' } : undefined)
+      }
+      if (vis && tip.current) tip.current.style.transform = `translate3d(${p.x.toFixed(0)}px, ${p.y.toFixed(0)}px, 0)`
     }
+    gsap.ticker.add(sync)
     const onDown = (e: PointerEvent) => {
-      if (e.pointerType !== 'mouse' || control.current.progress > 0.1) return
+      downX = e.clientX
+      downY = e.clientY
+      if (e.pointerType !== 'mouse' || !hero()) return
       down = true
-      lastX = downX = e.clientX
-      lastY = downY = e.clientY
+      lastX = e.clientX
+      lastY = e.clientY
       control.current.dragging = true
       el.setPointerCapture(e.pointerId)
       el.style.cursor = 'grabbing'
@@ -119,8 +143,10 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
       const r = el.getBoundingClientRect()
       control.current.mouseX = ((e.clientX - r.left) / r.width) * 2 - 1
       control.current.mouseY = ((e.clientY - r.top) / r.height) * 2 - 1
-      if (e.pointerType === 'mouse' && control.current.progress <= 0.1) setHot(down ? -1 : pick(e.clientX - r.left, e.clientY - r.top))
-      else setHot(-1)
+      if (e.pointerType === 'mouse' && hero()) {
+        hot = down ? -1 : pick(e.clientX - r.left, e.clientY - r.top, 24)
+        if (!down) el.style.cursor = hot >= 0 ? 'pointer' : ''
+      } else hot = -1
       if (!down) return
       control.current.dragYaw += (e.clientX - lastX) * 0.005
       control.current.dragPitch += (e.clientY - lastY) * 0.004
@@ -128,23 +154,35 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
       lastY = e.clientY
     }
     const onUp = (e: PointerEvent) => {
-      const click = down && Math.hypot(e.clientX - downX, e.clientY - downY) < 6
+      const still = Math.hypot(e.clientX - downX, e.clientY - downY) < 8
+      const r = el.getBoundingClientRect()
+      if (e.pointerType !== 'mouse') {
+        // Touch / pen tap: the first tap shows the tooltip, a second tap on the same plume opens it.
+        if (!still || !hero() || e.type === 'pointercancel') return
+        const i = pick(e.clientX - r.left, e.clientY - r.top, 34)
+        if (i >= 0 && pinned?.idx === i && pinned.how === 'tap') navigate(`/cluster/${clusters[i].id}`, { viewTransition: true })
+        else pinned = i >= 0 ? { idx: i, until: performance.now() + 5000, how: 'tap' } : null
+        return
+      }
+      const click = down && still
       down = false
       control.current.dragging = false
       el.style.cursor = ''
       if (click) {
-        const r = el.getBoundingClientRect()
-        const i = pick(e.clientX - r.left, e.clientY - r.top)
+        const i = pick(e.clientX - r.left, e.clientY - r.top, 24)
         if (i >= 0) navigate(`/cluster/${clusters[i].id}`, { viewTransition: true })
       }
     }
-    const onLeave = () => setHot(-1)
+    const onLeave = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') hot = -1
+    }
     el.addEventListener('pointerleave', onLeave)
     el.addEventListener('pointerdown', onDown)
     el.addEventListener('pointermove', onMove)
     el.addEventListener('pointerup', onUp)
     el.addEventListener('pointercancel', onUp)
     return () => {
+      gsap.ticker.remove(sync)
       el.removeEventListener('pointerdown', onDown)
       el.removeEventListener('pointermove', onMove)
       el.removeEventListener('pointerup', onUp)
@@ -163,7 +201,6 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
         onCreated={({ gl }) => {
           // Shader error checks force a synchronous GPU round-trip per program; dev only.
           gl.debug.checkShaderErrors = import.meta.env.DEV
-          onReady?.()
         }}
       >
         <PerformanceMonitor
@@ -172,31 +209,21 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
           iterations={6}
           bounds={(refresh) => (refresh > 100 ? [60, 90] : [50, 58])}
           flipflops={4}
-          onIncline={(api) => {
+          // No bloom pass: on an integrated GPU it halved the frame rate and its shader compile was a
+          // long frame; the scene's additive Halo sprite gives the glow instead.
+          onIncline={() => {
             if (dpr < ceiling.current) setDpr(Math.min(ceiling.current, dpr + 0.25))
-            // Bloom roughly halved the frame rate on an integrated GPU: try it only on ~60 Hz screens
-            // already pinned at vsync (a later decline turns it off for good).
-            else if (!bloomTried.current && api.refreshrate <= 100 && api.fps >= 0.95 * api.refreshrate) {
-              bloomTried.current = true
-              setBloom(true)
-            }
           }}
           onDecline={() => {
-            if (bloom) setBloom(false)
-            else if (dpr > 1) {
+            if (dpr > 1) {
               // Never climb back to a level that was too slow (no flip-flopping).
               ceiling.current = dpr - 0.25
               setDpr(dpr - 0.25)
             }
           }}
         >
-          <Driver control={control} live={live} />
-          <GlobeScene clusters={clusters} focusId={focusId} control={control} lite={lite} glow={!bloom} />
-          {bloom && (
-            <EffectComposer multisampling={0}>
-              <Bloom intensity={0.55} luminanceThreshold={0.62} luminanceSmoothing={0.2} mipmapBlur radius={0.6} />
-            </EffectComposer>
-          )}
+          <Driver control={control} live={live} onFirstFrame={onReady} />
+          <GlobeScene clusters={clusters} focusId={focusId} control={control} lite={lite} glow />
         </PerformanceMonitor>
       </Canvas>
       <div ref={tip} className={`globe-tip${hovered ? ' on' : ''}`} role="tooltip">
@@ -207,7 +234,7 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
               <i />
               {RISK_LABEL[hovered.risk_level]} · <b className="mono">{Math.round(hovered.risk_score)}</b>/100
             </div>
-            <div className="micro">Click to open</div>
+            <div className="micro">{shown?.how === 'tap' ? 'Tap again to open' : shown?.how === 'scan' ? 'Scanned · click to open' : 'Click to open'}</div>
           </div>
         )}
       </div>

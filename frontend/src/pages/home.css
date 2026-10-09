@@ -4,6 +4,10 @@
 .stage-visual { position: absolute; inset: 0; }
 .stage-visual .globe-host { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s var(--ease-out); touch-action: pan-y; }
 .stage-visual.ready .globe-host { opacity: 1; }
+/* Intro: the 3D globe and poster wait until the intro's dotted globe lands on them. */
+.stage-visual.hold .globe-poster { opacity: 0 !important; transition: none; }
+/* just above 0: the WebGL layer stays composited, so revealing it costs no first-composite stall */
+.stage-visual.hold .globe-host { opacity: 0.001 !important; transition: none; }
 .stage-visual .globe-poster { transition: opacity 1s var(--ease-out); left: 38%; }
 .stage-visual .globe-poster svg { width: min(70vh, 60vw); height: auto; }
 .stage-visual.ready .globe-poster { opacity: 0; }
@@ -18,17 +22,22 @@
 .hero { will-change: opacity, transform; position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding-top: var(--nav-h); z-index: 2; pointer-events: none; }
 .hero > * { pointer-events: auto; max-width: 640px; }
 .hero > .hero-title { max-width: 760px; font-size: clamp(30px, 3.5vw, 60px); }
-.hero-micro { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; }
-/* Hero entrance (after the intro, or on load) */
-.hero .hero-micro, .hero .hero-lede, .hero > .row { opacity: 0; translate: 0 16px; transition: opacity 0.8s var(--ease-out), translate 0.9s var(--ease-out); }
+.hero-micro { display: inline-flex; align-self: flex-start; align-items: center; gap: 10px; margin-bottom: 26px; }
+/* Hero entrance (after the intro, or on load): eyebrow, headline lines from a mask (MaskLines),
+   then lede and CTAs blur into focus. */
+.hero .hero-micro { opacity: 0; translate: -10px 0; transition: opacity 0.6s var(--ease-out), translate 0.8s var(--ease-out); }
+.hero .hero-lede, .hero > .row { opacity: 0; filter: blur(12px); translate: 0 8px; transition: opacity 0.9s var(--ease-out), filter 0.9s var(--ease-out), translate 0.9s var(--ease-out); }
 .hero.in .hero-micro { opacity: 1; translate: none; }
-.hero.in .hero-lede { opacity: 1; translate: none; transition-delay: 0.45s; }
-.hero.in > .row { opacity: 1; translate: none; transition-delay: 0.6s; }
+.hero.in .hero-lede { opacity: 1; filter: none; translate: none; transition-delay: 0.62s; }
+.hero.in > .row { opacity: 1; filter: none; translate: none; transition-delay: 0.78s; }
+.hero .scroll-cue { opacity: 0; transition: opacity 0.8s ease 1.4s; }
+.hero.in .scroll-cue { opacity: 1; }
+.hero-title .ml.acc { margin-top: 0.08em; }
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 10px var(--signal); animation: live 1.8s ease-in-out infinite; }
 @keyframes live { 50% { opacity: 0.3; } }
 .hero-title .dim { margin-top: 0.12em; }
 .hero-lede { margin: 30px 0 34px; }
-.scroll-cue { position: absolute; bottom: 28px; left: var(--gutter); display: flex; align-items: center; gap: 12px; }
+.scroll-cue { position: absolute; bottom: 64px; left: var(--gutter); display: flex; align-items: center; gap: 12px; }
 .scroll-cue::before { content: ''; width: 40px; height: 1px; background: var(--muted); transform-origin: left; animation: cue 2.4s var(--ease-out) infinite; }
 @keyframes cue { 0% { transform: scaleX(0); } 60% { transform: scaleX(1); } 100% { transform: scaleX(1); opacity: 0; } }
 
@@ -124,7 +133,7 @@
 .globe-tip { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 4; opacity: 0; transition: opacity 0.2s; will-change: transform; }
 .globe-tip.on { opacity: 1; }
 .globe-tip-box {
-  position: absolute; left: 16px; bottom: 14px; min-width: 170px; padding: 12px 14px; border-radius: 12px;
+  position: absolute; left: 16px; bottom: 14px; min-width: 170px; width: max-content; max-width: 280px; padding: 12px 14px; border-radius: 12px;
   background: rgba(10, 14, 19, 0.92); border: 1px solid var(--c); box-shadow: 0 0 24px -6px var(--c), 0 18px 40px -20px #000;
   animation: tip-in 0.25s var(--ease-out);
 }
@@ -133,3 +142,56 @@
 .globe-tip-row i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
 .globe-tip-row b { color: var(--text); font-weight: 500; }
 @keyframes tip-in { from { opacity: 0; translate: -6px 6px; } }
+
+/* ---------- Hero orbit: data chips around the globe + scan button (components/HeroOrbit.tsx) ---------- */
+.hero-orbit { position: absolute; inset: 0; z-index: 2; pointer-events: none; will-change: opacity, transform; }
+.orbit-chip { position: absolute; translate: -50% -50%; pointer-events: auto; }
+.orbit-chip.off { visibility: hidden; } /* still measurable (offscreen at -999) */
+.orbit-chip-in {
+  display: inline-flex; align-items: center; gap: 9px; height: 38px; padding: 0 14px 0 6px; border-radius: 999px; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  background: linear-gradient(160deg, rgba(20, 28, 38, 0.92), rgba(9, 13, 19, 0.88)) padding-box,
+    linear-gradient(140deg, rgba(124, 232, 216, 0.45), rgba(255, 255, 255, 0.06) 45%, rgba(255, 138, 61, 0.3)) border-box;
+  border: 1px solid transparent;
+  opacity: 0; scale: 0.8; transition: opacity 0.7s var(--ease-out), scale 0.8s var(--ease-out), translate 0.35s var(--ease-out), border-color 0.3s, color 0.3s;
+  transition-delay: calc(var(--i) * 0.14s), calc(var(--i) * 0.14s), 0s, 0s, 0s;
+  animation: chip-orbit var(--dur) ease-in-out calc(var(--i) * -2.1s) infinite;
+}
+.hero-orbit.in .orbit-chip-in { opacity: 1; scale: 1; }
+.orbit-chip-in:hover { translate: 0 -5px; color: var(--text); transition-delay: 0s; background: linear-gradient(160deg, rgba(24, 36, 46, 0.95), rgba(11, 17, 24, 0.92)) padding-box, linear-gradient(140deg, var(--signal), rgba(255, 255, 255, 0.1) 45%, var(--ember)) border-box; }
+.orbit-chip-in b { color: var(--text); font-weight: 500; }
+.orbit-ic { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: var(--signal);
+  background: radial-gradient(circle at 30% 25%, rgba(124, 232, 216, 0.28), rgba(124, 232, 216, 0.05) 70%); border: 1px solid rgba(124, 232, 216, 0.3); }
+.orbit-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 6px var(--ember); }
+/* Each chip drifts on its own small orbit (transform only; hover lift uses `translate`). */
+@keyframes chip-orbit {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(7px, -5px, 0); }
+  50% { transform: translate3d(0, -9px, 0); }
+  75% { transform: translate3d(-7px, -4px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.scan-btn-wrap { position: absolute; translate: -50% -50%; display: grid; justify-items: center; gap: 10px; pointer-events: auto;
+  opacity: 0; scale: 0.6; transition: opacity 0.6s var(--ease-out) 0.5s, scale 0.8s var(--ease-out) 0.5s; }
+.hero-orbit.in .scan-btn-wrap { opacity: 1; scale: 1; }
+.scan-btn { position: relative; width: 58px; height: 58px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: none; display: grid; place-items: center; }
+.scan-core { position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; color: #1c0d03;
+  background: radial-gradient(circle at 35% 30%, #ffc9a3, var(--ember) 55%, #e2551f); box-shadow: 0 0 0 1px rgba(255, 138, 61, 0.6), 0 0 30px -2px rgba(255, 138, 61, 0.75);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s; }
+.scan-btn:hover .scan-core { transform: scale(1.08); box-shadow: 0 0 0 1px rgba(255, 138, 61, 0.8), 0 0 44px 0 rgba(255, 138, 61, 0.85); }
+.scan-btn:active .scan-core { transform: scale(0.94); }
+.scan-wave { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(255, 138, 61, 0.7); animation: scan-wave 2.4s var(--ease-out) infinite; }
+.scan-wave.b { animation-delay: 1.2s; }
+@keyframes scan-wave { 0% { transform: scale(0.75); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+.scan-label { color: var(--ember); font-size: 10px; text-shadow: 0 0 12px rgba(255, 138, 61, 0.5); }
+@media (max-width: 767px) {
+  .orbit-chip-in { height: 32px; font-size: 10px; padding: 0 11px 0 4px; gap: 7px; }
+  .orbit-ic { width: 22px; height: 22px; }
+  .scan-btn, .scan-core { width: 44px; height: 44px; }
+  .scan-core { width: 38px; height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-chip-in, .scan-wave { animation: none; }
+}
+

@@ -1,27 +1,32 @@
-import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
 import BigWord from '../components/BigWord'
 import CountUp from '../components/CountUp'
 import { IconTile, type IconName } from '../components/Icons'
 import { InspectorScene } from '../components/Illustrations'
 import GlobePoster from '../components/GlobePoster'
+import HeroOrbit, { type OrbitChip } from '../components/HeroOrbit'
 import HomeStory from '../components/HomeStory'
-import Intro from '../components/Intro'
-import { shouldPlayIntro } from '../lib/intro'
-import { Divider, Ticker, Words, type TickerItem } from '../components/PageHero'
+import Intro, { type IntroBeat } from '../components/Intro'
+import MaskLines from '../components/MaskLines'
+import { holdNav, shouldPlayIntro } from '../lib/intro'
+import { Divider, Ticker, type TickerItem } from '../components/PageHero'
 import { fmt, fmtInt, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
 import { useIsMobile, useReducedMotion } from '../lib/motion'
 import { useBackdropTone } from '../lib/backdrop'
-import { scrollToY } from '../lib/scroll'
+import { scrollTop, scrollToY } from '../lib/scroll'
 import { STEP_AT, stepFor, type RegisterDrive } from '../lib/story'
 import { webglOk } from '../lib/webgl'
 import { useAsync } from '../lib/useAsync'
 import type { GlobeControl } from '../three/GlobeScene'
 import './home.css'
 
-const GlobeCanvas = lazy(() => import('../three/GlobeCanvas'))
+// When the intro will play, the 3D chunk starts downloading with this module, so its set-up is
+// done during the intro's boot beat.
+const globeChunk = shouldPlayIntro() && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? import('../three/GlobeCanvas') : null
+const GlobeCanvas = lazy(() => globeChunk ?? import('../three/GlobeCanvas'))
 
 const PROBLEMS: { title: string; body: string; icon: IconName }[] = [
   {
@@ -81,6 +86,7 @@ export default function Home() {
   const stage = useRef<HTMLDivElement>(null)
   const control = useRef<GlobeControl>({ progress: 0, dragging: false, dragYaw: 0, dragPitch: 0, mouseX: 0, mouseY: 0 })
   const hero = useRef<HTMLDivElement>(null)
+  const orbit = useRef<HTMLDivElement>(null)
   const storyDrive = useRef<((p: number) => void) | null>(null)
   const register = useCallback<RegisterDrive>((fn) => {
     storyDrive.current = fn
@@ -92,27 +98,69 @@ export default function Home() {
   const [mount3d, setMount3d] = useState(false)
   const [ready3d, setReady3d] = useState(false)
   const onReady = useCallback(() => setReady3d(true), [])
-  const [playIntro] = useState(shouldPlayIntro)
-  const [introDone, setIntroDone] = useState(!playIntro)
-  const endIntro = useCallback(() => setIntroDone(true), [])
-  const setPull = useCallback((k: number) => {
-    control.current.intro = k
-  }, [])
 
-  // During the intro the 3D hero loads straight away (after the intro's first frame), so it is
-  // rendering by the time the pupil opens.
+  // Intro: every fresh load of Home (?intro=0 skips); the footer's "Replay intro" link replays it.
+  const [introOn, setIntroOn] = useState(shouldPlayIntro)
+  const [introKey, setIntroKey] = useState(0)
+  const [noGl, setNoGl] = useState(false)
+  const [landed, setLanded] = useState(!introOn) // the 3D globe is shown (the intro's dots hand over)
+  const [heroIn, setHeroIn] = useState(false)
+  const onBeat = useCallback((b: IntroBeat) => {
+    const c = control.current
+    if (b === 'warm') c.paused = false
+    else if (b === 'nav') holdNav(false)
+    else if (b === 'land') {
+      c.intro = 1
+      setLanded(true)
+    } else if (b === 'hero') setHeroIn(true)
+    else if (b === 'done') setIntroOn(false)
+  }, [])
+  // During the intro the 3D globe renders one frame (set-up cost paid while the screen is dark) and
+  // then waits, paused, until the intro's 'warm' beat.
+  useLayoutEffect(() => {
+    if (!introOn) return
+    control.current.paused = true
+    control.current.intro = 0
+  }, [introOn, introKey])
+  // Replay (footer link): router state changes -> restart the intro from the top.
+  const replay = (useLocation().state as { replayIntro?: number } | null)?.replayIntro
+  const [seenReplay, setSeenReplay] = useState(replay)
+  if (replay !== seenReplay) {
+    setSeenReplay(replay)
+    if (replay) {
+      setHeroIn(false)
+      setLanded(false)
+      setIntroKey((k) => k + 1)
+      setIntroOn(true)
+    }
+  }
+  useLayoutEffect(() => {
+    if (introKey) scrollTop()
+  }, [introKey])
+  const requestScan = useCallback((idx: number) => {
+    control.current.scan = { idx, t: performance.now() }
+  }, [])
+  // No intro: the hero copy enters on the next frame.
   useEffect(() => {
-    if (!playIntro || reduced) return
+    if (introOn) return
+    const id = requestAnimationFrame(() => setHeroIn(true))
+    return () => cancelAnimationFrame(id)
+  }, [introOn])
+
+  // During the intro the 3D hero loads straight away (after the intro's first paint).
+  useEffect(() => {
+    if (!introOn || reduced) return
     const id = setTimeout(() => {
       if (webglOk()) setMount3d(true)
-    }, 80)
+      else setNoGl(true)
+    }, 60)
     return () => clearTimeout(id)
-  }, [playIntro, reduced])
+  }, [introOn, reduced])
 
   // Otherwise the 3D scene (and the WebGL probe, which can block for a while on first GPU use) loads
-  // on the first sign of intent (pointer, scroll, touch, key) or after 5 s; the poster shows until then.
+  // on the first sign of intent (pointer, scroll, touch, key) or after 2.5 s; the poster shows until then.
   useEffect(() => {
-    if (reduced || playIntro) return
+    if (reduced || introOn || mount3d) return
     const events = ['pointermove', 'pointerdown', 'wheel', 'scroll', 'touchstart', 'keydown'] as const
     let done = false
     const go = () => {
@@ -121,14 +169,14 @@ export default function Home() {
       cleanup()
       if (webglOk()) setMount3d(true)
     }
-    const id = setTimeout(go, 5000)
+    const id = setTimeout(go, 2500)
     events.forEach((e) => window.addEventListener(e, go, { passive: true, once: true }))
     function cleanup() {
       clearTimeout(id)
       events.forEach((e) => window.removeEventListener(e, go))
     }
     return cleanup
-  }, [reduced, playIntro])
+  }, [reduced, introOn, mount3d])
 
   // Scroll progress through the pinned stage. Continuous values go straight to refs and DOM;
   // React only re-renders when the story step changes.
@@ -139,13 +187,14 @@ export default function Home() {
       control.current.progress = p
       setStep(stepFor(p))
       storyDrive.current?.(p)
-      const h = hero.current
-      if (h) {
-        const out = Math.min(1, p / 0.1)
+      const out = Math.min(1, p / 0.1)
+      for (const h of [hero.current, orbit.current]) {
+        if (!h) continue
         h.style.opacity = String(1 - out)
         h.style.transform = `translate3d(0, ${(-out * 40).toFixed(1)}px, 0)`
-        h.style.pointerEvents = out > 0.5 ? 'none' : ''
+        h.style.visibility = out >= 1 ? 'hidden' : ''
       }
+      if (hero.current) hero.current.style.pointerEvents = out > 0.5 ? 'none' : ''
     }
     const st = ScrollTrigger.create({ trigger: el, start: 'top top', end: 'bottom bottom', onUpdate: (s) => apply(s.progress) })
     apply(st.progress)
@@ -166,6 +215,18 @@ export default function Home() {
   }, [])
 
   const years = months?.length ? `${months[0].month.slice(0, 4)}–${months[months.length - 1].month.slice(0, 4)}` : '2019–2026'
+  const nClusters = clusters.data?.clusters.length ?? 11
+  const days = summary.data?.pooled_model.enhancement.n
+  const chips: OrbitChip[] = useMemo(
+    () => [
+      { label: 'Sentinel-5P', value: 'NO₂', icon: 'satellite' },
+      { label: 'CEA', value: 'Daily generation', icon: 'plant' },
+      { label: 'ERA5', value: 'Wind', icon: 'wind' },
+      { label: 'clusters', value: String(nClusters), icon: 'pin', lead: true },
+      { label: 'cluster-days', value: days ? fmtInt(days) : '…', icon: 'chart', lead: true },
+    ],
+    [nClusters, days],
+  )
   const ticker: TickerItem[] = useMemo(() => {
     const c = clusters.data, s = summary.data
     if (!c || !s) return []
@@ -185,7 +246,7 @@ export default function Home() {
     <>
       <div ref={stage} className="stage">
         <div className="stage-sticky">
-          <div className={`stage-visual ${ready3d ? 'ready' : ''}`}>
+          <div className={`stage-visual${ready3d ? ' ready' : ''}${landed ? '' : ' hold'}`}>
             <GlobePoster className={`${mobile ? 'mobile' : ''}`} />
             {mount3d && clusters.data && focus && (
               <Suspense fallback={null}>
@@ -195,12 +256,12 @@ export default function Home() {
           </div>
           <div className="stage-vignette" aria-hidden="true" />
 
-          <div ref={hero} className={`hero container${introDone ? ' in' : ''}`}>
+          <div ref={hero} className={`hero container${heroIn ? ' in' : ''}`}>
             <div className="micro signal hero-micro">
               <span className="live-dot" aria-hidden="true" /> Live data · {clusters.data?.clusters.length ?? 11} clusters · {years}
             </div>
             <h1 className="display d-xl hero-title">
-              <Words text="Coal plants report their own pollution." dim="We watch from space." delay={150} />
+              <MaskLines lines={['Coal plants report', 'their own pollution.', 'We watch from space.']} accentFrom={2} delay={120} step={150} />
             </h1>
             <p className="lede hero-lede">
               PanoptiCoal compares daily satellite measurements of nitrogen dioxide around India’s largest coal plant
@@ -219,6 +280,8 @@ export default function Home() {
             </div>
           </div>
 
+          <HeroOrbit ref={orbit} chips={chips} clusters={clusters.data?.clusters} onScan={requestScan} live={mount3d && ready3d && landed} on={heroIn} />
+
           {clusters.data && focus && step >= 0 && (
             <HomeStory register={register} progress={control} step={step} clusters={clusters.data.clusters} focus={focus} summary={summary.data} months={months} go={goStep} />
           )}
@@ -226,7 +289,7 @@ export default function Home() {
       </div>
 
       <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} ticker={ticker} />
-      {!introDone && <Intro setPull={setPull} clusters={clusters.data} summary={summary.data} reduced={reduced} onDone={endIntro} />}
+      {introOn && <Intro key={introKey} clusters={clusters.data} summary={summary.data} reduced={reduced} ready={ready3d || noGl} onBeat={onBeat} />}
     </>
   )
 }

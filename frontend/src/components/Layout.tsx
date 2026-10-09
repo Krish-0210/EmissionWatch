@@ -1,6 +1,6 @@
 import Lenis from 'lenis'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { backdropFor } from '../lib/backdrop'
 import { setLenis } from '../lib/scroll'
 import { gsap, ScrollTrigger } from '../lib/gsap'
@@ -78,7 +78,7 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
     let dirty = true
     let lastY = -1
     const scan = () => {
-      el.querySelectorAll('.reveal, .rule, .trig, .draw, .divider').forEach((n) => {
+      el.querySelectorAll('.reveal, .rule, .trig, .draw, .divider, .mask, .blur-in').forEach((n) => {
         if (!seen.has(n)) {
           seen.add(n)
           io.observe(n)
@@ -127,6 +127,7 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
 export default function Layout() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const main = useRef<HTMLElement>(null)
   useSmoothScroll()
   useInteractions()
@@ -223,6 +224,11 @@ export default function Layout() {
               </li>
               <li>
                 <Link to="/limits">Limits of this method</Link>
+              </li>
+              <li>
+                <button type="button" className="linklike" onClick={() => navigate('/', { state: { replayIntro: Date.now() } })}>
+                  Replay intro ↺
+                </button>
               </li>
               <li>Basemap © Esri, © OpenStreetMap contributors</li>
             </ul>

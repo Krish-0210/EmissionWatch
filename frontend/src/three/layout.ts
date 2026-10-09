@@ -1,10 +1,8 @@
 // Where the hero globe sits on screen. Shared by GlobeScene (3D) and the intro (DOM), so the
-// intro's iris lands exactly on the globe. No three.js import: the intro loads before the 3D chunk.
+// intro's dotted globe lands exactly on the 3D globe. No three.js import: the intro loads before the 3D chunk.
 export const FOV = 40
 export const heroDist = (narrow: boolean) => (narrow ? 6.2 : 4.3)
 export const heroOffset = (narrow: boolean) => (narrow ? { x: 0, y: -0.8 } : { x: 1.45, y: 0 })
-// Intro: the camera starts this fraction of the hero distance away (inside the pupil) and pulls back.
-export const INTRO_NEAR = 0.46
 
 /** Globe centre and silhouette radius in CSS px for a viewport of w x h. */
 export function heroGlobeScreen(w: number, h: number) {

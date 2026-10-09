@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import type { ClusterSummary } from '../api'
 import { easeInOut, easeOut, span } from '../lib/motion'
 import { faceRotation, kmToUnits, latLonToVec3, wrapAngle } from './geo'
-import { heroDist, heroOffset, INTRO_NEAR } from './layout'
+import { heroDist, heroOffset } from './layout'
 
 export interface GlobePin {
   id: string
@@ -23,7 +23,9 @@ export interface GlobeControl {
   mouseX: number // -1..1
   mouseY: number
   active?: boolean // set by the scene: something is moving, keep rendering
-  intro?: number // 0 = camera inside the intro's pupil, 1 = hero position (default)
+  intro?: number // 0 = intro still running (satellite hidden), 1 = handed over (default)
+  paused?: boolean // intro: render nothing until it hands over (the first frame still renders)
+  scan?: { idx: number; t: number } // scan request from the hero button: cluster index, performance.now()
   hover?: number // index of the hovered cluster, -1 for none
   pins?: GlobePin[] // screen positions of the clusters, written every frame
 }
@@ -42,13 +44,25 @@ const TEX_BASE = `${import.meta.env.BASE_URL}textures/`
 const INDIA = { lat: 22.5, lon: 81.5 }
 const fract = (x: number) => x - Math.floor(x)
 
-function loadTex(name: string, opts: { red?: boolean; aniso?: number } = {}) {
-  const t = new THREE.TextureLoader().load(TEX_BASE + name)
+// Textures decode off the main thread (ImageBitmap) and upload as soon as they arrive (initTexture),
+// so neither the decode nor the upload lands in a frame mid-animation.
+const bitmaps = typeof createImageBitmap === 'function' ? new THREE.ImageBitmapLoader().setOptions({ imageOrientation: 'flipY' }) : null
+function loadTex(name: string, gl: THREE.WebGLRenderer, opts: { red?: boolean; aniso?: number; srgb?: boolean } = {}) {
+  const t = new THREE.Texture()
   if (opts.red) t.format = THREE.RedFormat // single-channel upload: 1/4 of the GPU memory
+  if (opts.srgb) t.colorSpace = THREE.SRGBColorSpace
   t.generateMipmaps = true
   t.minFilter = THREE.LinearMipmapLinearFilter
   t.anisotropy = opts.aniso ?? 4
   t.wrapS = THREE.RepeatWrapping
+  const done = (img: ImageBitmap | HTMLImageElement) => {
+    t.image = img
+    t.flipY = !bitmaps // an ImageBitmap is already flipped at decode
+    t.needsUpdate = true
+    gl.initTexture(t)
+  }
+  if (bitmaps) bitmaps.load(TEX_BASE + name, done)
+  else new THREE.ImageLoader().load(TEX_BASE + name, done)
   return t
 }
 
@@ -101,17 +115,18 @@ const earthShader = {
 }
 
 function Earth({ lite, sun, no2, grid }: { lite: boolean; sun: THREE.Vector3; no2: MutableRefObject<number>; grid: MutableRefObject<number> }) {
+  const gl = useThree((s) => s.gl)
   const uniforms = useMemo(
     () => ({
-      uMask: { value: loadTex('earth_mask.webp') },
-      uLights: { value: loadTex(lite ? 'night_lights_1k.webp' : 'night_lights.webp', { red: true, aniso: lite ? 2 : 8 }) },
-      uNo2: { value: loadTex('no2_world_2024.webp') },
+      uMask: { value: loadTex('earth_mask.webp', gl) },
+      uLights: { value: loadTex(lite ? 'night_lights_1k.webp' : 'night_lights.webp', gl, { red: true, aniso: lite ? 2 : 8 }) },
+      uNo2: { value: loadTex('no2_world_2024.webp', gl) },
       uSun: { value: sun },
       uNo2Opacity: { value: 0.6 },
       uLightBoost: { value: 1 },
       uGrid: { value: 1 },
     }),
-    [lite, sun],
+    [lite, sun, gl],
   )
   useEffect(
     () => () => {
@@ -147,9 +162,10 @@ const cloudShader = {
     }`,
 }
 function Clouds({ sun, opacity }: { sun: THREE.Vector3; opacity: MutableRefObject<number> }) {
+  const gl = useThree((s) => s.gl)
   const uniforms = useMemo(
-    () => ({ uMap: { value: loadTex('clouds.webp', { red: true }) }, uSun: { value: sun }, uShift: { value: 0 }, uOpacity: { value: 0.22 } }),
-    [sun],
+    () => ({ uMap: { value: loadTex('clouds.webp', gl, { red: true }) }, uSun: { value: sun }, uShift: { value: 0 }, uOpacity: { value: 0.22 } }),
+    [sun, gl],
   )
   useEffect(() => () => uniforms.uMap.value.dispose(), [uniforms])
   useFrame((_, dt) => {
@@ -211,14 +227,12 @@ const no2Shader = {
     }`,
 }
 function No2Layer({ opacity }: { opacity: MutableRefObject<number> }) {
+  const gl = useThree((s) => s.gl)
   const uniforms = useMemo(() => {
-    const t = new THREE.TextureLoader().load(TEX_BASE + 'no2_india_2024.webp')
-    t.colorSpace = THREE.SRGBColorSpace
-    t.generateMipmaps = true
-    t.minFilter = THREE.LinearMipmapLinearFilter
-    t.anisotropy = 4
+    const t = loadTex('no2_india_2024.webp', gl, { srgb: true })
+    t.wrapS = THREE.ClampToEdgeWrapping
     return { uMap: { value: t }, uOpacity: { value: 0.8 } }
-  }, [])
+  }, [gl])
   useEffect(() => () => uniforms.uMap.value.dispose(), [uniforms])
   const d = THREE.MathUtils.degToRad
   useFrame(() => {
@@ -426,7 +440,7 @@ const beamShader = {
     void main() { gl_FragColor = vec4(uColor, uA * (0.15 + 0.85 * smoothstep(0.0, 1.0, vY))); }`,
 }
 const R_ORBIT = 1.32
-function Satellite({ fade, clusters, lite }: { fade: MutableRefObject<number>; clusters: ClusterSummary[]; lite: boolean }) {
+function Satellite({ fade, clusters, lite, control }: { fade: MutableRefObject<number>; clusters: ClusterSummary[]; lite: boolean; control: MutableRefObject<GlobeControl> }) {
   const sat = useRef<THREE.Group>(null)
   const glow = useRef<THREE.Sprite>(null)
   const beam = useRef<THREE.Mesh>(null)
@@ -473,13 +487,32 @@ function Satellite({ fade, clusters, lite }: { fade: MutableRefObject<number>; c
   const beamU = useMemo(() => ({ uA: { value: 0 }, uColor: { value: SIGNAL } }), [])
   const pingMat = useMemo(() => new THREE.MeshBasicMaterial({ color: SIGNAL, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }), [])
   const dirs = useMemo(() => clusters.map((c) => latLonToVec3(c.lat, c.lon).normalize()), [clusters])
-  const st = useRef({ t: -0.9, cool: 1.5, beamT: -1, target: -1 })
+  const st = useRef({ t: -0.9, cool: 1.5, beamT: -1, target: -1, scanSeen: 0, len: 1.6 })
   const tmp = useMemo(() => ({ p: new THREE.Vector3(), up: new THREE.Vector3(), g: new THREE.Vector3(), e: new THREE.Vector3(), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) }), [])
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.1)
     const s = st.current
-    s.t += dt * 0.22
+    // Scan request (hero button): sweep the satellite to the orbit point above the cluster, then beam.
+    const req = control.current.scan
+    let sweeping = false
+    if (req && req.t !== s.scanSeen) {
+      s.scanSeen = req.t
+      s.target = req.idx
+      s.beamT = -1
+    }
+    const sinceScan = req ? (performance.now() - req.t) / 1000 : 99
+    if (req && sinceScan < 0.75 && s.target === req.idx) {
+      const d = dirs[req.idx]
+      const want = Math.atan2(d.dot(b), d.dot(a))
+      const diff = Math.atan2(Math.sin(want - s.t), Math.cos(want - s.t))
+      s.t += diff * Math.min(1, dt * 7)
+      sweeping = true
+    } else s.t += dt * 0.22
+    if (req && !sweeping && sinceScan < 1 && s.beamT < 0 && s.target === req.idx) {
+      s.beamT = 0
+      s.len = 2.6
+    }
     const p = tmp.p.copy(a).multiplyScalar(Math.cos(s.t) * R_ORBIT).addScaledVector(b, Math.sin(s.t) * R_ORBIT)
     const f = fade.current
     if (sat.current) {
@@ -496,7 +529,7 @@ function Satellite({ fade, clusters, lite }: { fade: MutableRefObject<number>; c
 
     // Scan beam: when the satellite passes over a cluster, point at it for ~1.6 s.
     s.cool -= dt
-    if (s.beamT < 0 && s.cool <= 0 && f > 0.5) {
+    if (s.beamT < 0 && s.cool <= 0 && f > 0.5 && sinceScan > 3) {
       const up = tmp.up.copy(p).normalize()
       let best = -1, bestDot = Math.cos(THREE.MathUtils.degToRad(16))
       dirs.forEach((d, i) => {
@@ -509,12 +542,13 @@ function Satellite({ fade, clusters, lite }: { fade: MutableRefObject<number>; c
       if (best >= 0) {
         s.target = best
         s.beamT = 0
+        s.len = 1.6
       }
     }
     const bm = beam.current, pg = ping.current
     if (s.beamT >= 0 && bm && pg) {
       s.beamT += dt
-      const k = s.beamT / 1.6
+      const k = s.beamT / s.len
       const ground = dirs[s.target]
       const g = tmp.g.copy(ground).multiplyScalar(1.004)
       const len = p.distanceTo(g)
@@ -650,6 +684,7 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
   const sun = useMemo(() => new THREE.Vector3(-0.8, 0.25, -0.4).normalize(), [])
   const tmp = useMemo(() => ({ cam: new THREE.Vector3(), target: new THREE.Vector3(), v: new THREE.Vector3(), n: new THREE.Vector3() }), [])
   const local = useMemo(() => clusters.map((c) => latLonToVec3(c.lat, c.lon).normalize()), [clusters])
+  const faceRot = useMemo(() => clusters.map((c) => faceRotation(c.lat, c.lon)), [clusters])
   const narrow = size.width < 768
 
   useEffect(() => {
@@ -668,15 +703,21 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
     const p = s.p
     const d1 = easeInOut(span(p, 0.12, 0.32)) // overview -> India
     const d2 = easeInOut(span(p, 0.36, 0.54)) // India -> focus cluster
-    const pull = easeInOut(s.intro) // intro: out of the pupil
 
     // Slow terminator sweep: the sun sits to the left, behind the globe, and swings slowly, so the
     // day/night line drifts across the visible face.
     const sa = Math.PI - 0.62 + 0.45 * Math.sin(s.clock * 0.045)
     sun.set(Math.cos(sa), 0.28, Math.sin(sa)).normalize()
 
-    // Free rotation: auto-rotate + drag, only meaningful in the hero.
-    if (!c.dragging && d1 < 0.02) free.current.yaw += dt * 0.07
+    // Free rotation: auto-rotate + drag, only meaningful in the hero. A scan turns the scanned
+    // cluster toward the camera (a little off-centre, so its plume shows against the limb glow).
+    const scanAge = c.scan ? (performance.now() - c.scan.t) / 1000 : 99
+    if (scanAge < 2.4 && d1 < 0.02 && !c.dragging) {
+      const f = faceRot[c.scan!.idx]
+      const k = Math.min(1, dt * 3.2)
+      free.current.yaw += wrapAngle(f.yaw - 0.25 - free.current.yaw) * k
+      free.current.pitch += (f.pitch * 0.8 - free.current.pitch) * k
+    } else if (!c.dragging && d1 < 0.02) free.current.yaw += dt * 0.07
     free.current.yaw += c.dragYaw
     free.current.pitch = THREE.MathUtils.clamp(free.current.pitch + c.dragPitch, -0.9, 0.9)
     c.dragYaw = 0
@@ -689,16 +730,13 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
     const pitch = THREE.MathUtils.lerp(pitchIndia, focusRot.pitch, d2)
 
     // Camera: hero -> India -> oblique close-up over the cluster (altitude ~0.075 ≈ 480 km).
-    // During the intro the camera starts close (inside the pupil) and pulls back; the globe's
-    // offset scales with distance so it stays on the same spot of the screen.
     const d0 = heroDist(narrow)
     const off = heroOffset(narrow)
-    const introK = THREE.MathUtils.lerp(INTRO_NEAR, 1, pull)
-    const dist = THREE.MathUtils.lerp(THREE.MathUtils.lerp(d0 * introK, 2.05, d1), 1.085, d2)
+    const dist = THREE.MathUtils.lerp(THREE.MathUtils.lerp(d0, 2.05, d1), 1.085, d2)
     const g = globe.current
     if (g) {
       g.rotation.set(pitch, yaw, 0, 'XYZ')
-      g.position.set(off.x * introK * (1 - d1), off.y * introK * (1 - d1), 0)
+      g.position.set(off.x * (1 - d1), off.y * (1 - d1), 0)
     }
     tmp.cam.set(s.mx * 0.12 * (1 - d1), -s.my * 0.08 * (1 - d1) - 0.05 * d2, dist)
     tmp.target.set(0, 0, THREE.MathUtils.lerp(0, 1, d2))
@@ -734,7 +772,7 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
     // Keep rendering while the globe auto-rotates (hero), is dragged, or scroll/parallax/intro is still settling.
     const settling =
       Math.abs(c.progress - s.p) > 1e-4 || Math.abs(c.mouseX - s.mx) > 1e-3 || Math.abs(c.mouseY - s.my) > 1e-3 || Math.abs((c.intro ?? 1) - s.intro) > 1e-3
-    c.active = d1 < 0.02 || c.dragging || settling
+    c.active = d1 < 0.02 || c.dragging || settling || scanAge < 4.5
   })
 
   return (
@@ -748,7 +786,7 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
         {glow && <Halo strength={haloStrength} />}
         <Plumes clusters={clusters} total={lite ? 600 : 1400} scale={plumeScale} control={control} />
         <Rings lat={focus.lat} lon={focus.lon} reveal={ringReveal} />
-        <Satellite fade={satFade} clusters={clusters} lite={lite} />
+        <Satellite fade={satFade} clusters={clusters} lite={lite} control={control} />
       </group>
     </>
   )

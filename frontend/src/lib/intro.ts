@@ -1,19 +1,21 @@
-// Once-per-session intro: plays on a first load that lands on Home (sessionStorage flag).
-const KEY = 'pc-intro'
+// Intro: plays on every fresh page load that lands on Home (for the demo), unless the URL has
+// ?intro=0. Client-side navigation back to Home does not replay it; the footer's "Replay intro"
+// link does (router state { replayIntro }).
 let decided: boolean | undefined
 
-/** Stable until the intro has run (StrictMode calls initialisers twice). */
+/** Stable for the first Home mount of this page load (StrictMode calls initialisers twice). */
 export function shouldPlayIntro(): boolean {
   if (decided !== undefined) return decided
-  try {
-    decided = !sessionStorage.getItem(KEY) && window.location.pathname === '/'
-    sessionStorage.setItem(KEY, '1')
-  } catch {
-    decided = false
-  }
+  const q = new URLSearchParams(window.location.search)
+  decided = window.location.pathname === '/' && q.get('intro') !== '0'
   return decided
 }
 
 export function introFinished() {
   decided = false
+}
+
+/** Hides the nav until the intro hands off (html.intro-hold, see styles/intro.css). */
+export function holdNav(on: boolean) {
+  document.documentElement.classList.toggle('intro-hold', on)
 }

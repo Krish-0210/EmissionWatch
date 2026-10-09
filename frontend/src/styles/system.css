@@ -181,3 +181,18 @@
   .tilt, .magnetic { transform: none !important; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* ---------- Mask line reveal (components/MaskLines.tsx) ---------- */
+.mlines { display: block; }
+.mlines .ml { display: block; overflow: hidden; padding: 0.06em 0 0.1em; margin: -0.06em 0 -0.1em; }
+.mlines .ml > span { display: block; translate: 0 108%; transition: translate 1s var(--ease-out); transition-delay: calc(var(--md, 0ms) + var(--l) * var(--ms, 120ms)); will-change: translate; }
+.in .mlines .ml > span, .mlines.in .ml > span { translate: none; }
+.mlines .ml.acc > span { background: linear-gradient(92deg, var(--signal) 0%, #c8fbf3 55%, var(--signal) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mlines .ml.acc.ember > span { background-image: linear-gradient(92deg, var(--ember) 0%, #ffc9a3 55%, var(--ember) 100%); }
+/* Blur-to-focus entrance for ledes and actions (paired with a mask headline) */
+.blur-in { opacity: 0; filter: blur(10px); translate: 0 10px; transition: opacity 0.9s var(--ease-out), filter 0.9s var(--ease-out), translate 0.9s var(--ease-out); transition-delay: var(--d, 0ms); }
+.in .blur-in, .blur-in.in { opacity: 1; filter: none; translate: none; }
+@media (prefers-reduced-motion: reduce) {
+  .mlines .ml > span { translate: none; }
+  .blur-in { filter: none; translate: none; }
+}
