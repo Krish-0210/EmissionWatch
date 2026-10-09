@@ -5,6 +5,7 @@ import { gsap, ScrollTrigger } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
 import BigWord from './BigWord'
 import Cursor from './Cursor'
+import { Wordmark } from './Logo'
 
 export const GITHUB_URL = 'https://github.com/Krish-0210/EmissionWatch'
 
@@ -145,9 +146,8 @@ export default function Layout() {
       </div>
       <header className="nav">
         <div className="container nav-inner">
-          <Link to="/" className="brand" onClick={close}>
-            <span className="brand-mark" aria-hidden="true" />
-            EmissionWatch
+          <Link to="/" className="brand" onClick={close} aria-label="PanoptiCoal home">
+            <Wordmark animated />
           </Link>
           <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpen((o) => !o)}>
             {open ? 'Close' : 'Menu'}
@@ -176,13 +176,12 @@ export default function Layout() {
         <BigWord speed={0.05}>Ember</BigWord>
         <div className="container layer footer-grid">
           <div>
-            <Link to="/" className="brand">
-              <span className="brand-mark" aria-hidden="true" />
-              EmissionWatch
+            <Link to="/" className="brand" aria-label="PanoptiCoal home">
+              <Wordmark />
             </Link>
             <p className="muted small" style={{ marginTop: 16, maxWidth: '40ch' }}>
-              Satellite-verified accountability for Indian coal plants. Flags anomalies that warrant an audit, not
-              proof of wrongdoing.
+              Coal plants report their own pollution. We watch from space. PanoptiCoal flags anomalies that warrant an
+              audit, not proof of wrongdoing.
             </p>
           </div>
           <div>

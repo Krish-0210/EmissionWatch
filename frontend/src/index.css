@@ -52,17 +52,17 @@ h1, h2, h3, h4 { margin: 0 0 0.5em; font-weight: 400; }
 /* ---------- Type ---------- */
 .display {
   font-family: var(--font-display);
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 0.98;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
   margin: 0;
+  text-wrap: balance;
 }
 .display .dim { color: var(--muted); display: block; }
-.d-xl { font-size: clamp(30px, 4.6vw, 92px); }
-.d-lg { font-size: clamp(28px, 5vw, 84px); }
-.d-md { font-size: clamp(24px, 3.4vw, 52px); }
-.d-sm { font-size: clamp(20px, 2.2vw, 30px); line-height: 1.1; }
+.d-xl { font-size: clamp(30px, 4.4vw, 80px); }
+.d-lg { font-size: clamp(28px, 4.4vw, 68px); }
+.d-md { font-size: clamp(22px, 2.9vw, 42px); }
+.d-sm { font-size: clamp(18px, 1.9vw, 26px); line-height: 1.15; }
 .micro {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -109,8 +109,9 @@ h1, h2, h3, h4 { margin: 0 0 0.5em; font-weight: 400; }
   pointer-events: none;
   user-select: none;
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: -0.03em;
   line-height: 0.8;
   color: var(--text);
   opacity: 0.05;
@@ -202,11 +203,17 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
   border-bottom: 1px solid rgba(28, 35, 43, 0.7);
 }
 .nav-inner { display: flex; align-items: center; gap: 20px; height: 100%; }
-.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-family: var(--font-display); font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; font-size: 15px; white-space: nowrap; }
+.brand { display: inline-flex; align-items: center; color: var(--text); text-decoration: none; white-space: nowrap; }
 .brand:hover { color: var(--text); }
-.brand-mark { width: 22px; height: 22px; position: relative; }
-.brand-mark::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px var(--ember); }
-.brand-mark::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--signal); transform: rotateX(65deg) rotateZ(20deg); }
+/* Wordmark: PANOPTI in --text, COAL in --ember */
+.wordmark { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
+.wm-coal { color: var(--ember); }
+.logo-mark { flex: none; overflow: visible; }
+.logo-mark .lm-orbit, .logo-mark .lm-iris { transform-origin: 24px 24px; transform-box: view-box; }
+.logo-mark.spin .lm-orbit { animation: lm-orbit 9s linear infinite; }
+.logo-mark.spin .lm-iris { animation: lm-orbit 14s linear infinite reverse; }
+.brand:hover .logo-mark .lm-orbit { animation-duration: 2.4s; }
+@keyframes lm-orbit { to { transform: rotate(360deg); } }
 .nav-links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .nav-links a {
   font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;

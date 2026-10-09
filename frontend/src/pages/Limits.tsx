@@ -122,7 +122,7 @@ export default function Limits() {
             What this <span className="dim">cannot do.</span>
           </h1>
           <p className="lede reveal" style={{ '--d': '160ms' } as CSSProperties}>
-            EmissionWatch is a screening tool. It points inspectors to where a closer look is most likely to be useful.
+            PanoptiCoal is a screening tool. It points inspectors to where a closer look is most likely to be useful.
             Here is what it cannot do.
           </p>
           <div className="reveal" style={{ '--d': '220ms', marginTop: 40 } as CSSProperties}>

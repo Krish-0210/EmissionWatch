@@ -144,10 +144,10 @@ export default function Home() {
             </div>
             <h1 className="display d-xl hero-title">
               Coal plants report their own pollution.
-              <span className="dim">We check it from space.</span>
+              <span className="dim">We watch from space.</span>
             </h1>
             <p className="lede hero-lede">
-              EmissionWatch compares daily satellite measurements of nitrogen dioxide around India’s largest coal plant
+              PanoptiCoal compares daily satellite measurements of nitrogen dioxide around India’s largest coal plant
               clusters with the electricity they report generating, and flags where the two stop matching.
             </p>
             <div className="row">
