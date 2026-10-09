@@ -1,7 +1,10 @@
-import { useRef, type CSSProperties } from 'react'
+import { useMemo, useRef, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchCluster } from '../api'
-import BigWord from '../components/BigWord'
+import { fetchCluster, fetchClusters, fetchSummary, peekClusters, peekSummary } from '../api'
+import Icon, { IconTile, type IconName } from '../components/Icons'
+import LimitArt from '../components/LimitArt'
+import PageHero, { Divider, type TickerItem } from '../components/PageHero'
+import { fmt } from '../lib/format'
 import { useInView } from '../lib/motion'
 import { useAsync } from '../lib/useAsync'
 import './limits.css'
@@ -31,6 +34,28 @@ const LIMITS = [
     title: 'Not proof of a violation',
     body: 'A high score means satellite NO₂ is higher than reported generation and weather explain. That is a reason to inspect, not evidence that a plant broke the law. Emission limits apply to stack concentrations, which satellites do not measure.',
   },
+]
+
+const RELATED: { name: string; url: string; icon: IconName; body: string }[] = [
+  {
+    name: 'Climate TRACE',
+    url: 'https://climatetrace.org',
+    icon: 'satellite',
+    body: 'An independent coalition that estimates greenhouse-gas emissions for individual facilities worldwide, including power plants, from satellite and other remote-sensing data with machine learning.',
+  },
+  {
+    name: 'CREA',
+    url: 'https://energyandcleanair.org',
+    icon: 'chart',
+    body: 'The Centre for Research on Energy and Clean Air: independent research on air pollution and the energy transition, including analyses of India’s coal power fleet and of satellite pollution data.',
+  },
+]
+
+const ADDS = [
+  'Checks satellite NO₂ against what each cluster reports generating, day by day (CEA daily reports).',
+  'Adjusts for wind, mixing height and season before comparing, and shows the residual.',
+  'Ranks clusters with an Audit Risk Score, a confidence level and the reasons behind both.',
+  'Open method, public map and plain-language view for citizens; anomalies, not verdicts.',
 ]
 
 // Real plant positions of one cluster, with a 5.5 × 3.5 km pixel grid snapping over them.
@@ -112,39 +137,82 @@ function PixelGrid() {
 }
 
 export default function Limits() {
+  const summary = useAsync(fetchSummary, [], peekSummary)
+  const clusters = useAsync(fetchClusters, [], peekClusters)
+  const ticker: TickerItem[] = useMemo(() => {
+    const s = summary.data, c = clusters.data
+    if (!s || !c) return []
+    const bt = s.backtest.filter((r) => r.cluster !== 'POOLED')
+    return [
+      { label: 'One Sentinel-5P pixel', value: '≈ 5.5 × 3.5 km' },
+      { label: 'Lockdown 2020: NO₂ fell in', value: `${bt.filter((r) => r.observed_change_pct < 0).length} of ${bt.length} clusters` },
+      { label: 'Model over-predicted', value: `${bt.filter((r) => r.error > 0).length} of ${bt.length}`, color: '#ff8a3d' },
+      { label: 'Pooled partial R² of generation', value: fmt(s.pooled_model.enhancement.partial_r2, 3) },
+      { label: 'Low-confidence clusters', value: c.clusters.filter((x) => x.confidence === 'low').map((x) => x.name).join(', ') || 'none' },
+    ]
+  }, [summary.data, clusters.data])
+
   return (
     <div className="limits-page">
-      <section className="section-tight" style={{ position: 'relative', overflow: 'hidden' }}>
-        <BigWord style={{ top: '0.05em', right: '-0.05em' }}>Limits</BigWord>
-        <div className="container layer">
-          <div className="micro signal reveal">Limits</div>
-          <h1 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 18px' } as CSSProperties}>
-            What this <span className="dim">cannot do.</span>
-          </h1>
-          <p className="lede reveal" style={{ '--d': '160ms' } as CSSProperties}>
-            PanoptiCoal is a screening tool. It points inspectors to where a closer look is most likely to be useful.
-            Here is what it cannot do.
-          </p>
-          <div className="reveal" style={{ '--d': '220ms', marginTop: 40 } as CSSProperties}>
-            <PixelGrid />
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow={
+          <>
+            <Icon name="grid" size={18} /> Limits
+          </>
+        }
+        title="What this"
+        dim="cannot do."
+        lede="PanoptiCoal is a screening tool. It points inspectors to where a closer look is most likely to be useful. Here is what it cannot do."
+        word="Limits"
+        visual={<PixelGrid />}
+        ticker={ticker}
+      />
 
       <section className="container section-tight">
-        <div className="limits-list">
+        <div className="limits-grid spot-group">
           {LIMITS.map((l, i) => (
-            <article className="limit reveal" key={l.title} style={{ '--d': `${(i % 2) * 120}ms` } as CSSProperties}>
+            <article className="card limit tilt reveal" data-tilt="4" key={l.title} style={{ '--d': `${(i % 3) * 110}ms` } as CSSProperties}>
+              <LimitArt i={i} />
               <span className="mono limit-n">0{i + 1}</span>
-              <div>
-                <h2 className="limit-title">{l.title}</h2>
-                <p className="muted">{l.body}</p>
-              </div>
+              <h2 className="limit-title">{l.title}</h2>
+              <p className="muted">{l.body}</p>
             </article>
           ))}
         </div>
+        <Divider />
+      </section>
+
+      <section className="container section-tight">
+        <div className="micro signal reveal">Related work</div>
+        <h2 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 28px' } as CSSProperties}>
+          Others watch too. <span className="dim">Here is what we add.</span>
+        </h2>
+        <div className="related spot-group">
+          {RELATED.map((r, i) => (
+            <a key={r.name} className="card related-card tilt reveal" data-tilt="3" href={r.url} target="_blank" rel="noreferrer" style={{ '--d': `${i * 110}ms` } as CSSProperties}>
+              <IconTile name={r.icon} />
+              <h3>
+                {r.name} <span aria-hidden="true">↗</span>
+              </h3>
+              <p className="muted small">{r.body}</p>
+              <span className="micro">{r.url.replace('https://', '')}</span>
+            </a>
+          ))}
+          <div className="card related-card adds reveal" style={{ '--d': '220ms' } as CSSProperties}>
+            <IconTile name="eye" tone="ember" />
+            <h3>What PanoptiCoal adds</h3>
+            <ul className="adds-list">
+              {ADDS.map((a) => (
+                <li key={a}>
+                  <Icon name="shield" size={18} />
+                  <span>{a}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
         <p style={{ marginTop: 40 }}>
-          <Link to="/how-it-works" className="pill ghost">
+          <Link to="/how-it-works" className="pill ghost magnetic" viewTransition>
             How the method works <span className="arrow" aria-hidden="true">→</span>
           </Link>
         </p>

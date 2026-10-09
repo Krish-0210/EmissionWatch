@@ -1,4 +1,4 @@
-.pixel-demo { position: relative; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #090c10; max-width: 900px; }
+.pixel-demo { position: relative; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #090c10; display: flex; align-items: center; }
 .pixel-demo svg { display: block; width: 100%; height: auto; }
 .pixel-demo .cell { fill: transparent; stroke: rgba(124, 232, 216, 0.35); stroke-width: 1; opacity: 0; transform: scale(1.15); transform-box: fill-box; transform-origin: center; transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), fill 0.6s; }
 .pixel-demo.in .cell { opacity: 1; transform: none; }
@@ -9,15 +9,63 @@
 
 /* Slow drifting monsoon clouds */
 .clouds { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.clouds span { position: absolute; width: 46%; height: 60%; border-radius: 50%; background: radial-gradient(closest-side, rgba(200, 212, 224, 0.2), transparent); filter: blur(18px); animation: drift 38s linear infinite; }
+.clouds span { position: absolute; width: 46%; height: 60%; border-radius: 50%; background: radial-gradient(closest-side, rgba(200, 212, 224, 0.2), transparent); animation: drift 38s linear infinite; }
 .clouds span:nth-child(1) { top: -10%; left: -50%; }
 .clouds span:nth-child(2) { top: 40%; left: -60%; width: 60%; animation-duration: 52s; animation-delay: -18s; }
 .clouds span:nth-child(3) { top: 10%; left: -40%; width: 36%; animation-duration: 44s; animation-delay: -30s; opacity: 0.8; }
 @keyframes drift { to { transform: translateX(320%); } }
 
-.limits-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
-@media (max-width: 860px) { .limits-list { grid-template-columns: 1fr; } }
-.limit { display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 28px 0; border-top: 1px solid var(--border); }
-.limit-n { color: var(--signal); font-size: 13px; padding-top: 4px; }
-.limit-title { font-size: 19px; font-weight: 500; margin: 0 0 8px; }
+/* Limit cards with looping illustrations */
+.limits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.limit { display: flex; flex-direction: column; }
+.limit-n { color: var(--signal); font-size: 12px; margin-top: 4px; }
+.limit-title { font-size: 19px; font-weight: 500; margin: 6px 0 8px; font-family: var(--font-body); }
 .limit p { margin: 0; }
+.limit-art { height: 120px; margin: -6px -6px 12px; border-radius: 10px; background: radial-gradient(closest-side, rgba(124, 232, 216, 0.06), transparent); display: flex; justify-content: center; }
+.la { height: 100%; width: auto; max-width: 100%; overflow: visible; }
+.la-cap { font-family: var(--font-mono); font-size: 6px; letter-spacing: 0.14em; fill: var(--muted); }
+.la-cell { fill: transparent; stroke: rgba(124, 232, 216, 0.25); }
+.la-cell.lit { animation: la-lit 2.6s ease-in-out var(--d) infinite; }
+@keyframes la-lit { 0%, 100% { fill: rgba(255, 138, 61, 0.05); stroke: rgba(124, 232, 216, 0.25); } 50% { fill: rgba(255, 138, 61, 0.28); stroke: rgba(255, 138, 61, 0.8); } }
+.la-plant { fill: var(--ember); filter: drop-shadow(0 0 3px var(--ember)); }
+.la-sat { fill: #c9d4de; }
+.la-panel { fill: #1d3a52; stroke: var(--signal); stroke-width: 0.6; }
+.la-beam { fill: rgba(124, 232, 216, 0.14); animation: la-beam 6s ease-in-out infinite; }
+@keyframes la-beam { 0%, 20%, 80%, 100% { opacity: 1; } 40%, 60% { opacity: 0.15; } }
+.la-cloud path { fill: rgba(200, 212, 224, 0.22); stroke: rgba(200, 212, 224, 0.5); stroke-width: 0.8; }
+.la-cloud { animation: la-cloud 6s ease-in-out infinite; }
+@keyframes la-cloud { 0%, 100% { transform: translateX(-36px); } 50% { transform: translateX(56px); } }
+.la-ground { stroke: #2a333d; stroke-width: 1; fill: none; }
+.la-fac { fill: #0e141b; stroke: #8a96a3; stroke-width: 0.8; stroke-linejoin: round; }
+.la-ghost { fill: none; stroke: var(--ember); stroke-width: 0.9; stroke-dasharray: 2 2; animation: la-blink 2s steps(1) infinite; }
+@keyframes la-blink { 50% { opacity: 0.25; } }
+.la-q { font-family: var(--font-display); font-size: 12px; fill: var(--ember); }
+.la-puff { fill: var(--ember); opacity: 0; transform-box: fill-box; transform-origin: center; animation: puff-rise 2.7s ease-out var(--d) infinite; }
+.la-puff.grey { fill: #8a96a3; }
+.la-fire { fill: var(--risk-medium); filter: drop-shadow(0 0 3px var(--risk-medium)); animation: la-flicker 0.6s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: bottom; }
+@keyframes la-flicker { to { transform: scaleY(0.82) skewX(4deg); } }
+.la-car rect { fill: #2a333d; stroke: #8a96a3; stroke-width: 0.6; }
+.la-car .lamp { fill: var(--risk-medium); }
+.la-car { animation: la-drive 4.5s linear infinite; }
+@keyframes la-drive { to { transform: translateX(190px); } }
+.la-ring { fill: none; stroke: var(--signal); stroke-width: 0.9; stroke-dasharray: 3 3; }
+.la-area { fill: rgba(255, 138, 61, 0.14); transform-box: fill-box; transform-origin: center; animation: la-area 3.4s ease-in-out infinite; }
+@keyframes la-area { 50% { fill: rgba(255, 138, 61, 0.3); transform: scale(1.04); } }
+.la-window { fill: rgba(124, 232, 216, 0.1); stroke: rgba(124, 232, 216, 0.4); stroke-width: 0.6; animation: la-window 5s linear infinite; }
+@keyframes la-window { from { transform: translateX(0); } to { transform: translateX(118px); } }
+.la-noise { fill: none; stroke: var(--ember); stroke-width: 1; stroke-linejoin: round; }
+.la-zero { stroke: #2a333d; stroke-dasharray: 2 3; }
+
+/* Related work */
+.related { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+@media (max-width: 960px) { .related { grid-template-columns: 1fr; } }
+.related-card { display: flex; flex-direction: column; gap: 10px; color: var(--text); text-decoration: none; }
+.related-card:hover { color: var(--text); }
+.related-card h3 { margin: 6px 0 0; font-size: 20px; }
+.related-card p { margin: 0; flex: 1; }
+.related-card.adds { background:
+    linear-gradient(165deg, rgba(36, 24, 18, 0.9), rgba(12, 12, 14, 0.85)) padding-box,
+    linear-gradient(150deg, rgba(255, 138, 61, 0.45), rgba(255, 255, 255, 0.05) 40%, rgba(124, 232, 216, 0.22)) border-box; }
+.adds-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 14px; color: var(--muted); }
+.adds-list li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
+.adds-list .icon { color: var(--ember); margin-top: 2px; }
