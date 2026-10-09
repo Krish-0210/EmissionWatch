@@ -9,7 +9,10 @@
 /* Hero stage: 3D rings with the gauge in front */
 .ch-stage { position: relative; height: clamp(320px, 42vw, 460px); }
 .ch-rings { position: absolute; inset: 0 0 40px 0; border-radius: var(--radius); overflow: hidden;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--risk) 14%, transparent), transparent); }
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--risk) 14%, transparent), transparent);
+  /* the ring plane fades out before the stage edge instead of being cut by it */
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%); }
 .rings-host { position: absolute; inset: 0; cursor: grab; }
 .rings-host:active { cursor: grabbing; }
 .rings-poster { position: absolute; inset: 0; width: 100%; height: 100%; }

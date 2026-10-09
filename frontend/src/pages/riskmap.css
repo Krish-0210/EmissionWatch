@@ -1,20 +1,29 @@
 .riskmap { position: relative; }
 
-/* Hero constellation */
-.constellation { width: 100%; height: 100%; overflow: visible; }
-.rc-grid { stroke: rgba(124, 232, 216, 0.08); stroke-width: 1; }
-.rc-axis { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; fill: var(--muted); }
-.rc-swath { animation: swath 6s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
-.rc-swath-edge { stroke: var(--signal); stroke-width: 1; opacity: 0.7; }
-@keyframes swath { from { transform: translateX(0); } to { transform: translateX(500px); } }
-.rc-dot { fill: var(--c); filter: drop-shadow(0 0 4px var(--c)); }
-.rc-pulse { fill: none; stroke: var(--c); stroke-width: 1; transform-box: fill-box; transform-origin: center; opacity: 0; animation: rc-pulse 3.2s var(--ease-out) var(--d) infinite; }
-.rc-node.high .rc-pulse { animation-duration: 1.8s; }
-.rc-node.medium .rc-pulse { animation-duration: 2.6s; }
-@keyframes rc-pulse { 0% { transform: scale(0.3); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
-.rc-label { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em; fill: var(--muted); }
-.rc-score { font-family: var(--font-mono); font-size: 9.5px; fill: var(--c); }
-.rc-leader { fill: none; stroke: var(--c); stroke-opacity: 0.22; stroke-width: 0.7; }
+/* Hero: tilted India with risk beacons (components/RiskBeacons.tsx) */
+.beacons { width: 100%; height: 100%; overflow: visible; }
+.rb-grid path { stroke: rgba(124, 232, 216, 0.09); stroke-width: 0.8; fill: none; }
+.rb-india { fill: url(#rb-land); stroke: rgba(124, 232, 216, 0.6); stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgba(124, 232, 216, 0.35));
+  stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: rb-draw 2.2s var(--ease-out) 0.1s forwards; }
+@keyframes rb-draw { to { stroke-dashoffset: 0; } }
+.rb-orbit { fill: none; stroke: rgba(124, 232, 216, 0.16); stroke-dasharray: 2 6; }
+.rb-sat circle { fill: #d8fff8; }
+.rb-sat .halo { fill: none; stroke: var(--signal); stroke-opacity: 0.45; }
+.rb-rise { transform-box: view-box; transform: scaleY(0); animation: rb-rise 1.2s var(--ease-out) var(--d) forwards; }
+@keyframes rb-rise { to { transform: scaleY(1); } }
+.rb-tip { fill: #fff; filter: drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 8px var(--c)); }
+.rb-base { fill: var(--c); filter: drop-shadow(0 0 4px var(--c)); }
+.rb-spark { fill: #fff; opacity: 0; animation: rb-spark 2.6s ease-in calc(var(--d) + 1.2s) infinite; }
+.rb-node.high .rb-spark { animation-duration: 1.7s; }
+@keyframes rb-spark { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(calc(var(--len) * -1)); opacity: 0; } }
+.rb-pulse { fill: none; stroke: var(--c); stroke-width: 1; transform-box: fill-box; transform-origin: center; opacity: 0; animation: rb-pulse 3.2s var(--ease-out) var(--d) infinite; }
+.rb-node.high .rb-pulse { animation-duration: 1.8s; }
+.rb-node.medium .rb-pulse { animation-duration: 2.6s; }
+@keyframes rb-pulse { 0% { transform: scale(0.25); opacity: 0.9; } 100% { transform: scale(1.5); opacity: 0; } }
+.rb-label { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em; fill: var(--muted); }
+.rb-score { font-family: var(--font-mono); font-size: 9.5px; fill: var(--c); }
+.rb-leader { fill: none; stroke: var(--c); stroke-opacity: 0.2; stroke-width: 0.7; }
+@media (prefers-reduced-motion: reduce) { .rb-rise { transform: none; animation: none; } .rb-india { stroke-dashoffset: 0; animation: none; } .rb-spark, .rb-pulse { animation: none; } }
 
 /* Filters */
 .filters { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; margin-bottom: 22px; }

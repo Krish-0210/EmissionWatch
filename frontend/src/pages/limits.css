@@ -69,3 +69,21 @@
 .adds-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 14px; color: var(--muted); }
 .adds-list li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
 .adds-list .icon { color: var(--ember); margin-top: 2px; }
+
+/* Hero loop: the satellite pixel grid drifts in, snaps onto the plants, the plant cells light up, then it lets go. */
+.pixel-demo.in .grid-layer { animation: grid-snap 6.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.9s infinite; transform-box: view-box; transform-origin: 50% 50%; }
+@keyframes grid-snap {
+  0% { transform: translate(26px, -18px) rotate(-3deg); opacity: 0.35; }
+  22% { transform: none; opacity: 1; }
+  80% { transform: none; opacity: 1; }
+  100% { transform: translate(-22px, 16px) rotate(2.5deg); opacity: 0.35; }
+}
+.pixel-demo.in .cell.lit { animation: cell-lit 6.5s ease 0.9s infinite; }
+@keyframes cell-lit {
+  0%, 22% { fill: transparent; stroke: rgba(124, 232, 216, 0.35); }
+  28%, 78% { fill: rgba(255, 138, 61, 0.2); stroke: rgba(255, 138, 61, 0.8); }
+  100% { fill: transparent; stroke: rgba(124, 232, 216, 0.35); }
+}
+.pixel-demo .plant { animation: plant-pulse 6.5s ease 0.9s infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes plant-pulse { 0%, 22% { transform: scale(1); } 26% { transform: scale(1.6); } 34%, 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .pixel-demo .grid-layer, .pixel-demo .cell.lit, .pixel-demo .plant { animation: none !important; } }

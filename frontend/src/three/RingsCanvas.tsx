@@ -129,7 +129,7 @@ export default function RingsCanvas({ count, lite }: { count: number; lite: bool
       <Canvas
         dpr={[1, maxDpr]}
         frameloop={visible ? 'always' : 'never'}
-        camera={{ fov: 35, position: [0, 9, 17], near: 0.1, far: 100 }}
+        camera={{ fov: 35, position: [0, 9.6, 18.6], near: 0.1, far: 100 }}
         gl={{ antialias: maxDpr <= 1, alpha: true, stencil: false }}
         onCreated={({ gl }) => {
           gl.debug.checkShaderErrors = import.meta.env.DEV
