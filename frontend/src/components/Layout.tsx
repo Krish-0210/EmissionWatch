@@ -6,11 +6,13 @@ import { setLenis } from '../lib/scroll'
 import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useInteractions } from '../lib/interactions'
 import { prefersReducedMotion } from '../lib/motion'
+import { scramble } from '../lib/scramble'
 import Backdrop from './Backdrop'
 import BigWord from './BigWord'
 import Cursor from './Cursor'
 import HoldFX from './HoldFX'
 import SoundToggle from './SoundToggle'
+import SwapText from './SwapText'
 import { Wordmark } from './Logo'
 
 export const GITHUB_URL = 'https://github.com/Krish-0210/EmissionWatch'
@@ -75,7 +77,19 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
         }),
       { rootMargin: '0px 0px -10% 0px' },
     )
+    // Eyebrow labels decode (scramble into place) the first time they come into view.
+    const sio = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            sio.unobserve(e.target)
+            window.setTimeout(() => scramble(e.target, 700), 120)
+          }
+        }),
+      { rootMargin: '0px 0px -8% 0px' },
+    )
     const seen = new WeakSet<Element>()
+    const seenS = new WeakSet<Element>()
     let para: HTMLElement[] = []
     let dirty = true
     let lastY = -1
@@ -86,6 +100,13 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
           io.observe(n)
         }
       })
+      if (!reduced)
+        el.querySelectorAll('.micro.signal, .micro.ember, .sec-head .micro, .phero-eyebrow, [data-scramble]').forEach((n) => {
+          if (!seenS.has(n)) {
+            seenS.add(n)
+            sio.observe(n)
+          }
+        })
       para = Array.from(el.querySelectorAll<HTMLElement>('[data-parallax]'))
       dirty = true
     }
@@ -119,6 +140,7 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
     }
     return () => {
       io.disconnect()
+      sio.disconnect()
       mo.disconnect()
       window.removeEventListener('resize', onResize)
       gsap.ticker.remove(update)
@@ -188,7 +210,7 @@ export default function Layout() {
           <nav id="nav-links" className={`nav-links${open ? ' open' : ''}`} aria-label="Main">
             {LINKS.map((l) => (
               <NavLink key={l.to} to={l.to} end={l.end} onClick={close} viewTransition>
-                {l.label}
+                <SwapText text={l.label} />
               </NavLink>
             ))}
             <a className="nav-gh" href={GITHUB_URL} target="_blank" rel="noreferrer" aria-label="GitHub repository">

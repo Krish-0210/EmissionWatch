@@ -6,6 +6,7 @@
 // No React state; rects are read once per frame, then CSS variables are written.
 import { useEffect } from 'react'
 import { prefersReducedMotion } from './motion'
+import { scramble } from './scramble'
 import { sound } from './sound'
 
 const CARD = '.card, .glass'
@@ -88,7 +89,12 @@ export function useInteractions() {
     let sounded: Element | null = null
     const over = (e: PointerEvent) => {
       const el = (e.target as Element | null)?.closest?.(SOUNDED) ?? null
-      if (el && el !== sounded && e.pointerType === 'mouse') sound.hover(soundKind(el))
+      if (el && el !== sounded && e.pointerType === 'mouse') {
+        sound.hover(soundKind(el))
+        // Mono buttons decode their label on hover.
+        const sc = el.closest('.pill, .ulink, [data-scramble-hover]')
+        if (sc && !reduced) scramble(sc, 420)
+      }
       sounded = el
     }
     const down = (e: PointerEvent) => {

@@ -2,7 +2,9 @@ import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo,
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
 import BigWord from '../components/BigWord'
-import CountUp from '../components/CountUp'
+import Marquee from '../components/Marquee'
+import RollNumber from '../components/RollNumber'
+import ScrubText from '../components/ScrubText'
 import { IconTile, type IconName } from '../components/Icons'
 import { InspectorScene, MagnifierScene } from '../components/Illustrations'
 import GlobePoster from '../components/GlobePoster'
@@ -265,7 +267,14 @@ export default function Home() {
               <span className="live-dot" aria-hidden="true" /> Live data · {clusters.data?.clusters.length ?? 11} clusters · {years}
             </div>
             <h1 className="display d-xl hero-title">
-              <MaskLines lines={['Coal plants report', 'their own pollution.', 'We watch from space.']} accentFrom={2} delay={120} step={150} />
+              {/* Sentinel-5P flies at about 824 km */}
+              <MaskLines
+                lines={['Coal plants report', 'their own pollution.', 'We watch from space.']}
+                accentFrom={2}
+                delay={120}
+                step={150}
+                rotate={{ line: 2, words: ['space.', 'orbit.', '824 km up.'] }}
+              />
             </h1>
             <p className="lede hero-lede">
               PanoptiCoal compares daily satellite measurements of nitrogen dioxide around India’s largest coal plant
@@ -303,6 +312,21 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
   return (
     <>
       <Ticker items={ticker} />
+      <section className="section-tight statement">
+        <div className="container">
+          <div className="micro signal" style={{ marginBottom: 22 }}>
+            The idea in one breath
+          </div>
+          <ScrubText text="Every day a satellite measures the *nitrogen* *dioxide* above India's coal plants. We line it up with the electricity those plants *say* they generated, and flag where the two drift apart." />
+        </div>
+      </section>
+      <Marquee
+        label="Observe, compare, flag: NO₂, generation, wind"
+        rows={[
+          { words: ['Observe', 'Compare', 'Flag'] },
+          { words: ['NO₂', 'Generation', 'Wind'], outline: true },
+        ]}
+      />
       <section className="section">
         <BigWord style={{ top: '0.1em', right: '-0.05em' }}>01</BigWord>
         <div className="container layer">
@@ -353,15 +377,15 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
         <div className="container">
           <div className="numbers-grid">
             <div className="reveal">
-              <CountUp value={clusterCount} pad={2} className="num" />
+              <RollNumber text={String(clusterCount).padStart(2, '0')} className="num" />
               <div className="micro">coal plant clusters</div>
             </div>
             <div className="reveal" style={{ '--d': '100ms' } as React.CSSProperties}>
-              <span className="num mono">{years}</span>
+              <RollNumber text={years} className="num" />
               <div className="micro">years of data</div>
             </div>
             <div className="reveal" style={{ '--d': '200ms' } as React.CSSProperties}>
-              <CountUp value={2800} prefix="~" className="num" />
+              <RollNumber text="~2,800" className="num" />
               <div className="micro">daily generation reports</div>
             </div>
             <div className="reveal" style={{ '--d': '300ms' } as React.CSSProperties}>
