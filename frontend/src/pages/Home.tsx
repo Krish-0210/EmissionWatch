@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
 import BigWord from '../components/BigWord'
 import CountUp from '../components/CountUp'
@@ -122,20 +122,24 @@ export default function Home() {
     control.current.paused = true
     control.current.intro = 0
   }, [introOn, introKey])
-  // Replay (footer link): router state changes -> restart the intro from the top.
-  const replay = (useLocation().state as { replayIntro?: number } | null)?.replayIntro
-  const [seenReplay, setSeenReplay] = useState(replay)
-  if (replay !== seenReplay) {
+  // Replay (footer link, from any page): router state { replayIntro } -> restart the intro from the
+  // top, then clear the state so Back/refresh does not replay it again.
+  const location = useLocation()
+  const navigate = useNavigate()
+  const replay = (location.state as { replayIntro?: number } | null)?.replayIntro
+  const [seenReplay, setSeenReplay] = useState<number>()
+  if (replay && replay !== seenReplay) {
     setSeenReplay(replay)
-    if (replay) {
-      setHeroIn(false)
-      setLanded(false)
-      setIntroKey((k) => k + 1)
-      setIntroOn(true)
-    }
+    setHeroIn(false)
+    setLanded(false)
+    setIntroKey((k) => k + 1)
+    setIntroOn(true)
   }
   useLayoutEffect(() => {
-    if (introKey) scrollTop()
+    if (!introKey) return
+    scrollTop()
+    navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per replay
   }, [introKey])
   const requestScan = useCallback((idx: number) => {
     control.current.scan = { idx, t: performance.now() }
