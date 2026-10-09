@@ -717,7 +717,7 @@ export default function GlobeScene({ clusters, focusId, control, lite, glow }: P
       const k = Math.min(1, dt * 3.2)
       free.current.yaw += wrapAngle(f.yaw - 0.25 - free.current.yaw) * k
       free.current.pitch += (f.pitch * 0.8 - free.current.pitch) * k
-    } else if (!c.dragging && d1 < 0.02) free.current.yaw += dt * 0.07
+    } else if (!c.dragging && d1 < 0.02 && (c.hover ?? -1) < 0) free.current.yaw += dt * 0.07 // holds still under a tooltip
     free.current.yaw += c.dragYaw
     free.current.pitch = THREE.MathUtils.clamp(free.current.pitch + c.dragPitch, -0.9, 0.9)
     c.dragYaw = 0
