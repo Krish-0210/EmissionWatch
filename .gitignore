@@ -51,3 +51,6 @@ CLAUDE.md
 docs/reference/*.mp4
 docs/reference/*.mov
 docs/reference/frames/
+
+# Playwright screenshots (frontend/scripts/screens.mjs)
+docs/reference/screens/
