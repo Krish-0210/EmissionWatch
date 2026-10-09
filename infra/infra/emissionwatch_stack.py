@@ -23,7 +23,9 @@ from aws_cdk import (
 from constructs import Construct
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPORT_DIR = ROOT / "pipeline" / "data" / "export"
+# The committed copy the static site reads (to_json writes it together with pipeline/data/export/,
+# which is gitignored), so the API serves byte-for-byte what local development serves.
+EXPORT_DIR = ROOT / "frontend" / "public" / "data"
 API_DIR = ROOT / "api"
 DATA_PREFIX = "data/"
 LOCAL_ORIGINS = ["http://localhost:5173", "http://localhost:4173"]
@@ -35,7 +37,7 @@ class EmissionWatchStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         if not (EXPORT_DIR / "clusters.json").exists():
-            raise FileNotFoundError(f"{EXPORT_DIR} has no clusters.json; run `python -m src.export.to_json` in pipeline/ first")
+            raise FileNotFoundError(f"{EXPORT_DIR} has no clusters.json; run `python -m src.export.to_json` in pipeline/")
         model_id = self.node.try_get_context("bedrock_model_id") or DEFAULT_MODEL_ID
         extra = self.node.try_get_context("allowed_origins") or ""
         origins = LOCAL_ORIGINS + [o.strip().rstrip("/") for o in extra.split(",") if o.strip()]

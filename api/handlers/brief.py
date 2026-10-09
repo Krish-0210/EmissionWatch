@@ -32,7 +32,8 @@ METHOD = (
     "(weight 0.25) and intensity relative to peer clusters (weight 0.25)."
 )
 
-SYSTEM_PROMPT = """You write short inspection briefs for environmental regulators in India.
+SYSTEM_PROMPT = """You write short inspection briefs for PanoptiCoal, a satellite screening tool that helps
+environmental regulators in India decide which coal plant clusters to inspect first.
 Rules:
 - Use ONLY the facts provided in FACTS and METHOD. Do not add, derive, round differently, estimate or
   recompute any number, date, percentage, unit count or capacity. If a number is not written in FACTS
@@ -45,7 +46,8 @@ Rules:
 - Output GitHub-flavoured Markdown, at most about 300 words, with these sections:
   "## Inspection brief: <cluster name>", "### Summary", "### What the data shows",
   "### Confidence and caveats", "### Suggested focus for inspectors" (qualitative only),
-  and a final italic line stating it is an anomaly warranting audit, not proof of violation."""
+  and this exact final line: "_PanoptiCoal flags an anomaly that warrants an audit, not proof of a violation._".
+"""
 
 
 def _f(x, nd=2) -> str:
@@ -159,7 +161,7 @@ def template_brief(f: dict) -> str:
         "- Check the operating status of NOx controls and continuous emission monitoring records.",
         "- Note other large NO2 sources near the cluster that could explain part of the signal.",
         "",
-        "_This is an anomaly that warrants an audit, not proof of a violation._",
+        "_PanoptiCoal flags an anomaly that warrants an audit, not proof of a violation._",
     ]
     return "\n".join(lines)
 

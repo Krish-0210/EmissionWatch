@@ -5,7 +5,8 @@ import json
 import pytest
 from botocore.exceptions import ClientError, ReadTimeoutError
 
-from conftest import CLUSTER_IDS, EXPORT, call
+from conftest import CLUSTER_IDS, EXPORT, PIPELINE_EXPORT, call, event
+from handlers.app import handler
 
 # Keys of the TypeScript interfaces in frontend/src/api.ts.
 SUMMARY_KEYS = {"id", "name", "states", "lat", "lon", "capacity_mw", "n_plants", "risk_score", "risk_level", "confidence", "headline"}
@@ -154,3 +155,43 @@ def test_brief_without_bedrock_credentials_falls_back():
     status, b = call("POST", "/brief/{id}", "korba")
     assert status == 200 and b["source"] == "template"
     assert "BALCO" in b["markdown"]
+
+
+# ---------- Deployed API == local static site ----------
+@pytest.mark.parametrize(
+    "route,cid,file",
+    [("/clusters", None, "clusters.json"), ("/summary", None, "summary.json")]
+    + [("/clusters/{id}", c, f"cluster_{c}.json") for c in CLUSTER_IDS]
+    + [("/clusters/{id}/timeseries", c, f"timeseries_{c}.json") for c in CLUSTER_IDS],
+)
+def test_api_body_is_the_static_file(route, cid, file):
+    """The frontend reads public/data/<file> locally and the API in production: same bytes, JSON, UTF-8."""
+    r = handler(event("GET", route, cid))
+    assert r["statusCode"] == 200
+    assert r["headers"]["content-type"] == "application/json; charset=utf-8"
+    assert r["body"] == (EXPORT / file).read_bytes().decode("utf-8")  # exact bytes (no newline translation)
+
+
+def test_every_frontend_file_is_routable():
+    """Each JSON file the static site can fetch has an API route (api.ts url() mapping)."""
+    names = {p.name for p in EXPORT.glob("*.json")}
+    routable = {"clusters.json", "summary.json"} | {f"cluster_{c}.json" for c in CLUSTER_IDS} | {f"timeseries_{c}.json" for c in CLUSTER_IDS}
+    assert names == routable
+
+
+@pytest.mark.skipif(not (PIPELINE_EXPORT / "clusters.json").exists(), reason="pipeline export not present (fresh clone)")
+def test_pipeline_export_matches_committed_copy():
+    """to_json writes both folders; a stale committed copy would make the deployed API differ from a fresh export."""
+    a = {p.name: p.read_bytes() for p in PIPELINE_EXPORT.glob("*.json")}
+    b = {p.name: p.read_bytes() for p in EXPORT.glob("*.json")}
+    assert a == b
+
+
+def test_brief_names_panopticoal(bedrock):
+    bedrock(error=RuntimeError("no Bedrock in tests"))
+    status, b = call("POST", "/brief/{id}", "talcher")
+    assert status == 200 and b["source"] == "template"
+    assert "PanoptiCoal" in b["markdown"] and "EmissionWatch" not in b["markdown"]
+    from handlers.brief import SYSTEM_PROMPT
+
+    assert "PanoptiCoal" in SYSTEM_PROMPT and "EmissionWatch" not in SYSTEM_PROMPT

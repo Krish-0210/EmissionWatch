@@ -21,7 +21,9 @@ If briefs fail for any reason the API still answers with the template brief (`"s
 ```bash
 cd pipeline && .venv/Scripts/python.exe -m src.export.to_json && cd ..
 ```
-The stack uploads `pipeline/data/export/*.json`; synth fails if `clusters.json` is missing.
+The exporter writes the same JSON to `pipeline/data/export/` (gitignored) and `frontend/public/data/` (committed).
+The stack uploads `frontend/public/data/*.json` (the files the local site reads), so the API serves exactly what
+local development serves; synth fails if `clusters.json` is missing. Commit the re-exported files before deploying.
 
 ## 2. Bootstrap and deploy
 ```bash

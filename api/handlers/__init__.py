@@ -1,1 +1,1 @@
-"""Lambda handlers for the EmissionWatch API."""
+"""Lambda handlers for the PanoptiCoal API (EmissionWatch stack)."""
