@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, type CSSProperties } from 'react'
+import type { BackdropVariant } from '../lib/backdrop'
 import { gsap } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
 import '../styles/backdrop.css'
@@ -7,23 +8,6 @@ import '../styles/backdrop.css'
 // page), two aurora bands, a measurement grid with "+" crosshairs and edge ruler (scroll parallax),
 // dust, vignette. The film grain is body::after (index.css). CSS only, transforms/opacity animate;
 // the grid offset is written from GSAP's ticker only when the scroll position changes.
-
-export type BackdropVariant = 'home' | 'map' | 'cluster' | 'near' | 'how' | 'limits'
-
-export const backdropFor = (path: string): BackdropVariant =>
-  path === '/' ? 'home' : path.startsWith('/map') ? 'map' : path.startsWith('/cluster') ? 'cluster' : path.startsWith('/near') ? 'near' : path.startsWith('/how') ? 'how' : 'limits'
-
-/** Tints the glows from a page: e.g. the cluster's risk level, or Home's story step. Cleared on unmount. */
-export function useBackdropTone(key: 'tone' | 'step', value: string | undefined) {
-  useEffect(() => {
-    const el = document.documentElement
-    if (value == null) delete el.dataset[key]
-    else el.dataset[key] = value
-    return () => {
-      delete el.dataset[key]
-    }
-  }, [key, value])
-}
 
 // Deterministic dust: position, size, drift duration and delay.
 const DUST = Array.from({ length: 18 }, (_, i) => {
