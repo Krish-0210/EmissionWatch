@@ -1,22 +1,23 @@
 import Lenis from 'lenis'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { backdropFor } from '../lib/backdrop'
 import { setLenis } from '../lib/scroll'
 import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useInteractions } from '../lib/interactions'
+import { GITHUB_URL } from '../lib/links'
 import { prefersReducedMotion } from '../lib/motion'
 import { scramble } from '../lib/scramble'
 import Backdrop from './Backdrop'
-import BigWord from './BigWord'
 import Blinds from './Blinds'
 import Cursor from './Cursor'
+import Footer from './Footer'
 import HoldFX from './HoldFX'
+import PageTransition from './PageTransition'
 import SoundToggle from './SoundToggle'
 import SwapText from './SwapText'
 import { Wordmark } from './Logo'
 
-export const GITHUB_URL = 'https://github.com/Krish-0210/EmissionWatch'
 
 const LINKS = [
   { to: '/', label: 'Home', end: true },
@@ -168,9 +169,10 @@ function useScrollProgress(ref: React.RefObject<HTMLElement | null>) {
 }
 
 export default function Layout() {
-  const [open, setOpen] = useState(false)
+  // Phone menu: open for the page it was opened on (navigation, including page transitions that
+  // bypass the links' onClick, closes it).
+  const [openAt, setOpenAt] = useState<string | null>(null)
   const { pathname } = useLocation()
-  const navigate = useNavigate()
   const main = useRef<HTMLElement>(null)
   useSmoothScroll()
   const progress = useRef<HTMLElement>(null)
@@ -204,7 +206,8 @@ export default function Layout() {
     return () => clearTimeout(id)
   }, [pathname])
 
-  const close = () => setOpen(false)
+  const open = openAt === pathname
+  const close = () => setOpenAt(null)
 
   return (
     <>
@@ -213,6 +216,7 @@ export default function Layout() {
       </a>
       <Cursor />
       <HoldFX />
+      <PageTransition />
       <Backdrop variant={backdropFor(pathname)} />
       <div className="proto-banner" role="note">
         <span className="micro">
@@ -225,7 +229,7 @@ export default function Layout() {
             <Wordmark animated />
           </Link>
           <SoundToggle className="nav-sound" />
-          <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpen((o) => !o)}>
+          <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpenAt((o) => (o === pathname ? null : pathname))}>
             {open ? 'Close' : 'Menu'}
           </button>
           <nav id="nav-links" className={`nav-links${open ? ' open' : ''}`} aria-label="Main">
@@ -252,56 +256,7 @@ export default function Layout() {
         </div>
       </main>
       <Blinds className="to-footer" />
-      <footer className="footer">
-        <BigWord speed={0.05}>Watching</BigWord>
-        <div className="container layer footer-grid">
-          <div>
-            <Link to="/" className="brand" aria-label="PanoptiCoal home">
-              <Wordmark />
-            </Link>
-            <p className="muted small" style={{ marginTop: 16, maxWidth: '40ch' }}>
-              Coal plants report their own pollution. We watch from space. PanoptiCoal flags anomalies that warrant an
-              audit, not proof of wrongdoing.
-            </p>
-          </div>
-          <div>
-            <div className="micro" style={{ marginBottom: 12 }}>
-              Sources
-            </div>
-            <ul>
-              <li>CEA daily generation reports · National Power Portal</li>
-              <li>ESA Sentinel-5P TROPOMI (Copernicus)</li>
-              <li>ECMWF ERA5 reanalysis</li>
-              <li>Global Energy Monitor · Natural Earth</li>
-              <li>Google Earth Engine</li>
-            </ul>
-          </div>
-          <div>
-            <div className="micro" style={{ marginBottom: 12 }}>
-              Project
-            </div>
-            <ul>
-              <li>
-                <a href={GITHUB_URL} target="_blank" rel="noreferrer">
-                  Source on GitHub ↗
-                </a>
-              </li>
-              <li>
-                <Link to="/how-it-works">How it works</Link>
-              </li>
-              <li>
-                <Link to="/limits">Limits of this method</Link>
-              </li>
-              <li>
-                <button type="button" className="linklike" onClick={() => navigate('/', { state: { replayIntro: Date.now() } })}>
-                  Replay intro ↺
-                </button>
-              </li>
-              <li>Basemap © Esri, © OpenStreetMap contributors</li>
-            </ul>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   )
 }

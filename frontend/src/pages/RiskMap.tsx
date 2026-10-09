@@ -174,6 +174,7 @@ export default function RiskMap() {
                 <li key={c.id} data-flip={c.id}>
                   <Link
                     to={`/cluster/${c.id}`}
+                    data-transition="off"
                     className={`rank-item card tilt${hover === c.id || flying === c.id ? ' hl' : ''}`}
                     data-tilt="3"
                     style={{ '--rc': RISK_COLOR[c.risk_level] } as CSSProperties}
