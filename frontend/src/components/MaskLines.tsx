@@ -40,15 +40,21 @@ function RotWord({ words, line }: { words: string[]; line: number }) {
   const [out, setOut] = useState(false)
   useEffect(() => {
     if (reduced || words.length < 2) return
-    let t1 = 0
-    const t0 = window.setInterval(() => {
+    let t1 = 0, t0 = 0
+    const swap = () => {
       setOut(true)
       t1 = window.setTimeout(() => {
         setN((k) => k + 1)
         setOut(false)
       }, 620)
-    }, 3800)
+    }
+    // First swap after the intro has handed over (~5 s), then every 3.8 s.
+    const t2 = window.setTimeout(() => {
+      swap()
+      t0 = window.setInterval(swap, 3800)
+    }, 7200)
     return () => {
+      window.clearTimeout(t2)
       window.clearInterval(t0)
       window.clearTimeout(t1)
     }
