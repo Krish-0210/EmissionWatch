@@ -64,7 +64,7 @@ export function useInteractions() {
       }
       tilted = tc
       // Magnetic buttons
-      const mb = t?.closest<HTMLElement>('.magnetic') ?? null
+      const mb = t?.closest<HTMLElement>('.magnetic, .pill') ?? null
       if (magnet && magnet !== mb) {
         magnet.style.setProperty('--tx', '0px')
         magnet.style.setProperty('--ty', '0px')
@@ -87,7 +87,21 @@ export function useInteractions() {
       if (!raf) raf = requestAnimationFrame(frame)
     }
     let sounded: Element | null = null
+    let filled: HTMLElement | null = null
+    // Pill fill grows from where the pointer came in and shrinks toward where it left.
+    const fillAt = (el: HTMLElement, cx: number, cy: number) => {
+      const r = el.getBoundingClientRect()
+      el.style.setProperty('--fx', `${(cx - r.left).toFixed(0)}px`)
+      el.style.setProperty('--fy', `${(cy - r.top).toFixed(0)}px`)
+      el.style.setProperty('--fd', `${(Math.hypot(r.width, r.height) * 2.1).toFixed(0)}px`)
+    }
     const over = (e: PointerEvent) => {
+      const pill = (e.target as Element | null)?.closest?.<HTMLElement>('.pill') ?? null
+      if (pill !== filled) {
+        if (filled) fillAt(filled, e.clientX, e.clientY)
+        if (pill) fillAt(pill, e.clientX, e.clientY)
+        filled = pill
+      }
       const el = (e.target as Element | null)?.closest?.(SOUNDED) ?? null
       if (el && el !== sounded && e.pointerType === 'mouse') {
         sound.hover(soundKind(el))

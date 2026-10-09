@@ -284,8 +284,8 @@ export default function Home() {
               <Link to="/map" className="pill">
                 Explore the map <span className="arrow" aria-hidden="true">→</span>
               </Link>
-              <Link to="/near-me" className="pill ghost">
-                Find plants near me
+              <Link to="/near-me" className="ulink">
+                Find plants near me <span className="arrow" aria-hidden="true">→</span>
               </Link>
             </div>
             <div className="micro scroll-cue" aria-hidden="true">

@@ -272,8 +272,8 @@ export default function NearMe() {
                 <Link to={`/cluster/${closest.c.id}`} className="pill magnetic" viewTransition>
                   Open {closest.c.name} <span className="arrow" aria-hidden="true">→</span>
                 </Link>
-                <Link to="/limits" className="pill ghost" viewTransition>
-                  What this cannot tell you
+                <Link to="/limits" className="ulink" viewTransition>
+                  What this cannot tell you <span className="arrow" aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>

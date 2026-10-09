@@ -35,7 +35,7 @@
 
 /* Magnetic + ripple + press */
 .pill { position: relative; overflow: hidden; isolation: isolate; }
-.magnetic { transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0); transition: transform 0.5s var(--ease-out), background 0.25s, box-shadow 0.25s, color 0.25s, border-color 0.25s; }
+.magnetic, .pill { transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0); transition: transform 0.5s var(--ease-out), background 0.25s, box-shadow 0.25s, color 0.25s, border-color 0.25s; }
 .pill:active { scale: 0.97; }
 .ripple { position: relative; overflow: hidden; isolation: isolate; }
 .ripple-ink { position: absolute; border-radius: 50%; background: currentColor; opacity: 0.28; transform: scale(0); pointer-events: none; z-index: -1; animation: ripple 0.65s var(--ease-out) forwards; }
@@ -181,7 +181,7 @@
   .ticker-track { animation: none !important; }
   .ticker-track { flex-wrap: wrap; width: auto; }
   .words .w { translate: none; }
-  .tilt, .magnetic { transform: none !important; }
+  .tilt, .magnetic, .pill { transform: none !important; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 

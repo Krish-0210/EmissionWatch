@@ -149,3 +149,37 @@ html.holding .globe-tip, html.holding .orbit-chip { opacity: 0 !important; trans
 .roll.go .rd-col { transform: translate3d(0, calc(var(--d) * -1em), 0); }
 .rs { display: inline-block; line-height: 1; }
 @media (prefers-reduced-motion: reduce) { .rd-col { transition: none; } }
+
+/* ---------- Buttons and links ---------- */
+/* Pill fill: a disc that grows from the pointer's entry point (set by lib/interactions) */
+.pill::before {
+  content: ''; position: absolute; left: var(--fx, 50%); top: var(--fy, 50%); width: var(--fd, 320px); height: var(--fd, 320px);
+  border-radius: 50%; translate: -50% -50%; scale: 0; z-index: -1; pointer-events: none; background: #e6fffa;
+  transition: scale 0.6s var(--ease-out);
+}
+.pill.ghost::before { background: var(--signal); }
+.pill:hover::before { scale: 1; }
+.pill.ghost:hover { color: var(--signal-ink); border-color: var(--signal); }
+/* Arrows leave to the right and come back in from the left */
+.pill .arrow, .ulink .arrow { display: inline-block; }
+.pill:hover .arrow, .ulink:hover .arrow, .ulink:focus-visible .arrow { animation: arrow-loop 0.6s var(--ease-out); }
+@keyframes arrow-loop { 0% { transform: translateX(0); opacity: 1; } 40% { transform: translateX(18px); opacity: 0; } 41% { transform: translateX(-18px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+/* Underline CTA: mono label, arrow at the far end, hairline that collapses right and redraws from the left */
+.ulink {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; min-width: 230px; min-height: 44px; padding: 0 2px;
+  font-family: var(--font-ui); font-size: 12px; font-weight: 400; letter-spacing: -0.04em; text-transform: uppercase; color: var(--text); text-decoration: none;
+  background: linear-gradient(var(--signal), var(--signal)) 0 100% / 100% 1px no-repeat; transition: color 0.25s;
+}
+.ulink:hover, .ulink:focus-visible { color: var(--signal); animation: ul-redraw 0.7s var(--ease-out); }
+@keyframes ul-redraw {
+  0% { background-size: 100% 1px; background-position: 100% 100%; }
+  45% { background-size: 0% 1px; background-position: 100% 100%; }
+  46% { background-size: 0% 1px; background-position: 0 100%; }
+  100% { background-size: 100% 1px; background-position: 0 100%; }
+}
+/* Text links in prose: the same redraw */
+main p a:not(.pill):not(.ulink), .lede a, main li a:not(.pill):not(.ulink):not([class]) {
+  text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat; padding-bottom: 1px;
+}
+main p a:not(.pill):not(.ulink):hover, .lede a:hover, main li a:not(.pill):not(.ulink):not([class]):hover { animation: ul-redraw 0.6s var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { .pill:hover .arrow, .ulink:hover .arrow, .ulink:hover, main p a:hover, .lede a:hover { animation: none; } .pill::before { transition: none; } }

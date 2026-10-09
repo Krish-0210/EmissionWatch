@@ -217,7 +217,7 @@ export default function Limits() {
           </div>
         </div>
         <p style={{ marginTop: 40 }}>
-          <Link to="/how-it-works" className="pill ghost magnetic" viewTransition>
+          <Link to="/how-it-works" className="ulink" viewTransition>
             How the method works <span className="arrow" aria-hidden="true">→</span>
           </Link>
         </p>
