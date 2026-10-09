@@ -1,7 +1,8 @@
 import Lenis from 'lenis'
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { gsap, ScrollTrigger } from '../lib/gsap'
+import { useInteractions } from '../lib/interactions'
 import { prefersReducedMotion } from '../lib/motion'
 import BigWord from './BigWord'
 import Cursor from './Cursor'
@@ -26,6 +27,20 @@ function GitHubIcon() {
 }
 
 let lenis: Lenis | null = null
+
+// Slow gradient-mesh background, one palette per section of the site.
+const meshFor = (path: string) =>
+  path === '/' ? 'home' : path.startsWith('/map') ? 'map' : path.startsWith('/cluster') ? 'cluster' : path.startsWith('/near') ? 'near' : path.startsWith('/how') ? 'how' : 'limits'
+const Mesh = memo(function Mesh({ variant }: { variant: string }) {
+  return (
+    <div className={`mesh ${variant}`} aria-hidden="true">
+      <i />
+      <i />
+      <i />
+      <i />
+    </div>
+  )
+})
 
 // Smooth scroll on desktop with motion allowed; touch keeps native scrolling. Lenis runs inside
 // GSAP's ticker (first in the queue) and feeds ScrollTrigger, so there is a single frame loop.
@@ -71,7 +86,7 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
     let dirty = true
     let lastY = -1
     const scan = () => {
-      el.querySelectorAll('.reveal, .rule').forEach((n) => {
+      el.querySelectorAll('.reveal, .rule, .trig, .draw, .divider').forEach((n) => {
         if (!seen.has(n)) {
           seen.add(n)
           io.observe(n)
@@ -122,11 +137,15 @@ export default function Layout() {
   const { pathname } = useLocation()
   const main = useRef<HTMLElement>(null)
   useSmoothScroll()
+  useInteractions()
   useRevealAndParallax(main, pathname)
 
-  useEffect(() => {
-    if (lenis) lenis.scrollTo(0, { immediate: true })
+  // Before paint, so a view transition captures the new page at the top.
+  useLayoutEffect(() => {
+    if (lenis) lenis.scrollTo(0, { immediate: true, force: true })
     else window.scrollTo(0, 0)
+  }, [pathname])
+  useEffect(() => {
     const id = setTimeout(() => ScrollTrigger.refresh(), 450)
     return () => clearTimeout(id)
   }, [pathname])
@@ -139,6 +158,7 @@ export default function Layout() {
         Skip to content
       </a>
       <Cursor />
+      <Mesh variant={meshFor(pathname)} key={meshFor(pathname)} />
       <div className="proto-banner" role="note">
         <span className="micro">
           <b>Prototype</b> · research demo on public data · indicative, not an official assessment
@@ -146,7 +166,7 @@ export default function Layout() {
       </div>
       <header className="nav">
         <div className="container nav-inner">
-          <Link to="/" className="brand" onClick={close} aria-label="PanoptiCoal home">
+          <Link to="/" className="brand" onClick={close} aria-label="PanoptiCoal home" viewTransition>
             <Wordmark animated />
           </Link>
           <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpen((o) => !o)}>
@@ -154,14 +174,14 @@ export default function Layout() {
           </button>
           <nav id="nav-links" className={`nav-links${open ? ' open' : ''}`} aria-label="Main">
             {LINKS.map((l) => (
-              <NavLink key={l.to} to={l.to} end={l.end} onClick={close}>
+              <NavLink key={l.to} to={l.to} end={l.end} onClick={close} viewTransition>
                 {l.label}
               </NavLink>
             ))}
             <a className="nav-gh" href={GITHUB_URL} target="_blank" rel="noreferrer" aria-label="GitHub repository">
               <GitHubIcon />
             </a>
-            <Link to="/map" className="pill" onClick={close}>
+            <Link to="/map" className="pill magnetic" onClick={close} viewTransition>
               Explore the map <span className="arrow" aria-hidden="true">→</span>
             </Link>
           </nav>
@@ -173,7 +193,7 @@ export default function Layout() {
         </div>
       </main>
       <footer className="footer">
-        <BigWord speed={0.05}>Ember</BigWord>
+        <BigWord speed={0.05}>Watching</BigWord>
         <div className="container layer footer-grid">
           <div>
             <Link to="/" className="brand" aria-label="PanoptiCoal home">
