@@ -126,17 +126,38 @@ export const briefAvailable = API_URL !== undefined
 const staticBase = `${import.meta.env.BASE_URL}data/`
 const url = (apiPath: string, file: string) => (API_URL ? API_URL + apiPath : staticBase + file)
 
-async function getJson<T>(href: string): Promise<T> {
-  const res = await fetch(href)
-  if (!res.ok) throw new Error(`${href}: HTTP ${res.status}`)
-  return res.json() as Promise<T>
+// In-memory cache: one request per URL per page load; failed requests are retried next time.
+// `peek` returns a value synchronously once it has arrived (lets pages render on the first frame,
+// which view transitions need).
+const pending = new Map<string, Promise<unknown>>()
+const settled = new Map<string, unknown>()
+
+function getJson<T>(href: string): Promise<T> {
+  let p = pending.get(href)
+  if (!p) {
+    p = fetch(href).then(async (res) => {
+      if (!res.ok) throw new Error(`${href}: HTTP ${res.status}`)
+      const v = await res.json()
+      settled.set(href, v)
+      return v
+    })
+    p.catch(() => pending.delete(href))
+    pending.set(href, p)
+  }
+  return p as Promise<T>
 }
+const peek = <T>(href: string) => settled.get(href) as T | undefined
 
 export const fetchClusters = () => getJson<ClustersFile>(url('/clusters', 'clusters.json'))
 export const fetchCluster = (id: string) => getJson<ClusterDetail>(url(`/clusters/${id}`, `cluster_${id}.json`))
 export const fetchTimeseries = (id: string) =>
   getJson<TimeseriesFile>(url(`/clusters/${id}/timeseries`, `timeseries_${id}.json`))
 export const fetchSummary = () => getJson<SummaryFile>(url('/summary', 'summary.json'))
+
+export const peekClusters = () => peek<ClustersFile>(url('/clusters', 'clusters.json'))
+export const peekCluster = (id: string) => peek<ClusterDetail>(url(`/clusters/${id}`, `cluster_${id}.json`))
+export const peekTimeseries = (id: string) => peek<TimeseriesFile>(url(`/clusters/${id}/timeseries`, `timeseries_${id}.json`))
+export const peekSummary = () => peek<SummaryFile>(url('/summary', 'summary.json'))
 
 export async function generateBrief(id: string): Promise<Brief> {
   if (!API_URL) throw new Error('Brief generation available in deployed version')

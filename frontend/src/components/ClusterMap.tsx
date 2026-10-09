@@ -8,19 +8,20 @@ import { RISK_LABEL } from '../lib/format'
 interface Props {
   clusters: ClusterSummary[]
   highlight?: string
+  dimmed?: Set<string>
   onHover?: (id: string | undefined) => void
   onSelect: (id: string) => void
   flyTo?: ClusterSummary
   onArrive?: () => void
 }
 
-function icon(c: ClusterSummary, hl: boolean) {
+function icon(c: ClusterSummary, hl: boolean, dim: boolean) {
   const size = Math.round(18 + Math.sqrt(c.capacity_mw) / 3.2)
   return L.divIcon({
     className: '',
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
-    html: `<span class="mk mk-${c.risk_level}${hl ? ' hl' : ''}" style="--s:${size}px"><i></i><i></i><b></b></span>`,
+    html: `<span class="mk mk-${c.risk_level}${hl ? ' hl' : ''}${dim ? ' dim' : ''}" style="--s:${size}px"><i></i><i></i><b></b></span>`,
   })
 }
 
@@ -35,9 +36,9 @@ function Flyer({ target, onArrive }: { target?: ClusterSummary; onArrive?: () =>
   return null
 }
 
-export default function ClusterMap({ clusters, highlight, onHover, onSelect, flyTo, onArrive }: Props) {
+export default function ClusterMap({ clusters, highlight, dimmed, onHover, onSelect, flyTo, onArrive }: Props) {
   const icons = useMemo(
-    () => Object.fromEntries(clusters.map((c) => [c.id, { off: icon(c, false), on: icon(c, true) }])),
+    () => Object.fromEntries(clusters.map((c) => [c.id, { off: icon(c, false, false), on: icon(c, true, false), dim: icon(c, false, true) }])),
     [clusters],
   )
   return (
@@ -52,7 +53,7 @@ export default function ClusterMap({ clusters, highlight, onHover, onSelect, fly
         <Marker
           key={c.id}
           position={[c.lat, c.lon]}
-          icon={highlight === c.id ? icons[c.id].on : icons[c.id].off}
+          icon={highlight === c.id ? icons[c.id].on : dimmed?.has(c.id) ? icons[c.id].dim : icons[c.id].off}
           title={`${c.name}: ${RISK_LABEL[c.risk_level]}, score ${Math.round(c.risk_score)}`}
           alt={c.name}
           riseOnHover

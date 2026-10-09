@@ -5,10 +5,15 @@ export interface AsyncState<T> {
   error?: string
 }
 
-// Runs fn when deps change; results from stale calls are ignored.
-export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): AsyncState<T> {
+// Runs fn when deps change; results from stale calls are ignored. `peek` may return an already
+// cached value so the first render has data.
+export function useAsync<T>(fn: () => Promise<T>, deps: unknown[], peek?: () => T | undefined): AsyncState<T> {
   const key = JSON.stringify(deps)
-  const [state, setState] = useState<AsyncState<T> & { key?: string }>({})
+  const [state, setState] = useState<AsyncState<T> & { key?: string }>(() => {
+    const data = peek?.()
+    return data === undefined ? {} : { key, data }
+  })
+  const cached = state.key !== key ? peek?.() : undefined
   useEffect(() => {
     let live = true
     fn().then(
@@ -20,5 +25,5 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): AsyncState<T
     }
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
-  return state.key === key ? state : {}
+  return state.key === key ? state : cached !== undefined ? { data: cached } : {}
 }
