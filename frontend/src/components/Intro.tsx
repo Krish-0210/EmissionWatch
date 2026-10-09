@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import type { ClustersFile, SummaryFile } from '../api'
 import { fmtInt } from '../lib/format'
+import { HERO_VIEW, heroView, latLon, lookFix, vec } from '../lib/globeView'
 import { holdNav, introFinished } from '../lib/intro'
 import { setText } from '../lib/motion'
 import { heroGlobeScreen } from '../three/layout'
@@ -34,7 +35,6 @@ const T = { warm: 2250, nav: 2500, land: 2850, hero: 2950, done: 3550, skipTo: 2
 const PALETTE = ['#ff8a3d', '#ffc24b', '#ff5a3c', '#7ce8d8', '#d8fff8', '#3e5a6b', '#e8edf2']
 const EMBER = 0, AMBER = 1, HOT = 2, TEAL = 3, WHITE = 4, OCEAN = 5
 const LEVELS = 6
-const INDIA = { lat: 22.5, lon: 81.5 }
 const RINGS = [
   { r: 0.55, inc: 62, psi: -20, w: 1.7, c: TEAL },
   { r: 0.76, inc: 72, psi: 35, w: -1.35, c: WHITE },
@@ -48,18 +48,6 @@ const hash = (i: number, k: number) => {
   return x - Math.floor(x)
 }
 const rad = (d: number) => (d * Math.PI) / 180
-// Same convention as three/geo.ts latLonToVec3 (kept three-free: the intro loads before the 3D chunk).
-const vec = (lat: number, lon: number) => {
-  const phi = rad(lon + 180), th = rad(90 - lat)
-  return [-Math.cos(phi) * Math.sin(th), Math.cos(th), Math.sin(phi) * Math.sin(th)] as const
-}
-// GlobeScene starts at yaw = India's facing yaw − 0.9, pitch = 0.6 × India's facing pitch.
-const INDIA_FACE = (() => {
-  const [x, y, z] = vec(INDIA.lat, INDIA.lon)
-  const yaw = Math.atan2(-x, z)
-  const z1 = -x * Math.sin(yaw) + z * Math.cos(yaw)
-  return { yaw, pitch: Math.atan2(y, z1) }
-})()
 
 interface Particles {
   n: number
@@ -118,9 +106,7 @@ async function sampleLand(p: Particles) {
   ctx.drawImage(bmp, 0, 0)
   const d = ctx.getImageData(0, 0, 512, 256).data
   for (let i = 0; i < p.n; i++) {
-    // Inverse of vec(): lat from y, lon from x/z.
-    const lat = Math.asin(p.gy[i]) * (180 / Math.PI)
-    const lon = ((Math.atan2(p.gz[i], -p.gx[i]) * 180) / Math.PI - 180 + 540) % 360 - 180
+    const [lat, lon] = latLon(p.gx[i], p.gy[i], p.gz[i])
     const u = Math.min(511, Math.floor(((lon + 180) / 360) * 512)), v = Math.min(255, Math.floor(((90 - lat) / 180) * 256))
     const k = (v * 512 + u) * 4
     p.land[i] = d[k + 2] > 120 ? 2 : d[k] > 120 ? 1 : 0
@@ -243,8 +229,8 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
     const bx = Array.from({ length: B }, () => new Float32Array(N * 3))
     const bn = new Int32Array(B)
     const rings = RINGS.map((r) => ({ ...r, ci: Math.cos(rad(r.inc)), si: Math.sin(rad(r.inc)), cp: Math.cos(rad(r.psi)), sp: Math.sin(rad(r.psi)) }))
-    const yawEnd = INDIA_FACE.yaw - 0.9, pitch = INDIA_FACE.pitch * 0.6
-    const cosP = Math.cos(pitch), sinP = Math.sin(pitch)
+    const yawEnd = HERO_VIEW.yaw, pitch = HERO_VIEW.pitch
+    const fix = lookFix(narrow)
     const Cx = w / 2, Cy = narrow ? h * 0.46 : h / 2
     const fired = new Set<IntroBeat>()
     const beat = (b: IntroBeat) => {
@@ -289,7 +275,6 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
       const dotsA = 1 - clamp01((t - 2950) / 450)
       // Globe spin settles onto the 3D globe's starting orientation.
       const yaw = yawEnd - 1.4 * (1 - ease(clamp01(t / 2900)))
-      const cy0 = Math.cos(yaw), sy0 = Math.sin(yaw)
       // Scan line and satellite
       const us = clamp01((t - 2100) / 600)
       const scanY = cy - R + 2 * R * us
@@ -322,11 +307,8 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
           if (e1 > 0.55) col = rg.c
         }
         if (e2 > 0) {
-          // Rotate the lattice point: yaw about Y, then pitch about X (as GlobeScene's Euler XYZ).
-          const px = P.gx[i] * cy0 + P.gz[i] * sy0
-          const pz0 = -P.gx[i] * sy0 + P.gz[i] * cy0
-          const py = P.gy[i] * cosP - pz0 * sinP
-          const pz = P.gy[i] * sinP + pz0 * cosP
+          // As the hero camera sees the 3D globe (GlobeScene rotation + off-axis perspective turn).
+          const [px, py, pz] = heroView(P.gx[i], P.gy[i], P.gz[i], yaw, pitch, fix)
           const lx = cx + px * R, ly = cy - py * R
           x += (lx - x) * e2
           y += (ly - y) * e2

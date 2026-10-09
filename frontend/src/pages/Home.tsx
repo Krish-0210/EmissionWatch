@@ -247,7 +247,7 @@ export default function Home() {
       <div ref={stage} className="stage">
         <div className="stage-sticky">
           <div className={`stage-visual${ready3d ? ' ready' : ''}${landed ? '' : ' hold'}`}>
-            <GlobePoster className={`${mobile ? 'mobile' : ''}`} />
+            <GlobePoster />
             {mount3d && clusters.data && focus && (
               <Suspense fallback={null}>
                 <GlobeCanvas clusters={clusters.data.clusters} focusId={focus.id} control={control} lite={mobile} onReady={onReady} />

@@ -1,35 +1,169 @@
-// Static stand-in for the 3D globe: shown while it loads, with reduced motion, or without WebGL.
+import { useEffect, useRef } from 'react'
+import { HERO_VIEW, heroModel, latLon, lookFix } from '../lib/globeView'
+import { heroGlobeScreen } from '../three/layout'
+
+// Still image of the hero globe, drawn once on a 2D canvas from the same textures and colours as the
+// 3D earth shader (land, borders, India, 2024 NO₂, graticule, day/night, teal rim and halo), at the
+// 3D globe's exact screen position and starting orientation, so the 3D globe fades in over it with no
+// jump. Shown while the 3D globe loads, with reduced motion, or without WebGL.
+
+const TEX = `${import.meta.env.BASE_URL}textures/`
+const SW = 1024, SH = 512 // texture sample resolution
+
+async function pixels(name: string, w = SW, h = SH) {
+  const blob = await (await fetch(TEX + name)).blob()
+  const bmp = await createImageBitmap(blob, { resizeWidth: w, resizeHeight: h, resizeQuality: 'medium' })
+  const c = document.createElement('canvas')
+  c.width = w
+  c.height = h
+  const ctx = c.getContext('2d', { willReadFrequently: true })!
+  ctx.drawImage(bmp, 0, 0)
+  return ctx.getImageData(0, 0, w, h).data
+}
+
+const smooth = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
+  return t * t * (3 - 2 * t)
+}
+
+// India NO2 layer bounds (three/GlobeScene No2Layer): lon 68–98, lat 6–37.
+const IN = { lon0: 68, lon1: 98, lat0: 6, lat1: 37, w: 512, h: 512 }
+
+function paint(cv: HTMLCanvasElement, R: number, narrow: boolean, mask: Uint8ClampedArray, no2: Uint8ClampedArray, no2In: Uint8ClampedArray) {
+  const pad = Math.round(R * 0.16)
+  const size = 2 * (R + pad)
+  cv.width = size
+  cv.height = size
+  const ctx = cv.getContext('2d')!
+  // Halo: soft teal ring just outside the limb (the 3D Halo sprite)
+  const g = ctx.createRadialGradient(size / 2, size / 2, R * 0.93, size / 2, size / 2, R + pad)
+  g.addColorStop(0, 'rgba(124,232,216,0)')
+  g.addColorStop(0.32, 'rgba(124,232,216,0.32)')
+  g.addColorStop(0.55, 'rgba(124,232,216,0.08)')
+  g.addColorStop(1, 'rgba(124,232,216,0)')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, size, size)
+
+  const img = ctx.getImageData(0, 0, size, size)
+  const d = img.data
+  const sun = [Math.cos(Math.PI - 0.62), 0.28, Math.sin(Math.PI - 0.62)]
+  const sl = Math.hypot(sun[0], sun[1], sun[2])
+  const { yaw, pitch } = HERO_VIEW
+  const fix = lookFix(narrow)
+  for (let py = 0; py < size; py++) {
+    const vy = -(py + 0.5 - size / 2) / R
+    for (let px = 0; px < size; px++) {
+      const vx = (px + 0.5 - size / 2) / R
+      const rr = vx * vx + vy * vy
+      if (rr > 1) continue
+      const vz = Math.sqrt(1 - rr)
+      const [mx, my, mz] = heroModel(vx, vy, vz, yaw, pitch, fix)
+      const [lat, lon] = latLon(mx, my, mz)
+      const u = (lon + 180) / 360, v = (90 - lat) / 180
+      const k = (Math.min(SH - 1, Math.floor(v * SH)) * SW + Math.min(SW - 1, Math.floor(u * SW))) * 4
+      const land = mask[k] / 255, border = mask[k + 1] / 255, india = mask[k + 2] / 255
+      const day = smooth(-0.06, 0.22, (vx * sun[0] + vy * sun[1] + vz * sun[2]) / sl)
+      // Earth shader colours (three/GlobeScene.tsx earthShader)
+      let r = (0.014 + (0.035 - 0.014) * day) * (1 - land) + (0.05 + 0.08 * day) * land
+      let gg = (0.04 + 0.09 * day) * (1 - land) + (0.095 + 0.155 * day) * land
+      let b = (0.062 + 0.118 * day) * (1 - land) + (0.11 + 0.16 * day) * land
+      r += india * 0.03
+      gg += india * 0.06
+      b += india * 0.065
+      const coast = smooth(0.25, 0.5, land) - smooth(0.5, 0.75, land)
+      const indiaEdge = smooth(0.2, 0.5, india) - smooth(0.5, 0.8, india)
+      const teal = coast * 0.16 + border * 0.22 + india * border * 0.25 + indiaEdge * 0.35
+      // Graticule every 15° (distance to the nearest line in px, roughly)
+      const fu = u * 24 - Math.floor(u * 24), fv = v * 12 - Math.floor(v * 12)
+      const du = Math.min(fu, 1 - fu) * ((2 * Math.PI * R) / 24) * Math.cos((lat * Math.PI) / 180) * vz
+      const dv = Math.min(fv, 1 - fv) * ((Math.PI * R) / 12) * vz
+      const grid = du < 0.7 || dv < 0.7 ? 0.035 : 0
+      r += 0.486 * (teal + grid)
+      gg += 0.91 * (teal + grid)
+      b += 0.847 * (teal + grid)
+      // NO2 hotspots
+      const na = (no2[k + 3] / 255) * 0.6
+      r = r * (1 - na) + (no2[k] / 255) * (0.7 + 0.5 * (1 - day)) * na
+      gg = gg * (1 - na) + (no2[k + 1] / 255) * (0.7 + 0.5 * (1 - day)) * na
+      b = b * (1 - na) + (no2[k + 2] / 255) * (0.7 + 0.5 * (1 - day)) * na
+      // India's higher-resolution NO2 layer on top (opacity ~0.85, colours x1.25)
+      if (lon > IN.lon0 && lon < IN.lon1 && lat > IN.lat0 && lat < IN.lat1) {
+        const iu = Math.floor(((lon - IN.lon0) / (IN.lon1 - IN.lon0)) * IN.w), iv = Math.floor(((IN.lat1 - lat) / (IN.lat1 - IN.lat0)) * IN.h)
+        const q = (Math.min(IN.h - 1, iv) * IN.w + Math.min(IN.w - 1, iu)) * 4
+        const ia = (no2In[q + 3] / 255) * 0.85
+        r = r * (1 - ia) + Math.pow(no2In[q] / 255, 2.2) * 1.25 * ia
+        gg = gg * (1 - ia) + Math.pow(no2In[q + 1] / 255, 2.2) * 1.25 * ia
+        b = b * (1 - ia) + Math.pow(no2In[q + 2] / 255, 2.2) * 1.25 * ia
+      }
+      // Inner rim light
+      const f = Math.pow(1 - vz, 3) * 0.2
+      r += 0.486 * f
+      gg += 0.91 * f
+      b += 0.847 * f
+      // Antialiased edge
+      const a = Math.min(1, (1 - Math.sqrt(rr)) * R * 1.5)
+      const o = (py * size + px) * 4
+      // The earth shader writes these values straight to the screen (no colour-space conversion).
+      d[o] = d[o] * (1 - a) + Math.min(255, r * 255) * a
+      d[o + 1] = d[o + 1] * (1 - a) + Math.min(255, gg * 255) * a
+      d[o + 2] = d[o + 2] * (1 - a) + Math.min(255, b * 255) * a
+      d[o + 3] = Math.max(d[o + 3], a * 255)
+    }
+  }
+  ctx.putImageData(img, 0, 0)
+  // Fresnel rim stroke
+  ctx.beginPath()
+  ctx.arc(size / 2, size / 2, R - 0.5, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(124,232,216,0.55)'
+  ctx.lineWidth = 1.5
+  ctx.stroke()
+}
+
 export default function GlobePoster({ className = '' }: { className?: string }) {
+  const wrap = useRef<HTMLDivElement>(null)
+  const cv = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const el = wrap.current, c = cv.current
+    if (!el || !c || typeof createImageBitmap !== 'function') return
+    let live = true
+    let tex: [Uint8ClampedArray, Uint8ClampedArray, Uint8ClampedArray] | null = null
+    let lastR = 0
+    const place = () => {
+      const w = el.clientWidth, h = el.clientHeight
+      if (!w || !h) return
+      const g = heroGlobeScreen(w, h)
+      const R = Math.round(g.r)
+      const pad = Math.round(R * 0.16)
+      c.style.left = `${g.cx - R - pad}px`
+      c.style.top = `${g.cy - R - pad}px`
+      c.style.width = c.style.height = `${2 * (R + pad)}px`
+      if (tex && Math.abs(R - lastR) > 2) {
+        lastR = R
+        paint(c, R, w < 768, tex[0], tex[1], tex[2])
+        el.classList.add('drawn')
+      }
+    }
+    // Decode off-thread, then paint when the browser is idle.
+    Promise.all([pixels('earth_mask.webp'), pixels('no2_world_2024.webp'), pixels('no2_india_2024.webp', IN.w, IN.h)])
+      .then((t) => {
+        if (!live) return
+        tex = t
+        const idle = (window as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number }).requestIdleCallback
+        if (idle) idle(place, { timeout: 600 })
+        else setTimeout(place, 50)
+      })
+      .catch(() => {})
+    place()
+    const ro = new ResizeObserver(place)
+    ro.observe(el)
+    return () => {
+      live = false
+      ro.disconnect()
+    }
+  }, [])
   return (
-    <div className={`poster globe-poster ${className}`} aria-hidden="true">
-      <svg viewBox="0 0 400 400" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <radialGradient id="gp-body" cx="45%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#111821" />
-            <stop offset="100%" stopColor="#07090c" />
-          </radialGradient>
-          <radialGradient id="gp-ember" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ff8a3d" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#ff8a3d" stopOpacity="0" />
-          </radialGradient>
-          <pattern id="gp-dots" width="7" height="7" patternUnits="userSpaceOnUse">
-            <circle cx="3.5" cy="3.5" r="0.9" fill="#5d6875" />
-          </pattern>
-          <clipPath id="gp-clip">
-            <circle cx="200" cy="200" r="150" />
-          </clipPath>
-        </defs>
-        <circle cx="200" cy="200" r="158" fill="none" stroke="#7ce8d8" strokeOpacity="0.18" strokeWidth="6" />
-        <circle cx="200" cy="200" r="150" fill="url(#gp-body)" />
-        <g clipPath="url(#gp-clip)" opacity="0.7">
-          <path d="M150 120 C190 105 235 112 262 140 C255 170 240 205 215 238 C200 258 190 262 180 240 C168 212 150 190 135 160 Z" fill="url(#gp-dots)" />
-          <path d="M60 200 C80 170 110 160 120 190 C118 230 95 260 70 250 Z" fill="url(#gp-dots)" />
-          <path d="M270 90 C310 95 340 130 345 170 C320 160 290 140 270 120 Z" fill="url(#gp-dots)" />
-        </g>
-        <circle cx="205" cy="175" r="28" fill="url(#gp-ember)" opacity="0.8" />
-        <ellipse cx="200" cy="200" rx="190" ry="60" fill="none" stroke="#7ce8d8" strokeOpacity="0.25" transform="rotate(-28 200 200)" />
-        <circle cx="200" cy="200" r="150" fill="none" stroke="#7ce8d8" strokeOpacity="0.35" />
-      </svg>
+    <div ref={wrap} className={`globe-poster ${className}`} aria-hidden="true">
+      <canvas ref={cv} />
     </div>
   )
 }

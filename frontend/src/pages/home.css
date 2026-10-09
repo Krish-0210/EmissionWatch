@@ -8,10 +8,10 @@
 .stage-visual.hold .globe-poster { opacity: 0 !important; transition: none; }
 /* just above 0: the WebGL layer stays composited, so revealing it costs no first-composite stall */
 .stage-visual.hold .globe-host { opacity: 0.001 !important; transition: none; }
-.stage-visual .globe-poster { transition: opacity 1s var(--ease-out); left: 38%; }
-.stage-visual .globe-poster svg { width: min(70vh, 60vw); height: auto; }
+.stage-visual .globe-poster { position: absolute; inset: 0; transition: opacity 1s var(--ease-out); }
+.globe-poster canvas { position: absolute; opacity: 0; transition: opacity 0.9s var(--ease-out); }
+.globe-poster.drawn canvas { opacity: 1; }
 .stage-visual.ready .globe-poster { opacity: 0; }
-.stage-visual .globe-poster.mobile { left: 0; top: 30%; }
 .stage-vignette {
   position: absolute; inset: 0; pointer-events: none;
   background:
