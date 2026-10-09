@@ -114,3 +114,7 @@
 @keyframes caret { 50% { opacity: 0; } }
 .brief-source { display: inline-block; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); margin-left: auto; }
 .brief-source.bedrock { color: var(--signal); border-color: rgba(124, 232, 216, 0.4); }
+@media (max-width: 520px) {
+  .tab { padding: 12px 10px; font-size: 11px; letter-spacing: 0.08em; }
+  .tab .icon { display: none; }
+}

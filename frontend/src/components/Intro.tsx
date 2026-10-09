@@ -1,9 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MutableRefObject } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import type { ClustersFile, SummaryFile } from '../api'
 import { fmtInt } from '../lib/format'
+import { introFinished } from '../lib/intro'
 import { setText } from '../lib/motion'
-import type { GlobeControl } from '../three/GlobeScene'
 import { heroGlobeScreen } from '../three/layout'
 import '../styles/intro.css'
 
@@ -15,34 +15,19 @@ import '../styles/intro.css'
 // The iris sits exactly where the hero globe will be (three/layout.ts), so the hand-off has no cut.
 // Click, any key or Skip jumps to the dilation. Reduced motion: a short fade.
 
-const KEY = 'pc-intro'
-let decided: boolean | undefined
-
-/** True once per session, on a first load that lands on Home. Stable until the intro has run. */
-export function shouldPlayIntro(): boolean {
-  if (decided !== undefined) return decided
-  try {
-    decided = !sessionStorage.getItem(KEY) && window.location.pathname === '/'
-    sessionStorage.setItem(KEY, '1')
-  } catch {
-    decided = false
-  }
-  return decided
-}
-
 const WORD = 'PANOPTICOAL'
 const BUILD_MS = 2600
 const DILATE_MS = 850
 
 interface Props {
-  control: MutableRefObject<GlobeControl>
+  setPull: (k: number) => void // 0 = camera inside the pupil, 1 = hero position
   clusters?: ClustersFile
   summary?: SummaryFile
   reduced: boolean
   onDone: () => void
 }
 
-export default function Intro({ control, clusters, summary, reduced, onDone }: Props) {
+export default function Intro({ setPull, clusters, summary, reduced, onDone }: Props) {
   const root = useRef<HTMLDivElement>(null)
   const counter = useRef<HTMLSpanElement>(null)
   const word = useRef<HTMLDivElement>(null)
@@ -81,7 +66,6 @@ export default function Intro({ control, clusters, summary, reduced, onDone }: P
   useEffect(() => {
     const el = root.current
     if (!el) return
-    const c = control.current
     let raf = 0
     const t0 = performance.now()
     let tFinish = 0
@@ -98,7 +82,7 @@ export default function Intro({ control, clusters, summary, reduced, onDone }: P
       tFinish = performance.now()
       const pull = () => {
         const k = Math.min(1, (performance.now() - tFinish) / (ms * 1.15))
-        c.intro = k
+        setPull(k)
         if (k < 1) raf = requestAnimationFrame(pull)
         else onDone()
       }
@@ -107,16 +91,16 @@ export default function Intro({ control, clusters, summary, reduced, onDone }: P
     }
 
     if (reduced) {
-      c.intro = 1
+      setPull(1)
       el.classList.add('fade')
       const id = setTimeout(onDone, 450)
       return () => {
         clearTimeout(id)
-        decided = false
+        introFinished()
       }
     }
 
-    c.intro = 0
+    setPull(0)
     // Counter 000 -> 100 between 0.9 s and 2.5 s.
     const tick = (t: number) => {
       const k = Math.min(1, Math.max(0, (t - t0 - 900) / 1600))
@@ -138,10 +122,10 @@ export default function Intro({ control, clusters, summary, reduced, onDone }: P
       el.removeEventListener('pointerdown', skip)
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('wheel', skip)
-      c.intro = 1
-      decided = false
+      setPull(1)
+      introFinished()
     }
-  }, [control, geo, reduced, onDone])
+  }, [setPull, geo, reduced, onDone])
 
   const plants = clusters?.clusters.reduce((a, x) => a + x.n_plants, 0)
   const mw = clusters?.clusters.reduce((a, x) => a + x.capacity_mw, 0)

@@ -7,7 +7,8 @@ import { IconTile, type IconName } from '../components/Icons'
 import { InspectorScene } from '../components/Illustrations'
 import GlobePoster from '../components/GlobePoster'
 import HomeStory from '../components/HomeStory'
-import Intro, { shouldPlayIntro } from '../components/Intro'
+import Intro from '../components/Intro'
+import { shouldPlayIntro } from '../lib/intro'
 import { Divider, Ticker, Words, type TickerItem } from '../components/PageHero'
 import { fmt, fmtInt, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
@@ -92,6 +93,9 @@ export default function Home() {
   const [playIntro] = useState(shouldPlayIntro)
   const [introDone, setIntroDone] = useState(!playIntro)
   const endIntro = useCallback(() => setIntroDone(true), [])
+  const setPull = useCallback((k: number) => {
+    control.current.intro = k
+  }, [])
 
   // During the intro the 3D hero loads straight away (after the intro's first frame), so it is
   // rendering by the time the pupil opens.
@@ -207,7 +211,7 @@ export default function Home() {
       </div>
 
       <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} ticker={ticker} />
-      {!introDone && <Intro control={control} clusters={clusters.data} summary={summary.data} reduced={reduced} onDone={endIntro} />}
+      {!introDone && <Intro setPull={setPull} clusters={clusters.data} summary={summary.data} reduced={reduced} onDone={endIntro} />}
     </>
   )
 }

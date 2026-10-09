@@ -8,7 +8,7 @@ unless noted.
 2. no2_world_2024.webp: the same 2024 mean worldwide, 2048 x 1024 (~0.18 degree). Log ramp:
    transparent below the 90th percentile, ember -> hot red, full at the 99.9th (no2_world_2024.json).
 3. land_mask.png: Natural Earth 110m land (public domain) at 720 x 360. Red = land, green = India
-   (Natural Earth admin-0, India point-of-view file when available).
+   (Natural Earth admin-0, India point-of-view file when available). Legacy: the globe now uses earth_mask.
 4. earth_mask.webp: 2048 x 1024, lossless, drawn at 2x and downsampled (anti-aliased).
    Red = land, green = country land borders (ne_110m_admin_0_boundary_lines_land), blue = India.
 5. night_lights.webp (3600 x 1800) and night_lights_1k.webp (1024 x 512): NASA Black Marble 2016,
