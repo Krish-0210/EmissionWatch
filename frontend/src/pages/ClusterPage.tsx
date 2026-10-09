@@ -384,7 +384,7 @@ function BriefPanel({ c }: { c: ClusterDetail }) {
               <span className="micro">
                 Inspection brief · {c.name} · data as of {c.as_of}
               </span>
-              <span className={`micro brief-source ${state.source}`}>{state.source === 'bedrock' ? 'Written by AI (Amazon Bedrock) from the numbers above' : 'Template brief from the numbers above'}</span>
+              <span className={`micro brief-source ${state.source}`}>{state.source === 'bedrock' ? 'Written by AI (Amazon Bedrock)' : 'Auto-generated brief'}</span>
             </header>
             <div className="doc-stamp" aria-hidden="true">
               Anomaly · not proof

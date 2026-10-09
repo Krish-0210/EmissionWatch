@@ -110,7 +110,7 @@ export interface SummaryFile {
 
 export interface Brief {
   markdown: string
-  source: 'bedrock' | 'template' // AI-written (Bedrock) or the deterministic fallback
+  source: 'bedrock' | 'template' | 'auto' // AI-written (Bedrock) or the deterministic fallback ('template'; 'auto' is treated the same)
 }
 
 // VITE_API_URL unset: static files from public/data/. Set: the deployed API, same shapes.
