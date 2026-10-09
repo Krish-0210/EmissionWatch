@@ -1,46 +1,5 @@
 /* PanoptiCoal motion + surface system. Transform/opacity animations only; reduced motion stops loops. */
 
-/* ---------- Gradient mesh: slow blurred colour fields, one palette per page ---------- */
-.mesh { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; contain: strict; animation: mesh-in 1.6s ease both; }
-@keyframes mesh-in { from { opacity: 0; } }
-.mesh i {
-  position: absolute; width: 72vmax; height: 72vmax; border-radius: 50%;
-  background: radial-gradient(closest-side, var(--c), transparent);
-  opacity: var(--o, 0.16); will-change: transform;
-  animation: mesh-drift var(--t, 40s) ease-in-out infinite alternate;
-}
-.mesh i:nth-child(1) { left: -22vmax; top: -30vmax; }
-.mesh i:nth-child(2) { right: -26vmax; top: -12vmax; animation-name: mesh-drift-b; }
-.mesh i:nth-child(3) { left: 18vw; bottom: -40vmax; animation-name: mesh-drift-c; }
-.mesh i:nth-child(4) { right: 6vw; bottom: -18vmax; width: 46vmax; height: 46vmax; animation-name: mesh-drift-b; animation-direction: alternate-reverse; }
-@keyframes mesh-drift { to { transform: translate3d(14vw, 10vh, 0) scale(1.18); } }
-@keyframes mesh-drift-b { to { transform: translate3d(-12vw, 14vh, 0) scale(0.88); } }
-@keyframes mesh-drift-c { to { transform: translate3d(10vw, -12vh, 0) scale(1.1); } }
-.mesh.home i:nth-child(1) { --c: #2a78d6; --o: 0.14; }
-.mesh.home i:nth-child(2) { --c: #7ce8d8; --o: 0.08; }
-.mesh.home i:nth-child(3) { --c: #ff8a3d; --o: 0.08; }
-.mesh.home i:nth-child(4) { --c: #3b4fd6; --o: 0.07; }
-.mesh.map i:nth-child(1) { --c: #ff5a3c; --o: 0.11; --t: 34s; }
-.mesh.map i:nth-child(2) { --c: #7ce8d8; --o: 0.09; }
-.mesh.map i:nth-child(3) { --c: #ffc24b; --o: 0.06; }
-.mesh.map i:nth-child(4) { --c: #2a78d6; --o: 0.1; }
-.mesh.cluster i:nth-child(1) { --c: var(--risk, #ff8a3d); --o: 0.12; }
-.mesh.cluster i:nth-child(2) { --c: #2a78d6; --o: 0.1; }
-.mesh.cluster i:nth-child(3) { --c: #7ce8d8; --o: 0.07; }
-.mesh.cluster i:nth-child(4) { --c: #ff8a3d; --o: 0.07; }
-.mesh.near i:nth-child(1) { --c: #7ce8d8; --o: 0.12; --t: 30s; }
-.mesh.near i:nth-child(2) { --c: #2a78d6; --o: 0.12; }
-.mesh.near i:nth-child(3) { --c: #7ce8d8; --o: 0.06; }
-.mesh.near i:nth-child(4) { --c: #ffc24b; --o: 0.05; }
-.mesh.how i:nth-child(1) { --c: #3b4fd6; --o: 0.12; }
-.mesh.how i:nth-child(2) { --c: #ff8a3d; --o: 0.08; }
-.mesh.how i:nth-child(3) { --c: #2a78d6; --o: 0.1; }
-.mesh.how i:nth-child(4) { --c: #7ce8d8; --o: 0.07; }
-.mesh.limits i:nth-child(1) { --c: #5d6875; --o: 0.16; }
-.mesh.limits i:nth-child(2) { --c: #ff8a3d; --o: 0.07; }
-.mesh.limits i:nth-child(3) { --c: #2a78d6; --o: 0.09; }
-.mesh.limits i:nth-child(4) { --c: #7ce8d8; --o: 0.05; }
-
 /* ---------- Glass cards: gradient border, cursor spotlight on the border ---------- */
 .card {
   --mx: 50%; --my: 50%;
@@ -216,7 +175,7 @@
 :root:active-view-transition .page { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .mesh i, .ticker-track { animation: none !important; }
+  .ticker-track { animation: none !important; }
   .ticker-track { flex-wrap: wrap; width: auto; }
   .words .w { translate: none; }
   .tilt, .magnetic { transform: none !important; }

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import type { ClusterDetail, ModelStats, MonthPoint } from '../api'
 import { briefAvailable, fetchCluster, fetchSummary, fetchTimeseries, generateBrief, peekCluster, peekSummary, peekTimeseries, type Brief } from '../api'
 import { ConfidenceBadge, RiskBadge } from '../components/Badges'
+import { useBackdropTone } from '../components/Backdrop'
 import BigWord from '../components/BigWord'
 import CountUp from '../components/CountUp'
 import Icon from '../components/Icons'
@@ -457,6 +458,7 @@ export default function ClusterPage() {
   const [tab, setTab] = useState('evidence')
   const c = detail.data
   const bt = summary.data?.backtest.find((r) => r.cluster === id)
+  useBackdropTone('tone', c?.risk_level)
 
   const ticker: TickerItem[] = useMemo(() => {
     if (!c) return []

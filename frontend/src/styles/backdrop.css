@@ -1,0 +1,96 @@
+/* Layered background (components/Backdrop.tsx). Glow colours are registered properties so a palette
+   change (Home's story step, a cluster's risk level) cross-fades instead of snapping. */
+@property --ga { syntax: '<color>'; inherits: true; initial-value: #7ce8d8; }
+@property --gb { syntax: '<color>'; inherits: true; initial-value: #ff8a3d; }
+@property --gc { syntax: '<color>'; inherits: true; initial-value: #8b6cff; }
+
+.bd {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; contain: strict;
+  background: linear-gradient(180deg, #0a1220 0%, #070b13 48%, #05070b 100%);
+  transition: --ga 1.4s ease, --gb 1.4s ease, --gc 1.4s ease;
+  animation: bd-in 1.2s ease both;
+  /* glow positions (centre, % of viewport) and strengths */
+  --ax: 72%; --ay: 48%; --bx: 10%; --by: 88%; --cx: 90%; --cy: 6%;
+  --oa: 0.26; --ob: 0.16; --oc: 0.14;
+}
+@keyframes bd-in { from { opacity: 0; } }
+
+.bd > i, .bd-gridwrap, .bd-dust { position: absolute; display: block; }
+
+/* Glows: big soft radial fields that drift and breathe */
+.bd-glow { width: 76vmax; height: 76vmax; border-radius: 50%; will-change: transform; }
+.bd-glow.g1 { left: calc(var(--ax) - 38vmax); top: calc(var(--ay) - 38vmax); opacity: var(--oa);
+  background: radial-gradient(closest-side, var(--ga), transparent); animation: bd-drift-a 38s ease-in-out infinite alternate; }
+.bd-glow.g2 { left: calc(var(--bx) - 38vmax); top: calc(var(--by) - 38vmax); opacity: var(--ob);
+  background: radial-gradient(closest-side, var(--gb), transparent); animation: bd-drift-b 46s ease-in-out infinite alternate; }
+.bd-glow.g3 { left: calc(var(--cx) - 38vmax); top: calc(var(--cy) - 38vmax); opacity: var(--oc);
+  background: radial-gradient(closest-side, var(--gc), transparent); animation: bd-drift-c 52s ease-in-out infinite alternate; }
+.bd-glow, .bd-glow.g1, .bd-glow.g2, .bd-glow.g3 { transition: opacity 1.4s ease; }
+@keyframes bd-drift-a { 0% { transform: translate3d(-2vw, 1vh, 0) scale(1); } 50% { transform: translate3d(2vw, -3vh, 0) scale(1.08); } 100% { transform: translate3d(-1vw, 3vh, 0) scale(0.96); } }
+@keyframes bd-drift-b { to { transform: translate3d(8vw, -6vh, 0) scale(1.15); } }
+@keyframes bd-drift-c { to { transform: translate3d(-7vw, 8vh, 0) scale(0.9); } }
+
+/* Aurora: two faint elliptical bands that sway */
+.bd-aurora { width: 140vw; height: 60vh; left: -20vw; will-change: transform; opacity: 0.5; }
+.bd-aurora.a1 { top: 4vh; background: radial-gradient(ellipse 50% 22% at 50% 50%, color-mix(in srgb, var(--ga) 16%, transparent), transparent 70%);
+  transform: rotate(-9deg); animation: bd-aurora-a 30s ease-in-out infinite alternate; }
+.bd-aurora.a2 { top: 46vh; background: radial-gradient(ellipse 46% 20% at 50% 50%, color-mix(in srgb, var(--gc) 14%, transparent), transparent 70%);
+  transform: rotate(7deg); animation: bd-aurora-b 36s ease-in-out infinite alternate; }
+@keyframes bd-aurora-a { to { transform: rotate(-3deg) translate3d(6vw, 4vh, 0) scaleY(1.3); } }
+@keyframes bd-aurora-b { to { transform: rotate(12deg) translate3d(-8vw, -3vh, 0) scaleY(0.8); } }
+
+/* Measurement grid: 120 px cells, "+" crosshairs on every other intersection, edge ruler ticks */
+.bd-gridwrap { inset: 0;
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 42%, #000 35%, transparent 92%);
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 42%, #000 35%, transparent 92%); }
+.bd-grid {
+  position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 240px); will-change: transform;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><path d='M120 113v14M113 120h14' stroke='%23c9d4de' stroke-opacity='.3' stroke-width='1'/><circle cx='0' cy='0' r='1.2' fill='%237ce8d8' fill-opacity='.35'/></svg>") 0 0 / 240px 240px,
+    linear-gradient(to right, rgba(124, 232, 216, 0.045) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(to bottom, rgba(124, 232, 216, 0.045) 1px, transparent 1px) 0 0 / 120px 120px;
+}
+.bd-grid::before, .bd-grid::after { content: ''; position: absolute; top: 0; bottom: 0; width: 14px;
+  background:
+    repeating-linear-gradient(to bottom, rgba(201, 212, 222, 0.28) 0 1px, transparent 1px 120px) 0 0 / 14px 120px no-repeat repeat,
+    repeating-linear-gradient(to bottom, rgba(201, 212, 222, 0.14) 0 1px, transparent 1px 24px) 0 0 / 7px 24px no-repeat repeat; }
+.bd-grid::before { left: 10px; }
+.bd-grid::after { right: 10px; transform: scaleX(-1); }
+
+/* Dust: a few motes drifting slowly */
+.bd-dust { inset: 0; }
+.bd-dust i { position: absolute; border-radius: 50%; background: #c9d4de; opacity: 0.35; will-change: transform;
+  animation: bd-dust var(--t) ease-in-out var(--dl) infinite alternate; }
+.bd-dust i.s { background: var(--signal); opacity: 0.5; box-shadow: 0 0 6px var(--signal); }
+.bd-dust i.e { background: var(--ember); opacity: 0.55; box-shadow: 0 0 6px var(--ember); }
+@keyframes bd-dust { 0% { transform: translate3d(0, 0, 0); opacity: 0.1; } 30% { opacity: 0.55; } 70% { opacity: 0.3; } 100% { transform: translate3d(40px, -90px, 0); opacity: 0.05; } }
+
+.bd-vignette { inset: 0; background: radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, rgba(3, 5, 8, 0.7) 100%); }
+
+/* ---------- Palettes ---------- */
+.bd.home { --ga: #7ce8d8; --gb: #ff8a3d; --gc: #8b6cff; }
+/* Home story steps: Claim = ember, Observation = teal, Comparison = teal + ember, Score = top cluster's risk */
+:root[data-step='0'] .bd.home { --ga: #ff8a3d; --gb: #ff5a3c; --oa: 0.3; }
+:root[data-step='1'] .bd.home { --ga: #7ce8d8; --gb: #2a78d6; --oa: 0.3; }
+:root[data-step='2'] .bd.home { --ga: #7ce8d8; --gb: #ff8a3d; --oa: 0.24; --ob: 0.26; }
+:root[data-step='3'][data-tone='high'] .bd.home { --ga: #ff5a3c; --gb: #ff8a3d; --oa: 0.3; }
+:root[data-step='3'][data-tone='medium'] .bd.home { --ga: #ffc24b; --gb: #ff8a3d; --oa: 0.28; }
+:root[data-step='3'][data-tone='low'] .bd.home { --ga: #7ce8d8; --gb: #2a78d6; --oa: 0.28; }
+:root[data-step] .bd.home { --ax: 50%; --ay: 46%; }
+
+.bd.map { --ga: #ff5a3c; --gb: #7ce8d8; --gc: #ffc24b; --ax: 74%; --ay: 30%; --oa: 0.2; --ob: 0.13; --oc: 0.1; }
+.bd.cluster { --ga: #ff8a3d; --gb: #2a78d6; --gc: #7ce8d8; --ax: 70%; --ay: 34%; --oa: 0.22; }
+:root[data-tone='high'] .bd.cluster { --ga: #ff5a3c; }
+:root[data-tone='medium'] .bd.cluster { --ga: #ffc24b; }
+:root[data-tone='low'] .bd.cluster { --ga: #7ce8d8; }
+.bd.near { --ga: #7ce8d8; --gb: #2a78d6; --gc: #ffc24b; --ax: 72%; --ay: 34%; --oa: 0.22; --oc: 0.08; }
+.bd.how { --ga: #6d7cff; --gb: #ff8a3d; --gc: #7ce8d8; --ax: 70%; --ay: 30%; --oa: 0.2; --ob: 0.12; --oc: 0.1; }
+.bd.limits { --ga: #5d7a96; --gb: #ff8a3d; --gc: #2a78d6; --ax: 72%; --ay: 30%; --oa: 0.22; --ob: 0.1; }
+
+@media (max-width: 767px) {
+  .bd-grid::before, .bd-grid::after, .bd-aurora.a2 { display: none; }
+  .bd { --ax: 50%; --ay: 62%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bd-glow, .bd-aurora, .bd-dust i { animation: none !important; }
+}

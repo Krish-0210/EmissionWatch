@@ -1,9 +1,10 @@
 import Lenis from 'lenis'
-import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useInteractions } from '../lib/interactions'
 import { prefersReducedMotion } from '../lib/motion'
+import Backdrop, { backdropFor } from './Backdrop'
 import BigWord from './BigWord'
 import Cursor from './Cursor'
 import { Wordmark } from './Logo'
@@ -28,19 +29,6 @@ function GitHubIcon() {
 
 let lenis: Lenis | null = null
 
-// Slow gradient-mesh background, one palette per section of the site.
-const meshFor = (path: string) =>
-  path === '/' ? 'home' : path.startsWith('/map') ? 'map' : path.startsWith('/cluster') ? 'cluster' : path.startsWith('/near') ? 'near' : path.startsWith('/how') ? 'how' : 'limits'
-const Mesh = memo(function Mesh({ variant }: { variant: string }) {
-  return (
-    <div className={`mesh ${variant}`} aria-hidden="true">
-      <i />
-      <i />
-      <i />
-      <i />
-    </div>
-  )
-})
 
 // Smooth scroll on desktop with motion allowed; touch keeps native scrolling. Lenis runs inside
 // GSAP's ticker (first in the queue) and feeds ScrollTrigger, so there is a single frame loop.
@@ -158,7 +146,7 @@ export default function Layout() {
         Skip to content
       </a>
       <Cursor />
-      <Mesh variant={meshFor(pathname)} key={meshFor(pathname)} />
+      <Backdrop variant={backdropFor(pathname)} />
       <div className="proto-banner" role="note">
         <span className="micro">
           <b>Prototype</b> · research demo on public data · indicative, not an official assessment
