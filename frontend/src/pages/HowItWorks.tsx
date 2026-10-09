@@ -10,7 +10,8 @@ import { SatellitePlantScene } from '../components/Illustrations'
 import MethodScene from '../components/MethodScene'
 import NaiveVsModel from '../components/NaiveVsModel'
 import PageHero, { Divider, type TickerItem } from '../components/PageHero'
-import { fmt, fmtP, fmtPct, RISK_COLOR } from '../lib/format'
+import PipelineNodes, { type PipeStep } from '../components/PipelineNodes'
+import { fmt, fmtInt, fmtP, fmtPct, RISK_COLOR } from '../lib/format'
 import { ScrollTrigger } from '../lib/gsap'
 import { setText, useInView, useReducedMotion } from '../lib/motion'
 import { METHOD_AT, type RegisterDrive } from '../lib/story'
@@ -371,6 +372,19 @@ export default function HowItWorks() {
     return () => st.kill()
   }, [])
 
+  const pipe: PipeStep[] = useMemo(() => {
+    const e = summary.data?.pooled_model.enhancement
+    const cl = clusters.data?.clusters ?? []
+    const plants = cl.reduce((a, c) => a + c.n_plants, 0)
+    const mw = cl.reduce((a, c) => a + c.capacity_mw, 0)
+    return [
+      { id: '01', label: 'The claim', value: cl.length ? `CEA · ${plants} plants · ${fmtInt(mw)} MW` : 'CEA daily generation', icon: 'doc' },
+      { id: '02', label: 'The observation', value: 'Sentinel-5P NO₂ · 20 km rings', icon: 'satellite' },
+      { id: '03', label: 'The comparison', value: e ? `+ ERA5 weather · t ${fmt(e.t, 1)}` : '+ ERA5 weather', icon: 'chart' },
+      { id: '04', label: 'The score', value: focus ? `${focus.name} ${Math.round(focus.risk_score)}/100` : 'Audit risk 0–100', icon: 'shield', tone: 'ember' },
+    ]
+  }, [summary.data, clusters.data, focus])
+
   return (
     <>
       <PageHero
@@ -379,7 +393,7 @@ export default function HowItWorks() {
         dim="to score."
         lede="We check whether the NO₂ seen from space around each coal plant cluster matches the electricity the plants report generating, after allowing for weather and season. Scroll to rebuild the method."
         word="Method"
-        visual={<SatellitePlantScene label="A satellite scanning a coal plant, with measurement rings on the ground" />}
+        visual={<PipelineNodes steps={pipe} />}
         ticker={ticker}
       />
 
@@ -442,13 +456,14 @@ export default function HowItWorks() {
         ))}
       </ol>
 
-      <section className="container section-tight">
+      <section className="container section-tight note-wrap">
         <div className="note-signal reveal">
           <p className="muted" style={{ margin: 0 }}>
             Each score also carries a confidence level, lowered when the generation effect is weak, satellite coverage is
             thin, or plants in the area are missing from the reports. See <Link to="/limits">Limits</Link>.
           </p>
         </div>
+        <SatellitePlantScene className="note-il reveal" label="A satellite scanning a coal plant, with measurement rings on the ground" />
       </section>
 
       <section className="container section-tight">
