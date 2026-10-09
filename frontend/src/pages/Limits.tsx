@@ -4,6 +4,7 @@ import { fetchCluster, fetchClusters, fetchSummary, peekClusters, peekSummary } 
 import Icon, { IconTile, type IconName } from '../components/Icons'
 import LimitArt from '../components/LimitArt'
 import PageHero, { Divider, type TickerItem } from '../components/PageHero'
+import MaskLines from '../components/MaskLines'
 import { fmt } from '../lib/format'
 import { useInView } from '../lib/motion'
 import { useAsync } from '../lib/useAsync'
@@ -184,8 +185,8 @@ export default function Limits() {
 
       <section className="container section-tight">
         <div className="micro signal reveal">Related work</div>
-        <h2 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 28px' } as CSSProperties}>
-          Others watch too. <span className="dim">Here is what we add.</span>
+        <h2 className="display d-lg mask" style={{ margin: '14px 0 28px' }}>
+          <MaskLines lines={['Others watch too.', 'Here is what we add.']} delay={80} />
         </h2>
         <div className="related spot-group">
           {RELATED.map((r, i) => (

@@ -142,6 +142,22 @@ export default function Layout() {
     const id = setTimeout(() => ScrollTrigger.refresh(), 450)
     return () => clearTimeout(id)
   }, [pathname])
+  // The logo eye blinks while the page changes.
+  const brand = useRef<HTMLAnchorElement>(null)
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    const el = brand.current
+    if (!el) return
+    el.classList.remove('blink')
+    void el.offsetWidth // restart the animation
+    el.classList.add('blink')
+    const id = setTimeout(() => el.classList.remove('blink'), 500)
+    return () => clearTimeout(id)
+  }, [pathname])
 
   const close = () => setOpen(false)
 
@@ -159,7 +175,7 @@ export default function Layout() {
       </div>
       <header className="nav">
         <div className="container nav-inner">
-          <Link to="/" className="brand" onClick={close} aria-label="PanoptiCoal home" viewTransition>
+          <Link ref={brand} to="/" className="brand" onClick={close} aria-label="PanoptiCoal home" viewTransition>
             <Wordmark animated />
           </Link>
           <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpen((o) => !o)}>

@@ -170,8 +170,11 @@
 ::view-transition-old(root) { animation: vt-out 0.26s var(--ease-out) both; }
 ::view-transition-new(root) { animation: vt-in 0.5s var(--ease-out) both; }
 ::view-transition-group(*) { animation-duration: 0.55s; animation-timing-function: var(--ease-out); }
-@keyframes vt-out { to { opacity: 0; transform: scale(0.99); } }
-@keyframes vt-in { from { opacity: 0; transform: scale(1.012); } }
+@keyframes vt-out { to { opacity: 0; transform: scale(0.985); filter: blur(6px); } }
+@keyframes vt-in { from { opacity: 0; transform: scale(1.015); filter: blur(8px); } }
+/* The logo eye blinks on every route change (Layout adds .blink to the brand link). */
+.brand.blink .logo-mark { animation: eye-blink 0.46s var(--ease-out); transform-origin: 50% 50%; transform-box: fill-box; }
+@keyframes eye-blink { 0% { transform: scaleY(1); } 35%, 50% { transform: scaleY(0.08); } 100% { transform: scaleY(1); } }
 :root:active-view-transition .page { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -186,7 +189,7 @@
 .mlines { display: block; }
 .mlines .ml { display: block; overflow: hidden; padding: 0.06em 0 0.1em; margin: -0.06em 0 -0.1em; }
 .mlines .ml > span { display: block; translate: 0 108%; transition: translate 1s var(--ease-out); transition-delay: calc(var(--md, 0ms) + var(--l) * var(--ms, 120ms)); will-change: translate; }
-.in .mlines .ml > span, .mlines.in .ml > span { translate: none; }
+.in .mlines .ml > span, .mlines.in .ml > span, .on > h2 .mlines .ml > span { translate: none; }
 .mlines .ml.acc > span { background: linear-gradient(92deg, var(--signal) 0%, #c8fbf3 55%, var(--signal) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .mlines .ml.acc.ember > span { background-image: linear-gradient(92deg, var(--ember) 0%, #ffc9a3 55%, var(--ember) 100%); }
 /* Blur-to-focus entrance for ledes and actions (paired with a mask headline) */

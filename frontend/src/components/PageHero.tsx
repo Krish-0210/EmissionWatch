@@ -1,5 +1,6 @@
 import { memo, type CSSProperties, type ReactNode } from 'react'
 import BigWord from './BigWord'
+import MaskLines from './MaskLines'
 
 // Title that rises word by word when its .reveal parent comes into view.
 export function Words({ text, dim, delay = 0 }: { text: string; dim?: string; delay?: number }) {
@@ -74,7 +75,7 @@ export default function PageHero({ eyebrow, title, dim, lede, word, visual, tick
         <div className="trig">
           <div className="micro signal phero-eyebrow">{eyebrow}</div>
           <h1 className={`display ${titleClass}`}>
-            <Words text={title} dim={dim} delay={120} />
+            <MaskLines lines={dim ? [title, dim] : [title]} delay={120} step={140} />
             <span className="scanline" aria-hidden="true" />
           </h1>
           {lede && (

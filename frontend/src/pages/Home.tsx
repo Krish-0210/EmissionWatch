@@ -303,8 +303,8 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
         <BigWord style={{ top: '0.1em', right: '-0.05em' }}>01</BigWord>
         <div className="container layer">
           <div className="micro signal reveal">01 / The problem</div>
-          <h2 className="display d-lg reveal" style={{ '--d': '80ms', marginTop: 14 } as React.CSSProperties}>
-            Emissions oversight <span className="dim">runs on trust.</span>
+          <h2 className="display d-lg mask" style={{ marginTop: 14 }}>
+            <MaskLines lines={['Emissions oversight', 'runs on trust.']} delay={80} />
           </h2>
           <Divider />
           <div className="grid grid-3 spot-group">
@@ -326,8 +326,8 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
         <BigWord style={{ top: '0.1em', left: '-0.05em' }}>02</BigWord>
         <div className="container layer">
           <div className="micro signal reveal">02 / Who it’s for</div>
-          <h2 className="display d-lg reveal" style={{ '--d': '80ms', marginTop: 14 } as React.CSSProperties}>
-            Built for the people <span className="dim">who act on it.</span>
+          <h2 className="display d-lg mask" style={{ marginTop: 14 }}>
+            <MaskLines lines={['Built for the people', 'who act on it.']} delay={80} />
           </h2>
           <Divider />
           <div className="audience-wrap">
@@ -373,8 +373,8 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
         <div className="container layer">
           <div className="honest reveal">
             <div className="micro ember">03 / Honest by design</div>
-            <p className="display d-md" style={{ margin: '18px 0 22px' }}>
-              Anomalies that warrant an audit, <span className="dim">not proof of wrongdoing.</span>
+            <p className="display d-md mask" style={{ margin: '18px 0 22px' }}>
+              <MaskLines lines={['Anomalies that warrant an audit,', 'not proof of wrongdoing.']} tone="ember" delay={120} />
             </p>
             <p className="muted" style={{ maxWidth: '64ch' }}>
               Satellite pixels are coarse, clouds hide the monsoon months, and other sources also emit NO₂. Every score

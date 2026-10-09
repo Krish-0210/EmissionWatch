@@ -4,6 +4,7 @@ import { CONF_LABEL, RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { easeOut, span } from '../lib/motion'
 import { STEP_AT, STEPS, type RegisterDrive } from '../lib/story'
 import CountUp from './CountUp'
+import MaskLines from './MaskLines'
 
 // Generation and observed NO2, each indexed to its own mean = 100 so they share one axis.
 // Line drawing is driven from scroll through refs (see HomeStory's drive), not props.
@@ -163,7 +164,7 @@ export default function HomeStory({ register, progress, step, clusters, focus, s
         <section className={`story-panel ${step === 0 ? 'on' : ''}`} aria-hidden={step !== 0}>
           <div className="micro signal">01 / The claim</div>
           <h2 className="display d-md">
-            Plants report <span className="dim">their own output.</span>
+            <MaskLines lines={['Plants report', 'their own output.']} delay={200} />
           </h2>
           <p className="muted">
             Every day, each plant files how much electricity it generated with the Central Electricity Authority. Independent
@@ -184,7 +185,7 @@ export default function HomeStory({ register, progress, step, clusters, focus, s
         <section className={`story-panel ${step === 1 ? 'on' : ''}`} aria-hidden={step !== 1}>
           <div className="micro signal">02 / The observation</div>
           <h2 className="display d-md">
-            Sentinel-5P <span className="dim">sees the NO₂.</span>
+            <MaskLines lines={['Sentinel-5P', 'sees the NO₂.']} delay={200} />
           </h2>
           <p className="muted">
             Around {focus.name}, we average NO₂ inside 20 km and subtract clean air 50–80 km out. What is left is the
@@ -208,7 +209,7 @@ export default function HomeStory({ register, progress, step, clusters, focus, s
         <section className={`story-panel wide ${step === 2 ? 'on' : ''}`} aria-hidden={step !== 2}>
           <div className="micro signal">03 / The comparison</div>
           <h2 className="display d-md">
-            Output vs <span className="dim">what’s in the air.</span>
+            <MaskLines lines={['Output vs', 'what’s in the air.']} delay={200} />
           </h2>
           <div className="row small" style={{ gap: 18, margin: '6px 0 4px' }}>
             <span className="key gen">Reported generation</span>

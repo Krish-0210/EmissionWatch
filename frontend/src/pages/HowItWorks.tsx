@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer,
 import type { BacktestRow, ClusterDetail, SummaryFile, TimeseriesFile } from '../api'
 import { fetchCluster, fetchClusters, fetchSummary, fetchTimeseries, peekClusters, peekSummary } from '../api'
 import CountUp from '../components/CountUp'
+import MaskLines from '../components/MaskLines'
 import { IconTile, type IconName } from '../components/Icons'
 import { SatellitePlantScene } from '../components/Illustrations'
 import MethodScene from '../components/MethodScene'
@@ -208,8 +209,8 @@ function Results({ s, names }: { s: SummaryFile; names: Record<string, string> }
   return (
     <>
       <div className="micro signal reveal">Results</div>
-      <h2 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 36px' } as CSSProperties}>
-        What the data <span className="dim">shows.</span>
+      <h2 className="display d-lg mask" style={{ margin: '14px 0 36px' }}>
+        <MaskLines lines={['What the data', 'shows.']} delay={80} />
       </h2>
       <div className="results-stats reveal">
         <div>
@@ -452,8 +453,8 @@ export default function HowItWorks() {
 
       <section className="container section-tight">
         <div className="micro signal reveal">Why the model, not a simple correlation</div>
-        <h2 className="display d-lg reveal" style={{ '--d': '80ms', margin: '14px 0 28px' } as CSSProperties}>
-          Weather hides <span className="dim">the signal.</span>
+        <h2 className="display d-lg mask" style={{ margin: '14px 0 28px' }}>
+          <MaskLines lines={['Weather hides', 'the signal.']} delay={80} />
         </h2>
         <div className="reveal" style={{ '--d': '160ms' } as CSSProperties}>
           {all ? <NaiveVsModel details={all.details} series={all.series} /> : <div className="loading micro">Loading the 11 clusters…</div>}
