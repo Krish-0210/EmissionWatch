@@ -7,17 +7,15 @@ unless noted.
    range is written to no2_india_2024.json.
 2. no2_world_2024.webp: the same 2024 mean worldwide, 2048 x 1024 (~0.18 degree). Log ramp:
    transparent below the 90th percentile, ember -> hot red, full at the 99.9th (no2_world_2024.json).
-3. land_mask.png: Natural Earth 110m land (public domain) at 720 x 360. Red = land, green = India
-   (Natural Earth admin-0, India point-of-view file when available). Legacy: the globe now uses earth_mask.
-4. earth_mask.webp: 2048 x 1024, lossless, drawn at 2x and downsampled (anti-aliased).
+3. earth_mask.webp: 2048 x 1024, lossless, drawn at 2x and downsampled (anti-aliased).
    Red = land, green = country land borders (ne_110m_admin_0_boundary_lines_land), blue = India.
-5. night_lights.webp (3600 x 1800) and night_lights_1k.webp (1024 x 512): NASA Black Marble 2016,
+4. night_lights.webp (3600 x 1800) and night_lights_1k.webp (1024 x 512): NASA Black Marble 2016,
    0.1 degree greyscale (public domain, NASA Earth Observatory). The dark floor is subtracted so only
    lights remain.
-6. clouds.webp: NASA Blue Marble cloud composite (public domain, NASA Visible Earth), 2048 x 1024, grey.
+5. clouds.webp: NASA Blue Marble cloud composite (public domain, NASA Visible Earth), 2048 x 1024, grey.
 
 Usage (from pipeline/):
-    python -m src.export.textures [--skip-no2] [--skip-world] [--skip-land] [--skip-earth] [--skip-nasa]
+    python -m src.export.textures [--skip-no2] [--skip-world] [--skip-earth] [--skip-nasa]
 """
 
 import argparse
@@ -43,7 +41,6 @@ NE_BASE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master
 NE_LAND = "ne_110m_land.geojson"
 NE_COUNTRIES = ["ne_110m_admin_0_countries_ind.geojson", "ne_110m_admin_0_countries.geojson"]
 NE_BORDERS = "ne_110m_admin_0_boundary_lines_land.geojson"
-MASK_W, MASK_H = 720, 360
 EARTH_W, EARTH_H = 2048, 1024
 WORLD_W, WORLD_H = 2048, 1024
 
@@ -129,42 +126,6 @@ def _rings(geom: dict):
     polys = [geom["coordinates"]] if geom["type"] == "Polygon" else geom["coordinates"]
     for poly in polys:
         yield poly[0], poly[1:]  # exterior, holes
-
-
-def _draw(draw: ImageDraw.ImageDraw, geom: dict) -> None:
-    px = lambda ring: [((lon + 180) / 360 * MASK_W, (90 - lat) / 180 * MASK_H) for lon, lat in ring]
-    for ext, holes in _rings(geom):
-        draw.polygon(px(ext), fill=255)
-        for hole in holes:
-            draw.polygon(px(hole), fill=0)
-
-
-def export_land() -> None:
-    land = _fetch(NE_LAND)
-    if land is None:
-        raise RuntimeError("could not download Natural Earth land")
-    land_img = Image.new("L", (MASK_W, MASK_H), 0)
-    d = ImageDraw.Draw(land_img)
-    for f in land["features"]:
-        _draw(d, f["geometry"])
-
-    india_img = Image.new("L", (MASK_W, MASK_H), 0)
-    for name in NE_COUNTRIES:
-        countries = _fetch(name)
-        if countries is None:
-            continue
-        feats = [f for f in countries["features"] if f["properties"].get("ADM0_A3") == "IND"]
-        if feats:
-            d = ImageDraw.Draw(india_img)
-            for f in feats:
-                _draw(d, f["geometry"])
-            log.info("india from %s", name)
-            break
-
-    zero = Image.new("L", (MASK_W, MASK_H), 0)
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    Image.merge("RGB", (land_img, india_img, zero)).save(OUT_DIR / "land_mask.png", optimize=True)
-    log.info("land mask %d x %d", MASK_W, MASK_H)
 
 
 def export_no2_world() -> None:
@@ -301,13 +262,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip-no2", action="store_true")
     ap.add_argument("--skip-world", action="store_true")
-    ap.add_argument("--skip-land", action="store_true")
     ap.add_argument("--skip-earth", action="store_true")
     ap.add_argument("--skip-nasa", action="store_true")
     a = ap.parse_args()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    if not a.skip_land:
-        export_land()
     if not a.skip_earth:
         export_earth()
     if not a.skip_nasa:
