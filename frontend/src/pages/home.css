@@ -17,8 +17,13 @@
 
 .hero { will-change: opacity, transform; position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding-top: var(--nav-h); z-index: 2; pointer-events: none; }
 .hero > * { pointer-events: auto; max-width: 640px; }
-.hero > .hero-title { max-width: 980px; }
+.hero > .hero-title { max-width: 760px; font-size: clamp(30px, 3.5vw, 60px); }
 .hero-micro { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; }
+/* Hero entrance (after the intro, or on load) */
+.hero .hero-micro, .hero .hero-lede, .hero > .row { opacity: 0; translate: 0 16px; transition: opacity 0.8s var(--ease-out), translate 0.9s var(--ease-out); }
+.hero.in .hero-micro { opacity: 1; translate: none; }
+.hero.in .hero-lede { opacity: 1; translate: none; transition-delay: 0.45s; }
+.hero.in > .row { opacity: 1; translate: none; transition-delay: 0.6s; }
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 10px var(--signal); animation: live 1.8s ease-in-out infinite; }
 @keyframes live { 50% { opacity: 0.3; } }
 .hero-title .dim { margin-top: 0.12em; }
@@ -95,3 +100,17 @@
 
 .sources { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
 .sources li { border: 1px solid var(--border-2); border-radius: 999px; padding: 10px 18px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+
+/* Globe plume tooltip (positioned by GlobeCanvas) */
+.globe-tip { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 4; opacity: 0; transition: opacity 0.2s; will-change: transform; }
+.globe-tip.on { opacity: 1; }
+.globe-tip-box {
+  position: absolute; left: 16px; bottom: 14px; min-width: 170px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(10, 14, 19, 0.92); border: 1px solid var(--c); box-shadow: 0 0 24px -6px var(--c), 0 18px 40px -20px #000;
+  animation: tip-in 0.25s var(--ease-out);
+}
+.globe-tip-name { font-family: var(--font-display); font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+.globe-tip-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.globe-tip-row i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.globe-tip-row b { color: var(--text); font-weight: 500; }
+@keyframes tip-in { from { opacity: 0; translate: -6px 6px; } }

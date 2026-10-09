@@ -2,6 +2,8 @@ import { PerformanceMonitor } from '@react-three/drei'
 import { advance, Canvas, useThree } from '@react-three/fiber'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import { memo, useEffect, useRef, useState, type MutableRefObject } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { gsap } from '../lib/gsap'
 import type { ClusterSummary } from '../api'
 import GlobeScene, { type GlobeControl } from './GlobeScene'
@@ -72,15 +74,43 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
     }
   }, [])
 
+  // Hover a plume: tooltip with name, risk and score; click (not drag) opens the cluster page.
+  const navigate = useNavigate()
+  const tip = useRef<HTMLDivElement>(null)
+  const [hoverId, setHoverId] = useState<string>()
+  const hovered = clusters.find((c) => c.id === hoverId)
   useEffect(() => {
     const el = host.current
     if (!el) return
-    let lastX = 0, lastY = 0, down = false
+    let lastX = 0, lastY = 0, downX = 0, downY = 0, down = false, hot = -1
+    const pick = (x: number, y: number) => {
+      const pins = control.current.pins ?? []
+      let best = -1, bestD = 24 * 24
+      pins.forEach((p, i) => {
+        if (!p.vis) return
+        const d = (p.x - x) ** 2 + (p.y - y) ** 2
+        if (d < bestD) {
+          bestD = d
+          best = i
+        }
+      })
+      return best
+    }
+    const setHot = (i: number) => {
+      if (i !== hot) {
+        hot = i
+        control.current.hover = i
+        setHoverId(i >= 0 ? clusters[i].id : undefined)
+        if (!down) el.style.cursor = i >= 0 ? 'pointer' : ''
+      }
+      const p = control.current.pins?.[i]
+      if (i >= 0 && p && tip.current) tip.current.style.transform = `translate3d(${p.x.toFixed(0)}px, ${p.y.toFixed(0)}px, 0)`
+    }
     const onDown = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse' || control.current.progress > 0.1) return
       down = true
-      lastX = e.clientX
-      lastY = e.clientY
+      lastX = downX = e.clientX
+      lastY = downY = e.clientY
       control.current.dragging = true
       el.setPointerCapture(e.pointerId)
       el.style.cursor = 'grabbing'
@@ -89,17 +119,27 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
       const r = el.getBoundingClientRect()
       control.current.mouseX = ((e.clientX - r.left) / r.width) * 2 - 1
       control.current.mouseY = ((e.clientY - r.top) / r.height) * 2 - 1
+      if (e.pointerType === 'mouse' && control.current.progress <= 0.1) setHot(down ? -1 : pick(e.clientX - r.left, e.clientY - r.top))
+      else setHot(-1)
       if (!down) return
       control.current.dragYaw += (e.clientX - lastX) * 0.005
       control.current.dragPitch += (e.clientY - lastY) * 0.004
       lastX = e.clientX
       lastY = e.clientY
     }
-    const onUp = () => {
+    const onUp = (e: PointerEvent) => {
+      const click = down && Math.hypot(e.clientX - downX, e.clientY - downY) < 6
       down = false
       control.current.dragging = false
       el.style.cursor = ''
+      if (click) {
+        const r = el.getBoundingClientRect()
+        const i = pick(e.clientX - r.left, e.clientY - r.top)
+        if (i >= 0) navigate(`/cluster/${clusters[i].id}`, { viewTransition: true })
+      }
     }
+    const onLeave = () => setHot(-1)
+    el.addEventListener('pointerleave', onLeave)
     el.addEventListener('pointerdown', onDown)
     el.addEventListener('pointermove', onMove)
     el.addEventListener('pointerup', onUp)
@@ -109,8 +149,9 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
       el.removeEventListener('pointermove', onMove)
       el.removeEventListener('pointerup', onUp)
       el.removeEventListener('pointercancel', onUp)
+      el.removeEventListener('pointerleave', onLeave)
     }
-  }, [control])
+  }, [control, clusters, navigate])
 
   return (
     <div ref={host} className="globe-host" aria-hidden="true">
@@ -158,6 +199,18 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
           )}
         </PerformanceMonitor>
       </Canvas>
+      <div ref={tip} className={`globe-tip${hovered ? ' on' : ''}`} role="tooltip">
+        {hovered && (
+          <div className="globe-tip-box" style={{ '--c': RISK_COLOR[hovered.risk_level] } as React.CSSProperties}>
+            <div className="globe-tip-name">{hovered.name}</div>
+            <div className="globe-tip-row">
+              <i />
+              {RISK_LABEL[hovered.risk_level]} · <b className="mono">{Math.round(hovered.risk_score)}</b>/100
+            </div>
+            <div className="micro">Click to open</div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

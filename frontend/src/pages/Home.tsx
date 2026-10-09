@@ -5,6 +5,8 @@ import BigWord from '../components/BigWord'
 import CountUp from '../components/CountUp'
 import GlobePoster from '../components/GlobePoster'
 import HomeStory from '../components/HomeStory'
+import Intro, { shouldPlayIntro } from '../components/Intro'
+import { Words } from '../components/PageHero'
 import { ScrollTrigger } from '../lib/gsap'
 import { useIsMobile, useReducedMotion } from '../lib/motion'
 import { stepFor, type RegisterDrive } from '../lib/story'
@@ -78,11 +80,24 @@ export default function Home() {
   const [mount3d, setMount3d] = useState(false)
   const [ready3d, setReady3d] = useState(false)
   const onReady = useCallback(() => setReady3d(true), [])
+  const [playIntro] = useState(shouldPlayIntro)
+  const [introDone, setIntroDone] = useState(!playIntro)
+  const endIntro = useCallback(() => setIntroDone(true), [])
 
-  // The 3D scene (and the WebGL probe, which can block for a while on first GPU use) loads on
-  // the first sign of intent (pointer, scroll, touch, key) or after 5 s; the poster shows until then.
+  // During the intro the 3D hero loads straight away (after the intro's first frame), so it is
+  // rendering by the time the pupil opens.
   useEffect(() => {
-    if (reduced) return
+    if (!playIntro || reduced) return
+    const id = setTimeout(() => {
+      if (webglOk()) setMount3d(true)
+    }, 80)
+    return () => clearTimeout(id)
+  }, [playIntro, reduced])
+
+  // Otherwise the 3D scene (and the WebGL probe, which can block for a while on first GPU use) loads
+  // on the first sign of intent (pointer, scroll, touch, key) or after 5 s; the poster shows until then.
+  useEffect(() => {
+    if (reduced || playIntro) return
     const events = ['pointermove', 'pointerdown', 'wheel', 'scroll', 'touchstart', 'keydown'] as const
     let done = false
     const go = () => {
@@ -98,7 +113,7 @@ export default function Home() {
       events.forEach((e) => window.removeEventListener(e, go))
     }
     return cleanup
-  }, [reduced])
+  }, [reduced, playIntro])
 
   // Scroll progress through the pinned stage. Continuous values go straight to refs and DOM;
   // React only re-renders when the story step changes.
@@ -138,13 +153,12 @@ export default function Home() {
           </div>
           <div className="stage-vignette" aria-hidden="true" />
 
-          <div ref={hero} className="hero container">
+          <div ref={hero} className={`hero container${introDone ? ' in' : ''}`}>
             <div className="micro signal hero-micro">
               <span className="live-dot" aria-hidden="true" /> Live data · {clusters.data?.clusters.length ?? 11} clusters · {years}
             </div>
             <h1 className="display d-xl hero-title">
-              Coal plants report their own pollution.
-              <span className="dim">We watch from space.</span>
+              <Words text="Coal plants report their own pollution." dim="We watch from space." delay={150} />
             </h1>
             <p className="lede hero-lede">
               PanoptiCoal compares daily satellite measurements of nitrogen dioxide around India’s largest coal plant
@@ -170,6 +184,7 @@ export default function Home() {
       </div>
 
       <HomeSections clusterCount={clusters.data?.clusters.length ?? 11} years={years} />
+      {!introDone && <Intro control={control} clusters={clusters.data} summary={summary.data} reduced={reduced} onDone={endIntro} />}
     </>
   )
 }
