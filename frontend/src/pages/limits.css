@@ -19,7 +19,7 @@
 .limits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; }
 .limit { display: flex; flex-direction: column; }
 .limit-n { color: var(--signal); font-size: 12px; margin-top: 4px; }
-.limit-title { font-size: 19px; font-weight: 500; margin: 6px 0 8px; font-family: var(--font-body); }
+.limit-title { font-size: 22px; font-weight: 400; margin: 6px 0 8px; font-family: var(--font-display); letter-spacing: -0.03em; }
 .limit p { margin: 0; }
 .limit-art { height: 120px; margin: -6px -6px 12px; border-radius: 10px; background: radial-gradient(closest-side, rgba(124, 232, 216, 0.06), transparent); display: flex; justify-content: center; }
 .la { height: 100%; width: auto; max-width: 100%; overflow: visible; }

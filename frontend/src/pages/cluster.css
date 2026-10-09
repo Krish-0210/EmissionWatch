@@ -112,7 +112,7 @@
 .brief-skeleton span { height: 12px; border-radius: 6px; background: linear-gradient(100deg, var(--border) 30%, #26303a 50%, var(--border) 70%); background-size: 220% 100%; animation: shimmer 1.3s linear infinite; }
 .brief-skeleton span:nth-child(2) { width: 85%; }
 .brief-skeleton span:nth-child(3) { width: 60%; }
-.brief h3 { font-size: 16px; margin-top: 1em; font-family: var(--font-display); font-weight: 600; }
+.brief h3 { font-size: 19px; margin-top: 1em; font-family: var(--font-display); font-weight: 500; }
 .typed:not(.done) .brief > :last-child::after { content: ''; display: inline-block; width: 8px; height: 1.1em; margin-left: 2px; vertical-align: -0.15em; background: var(--signal); animation: caret 0.8s steps(1) infinite; }
 @keyframes caret { 50% { opacity: 0; } }
 .brief-source { display: inline-block; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); margin-left: auto; }

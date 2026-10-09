@@ -37,19 +37,23 @@ button { font: inherit; color: inherit; }
 h1, h2, h3, h4 { margin: 0 0 0.5em; font-weight: 400; }
 
 /* ---------- Type ---------- */
+/* Display: Familjen Grotesk 400, tight negative tracking, sentence case (big sizes track tighter). */
 .display {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.04;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 0.94;
   margin: 0;
   text-wrap: balance;
 }
 .display .dim { color: var(--muted); display: block; }
-.d-xl { font-size: clamp(30px, 4.4vw, 80px); }
-.d-lg { font-size: clamp(28px, 4.4vw, 68px); }
-.d-md { font-size: clamp(22px, 2.9vw, 42px); }
-.d-sm { font-size: clamp(18px, 1.9vw, 26px); line-height: 1.15; }
+.d-xl { font-size: clamp(42px, 6.1vw, 96px); }
+.d-lg { font-size: clamp(36px, 5.4vw, 84px); }
+.d-md { font-size: clamp(28px, 3.5vw, 52px); letter-spacing: -0.045em; line-height: 1; }
+.d-sm { font-size: clamp(21px, 2.1vw, 30px); letter-spacing: -0.035em; line-height: 1.08; }
+h3 { font-family: var(--font-display); letter-spacing: -0.03em; line-height: 1.1; }
+/* Buttons / CTAs / nav: Martian Mono, uppercase, slightly negative tracking. */
+.ui { font-family: var(--font-ui); text-transform: uppercase; letter-spacing: -0.04em; font-weight: 400; }
 .micro {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -118,7 +122,7 @@ main, .footer { overflow-x: clip; }
   min-height: 48px; padding: 0 22px 0 24px;
   border-radius: 999px; border: 1px solid var(--signal);
   background: var(--signal); color: var(--signal-ink);
-  font-family: var(--font-mono); font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 400; letter-spacing: -0.04em; text-transform: uppercase;
   text-decoration: none; cursor: pointer; white-space: nowrap;
   transition: background 0.25s, box-shadow 0.25s, transform 0.25s var(--ease-out);
 }
@@ -144,7 +148,7 @@ main, .footer { overflow-x: clip; }
   padding: clamp(18px, 2.4vw, 28px);
   position: relative;
 }
-.card h3 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.card h3 { font-size: 22px; font-weight: 400; margin-bottom: 10px; }
 .card p:last-child { margin-bottom: 0; }
 
 /* Badges */
@@ -193,7 +197,7 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
 .brand { display: inline-flex; align-items: center; color: var(--text); text-decoration: none; white-space: nowrap; }
 .brand:hover { color: var(--text); }
 /* Wordmark: PANOPTI in --text, COAL in --ember */
-.wordmark { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
+.wordmark { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-brand); font-weight: 700; font-size: 15px; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
 .wm-coal { color: var(--ember); }
 .logo-mark { flex: none; overflow: visible; }
 .logo-mark .lm-orbit, .logo-mark .lm-iris { transform-origin: 24px 24px; transform-box: view-box; }
@@ -203,14 +207,14 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
 @keyframes lm-orbit { to { transform: rotate(360deg); } }
 .nav-links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .nav-links a {
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-family: var(--font-display); font-size: 15px; letter-spacing: -0.02em; text-transform: uppercase;
   color: var(--muted); text-decoration: none; padding: 8px 12px; border-radius: 999px; transition: color 0.2s;
 }
 .nav-links a:hover { color: var(--text); }
 .nav-links a.active { color: var(--signal); }
-.nav-links .pill { color: var(--signal-ink); padding: 0 16px 0 18px; min-height: 38px; font-size: 12px; margin-left: 8px; }
+.nav-links .pill { color: var(--signal-ink); padding: 0 16px 0 18px; min-height: 38px; font-size: 11.5px; margin-left: 8px; font-family: var(--font-ui); letter-spacing: -0.04em; }
 .nav-gh { display: inline-flex !important; padding: 8px !important; }
-.nav-toggle { display: none; margin-left: auto; background: none; border: 1px solid var(--border-2); border-radius: 999px; height: 38px; padding: 0 16px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
+.nav-toggle { display: none; margin-left: auto; background: none; border: 1px solid var(--border-2); border-radius: 999px; height: 38px; padding: 0 16px; cursor: pointer; font-family: var(--font-ui); font-size: 12px; letter-spacing: -0.04em; text-transform: uppercase; }
 @media (max-width: 960px) {
   .nav-toggle { display: inline-flex; align-items: center; }
   .nav-links {
@@ -218,7 +222,7 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
     background: rgba(7, 9, 12, 0.97); border-bottom: 1px solid var(--border); padding: 12px var(--gutter) 20px;
   }
   .nav-links.open { display: flex; }
-  .nav-links a { padding: 14px 4px; font-size: 13px; }
+  .nav-links a { padding: 14px 4px; font-size: 20px; }
   .nav-links .pill { margin: 8px 0 0; justify-content: center; min-height: 48px; }
 }
 

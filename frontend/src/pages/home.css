@@ -21,7 +21,7 @@
 
 .hero { will-change: opacity, transform; position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding-top: var(--nav-h); z-index: 2; pointer-events: none; }
 .hero > * { pointer-events: auto; max-width: 640px; }
-.hero > .hero-title { max-width: 760px; font-size: clamp(30px, 3.5vw, 60px); }
+.hero > .hero-title { max-width: 760px; font-size: clamp(38px, 4.9vw, 80px); }
 .hero-micro { display: inline-flex; align-self: flex-start; align-items: center; gap: 10px; margin-bottom: 26px; }
 /* Hero entrance (after the intro, or on load): eyebrow, headline lines from a mask (MaskLines),
    then lede and CTAs blur into focus. */
@@ -140,7 +140,7 @@
   background: rgba(10, 14, 19, 0.92); border: 1px solid var(--c); box-shadow: 0 0 24px -6px var(--c), 0 18px 40px -20px #000;
   animation: tip-in 0.25s var(--ease-out);
 }
-.globe-tip-name { font-family: var(--font-display); font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+.globe-tip-name { font-family: var(--font-display); font-weight: 500; font-size: 18px; letter-spacing: -0.02em; margin-bottom: 4px; }
 .globe-tip-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
 .globe-tip-row i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
 .globe-tip-row b { color: var(--text); font-weight: 500; }
