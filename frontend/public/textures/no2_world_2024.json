@@ -1,0 +1,25 @@
+{
+ "source": "COPERNICUS/S5P/OFFL/L3_NO2, tropospheric_NO2_column_number_density, mean 2024-01-01..2024-12-31",
+ "units": "mol/m^2",
+ "size": [
+  2048,
+  1024
+ ],
+ "resolution_deg": 0.17578125,
+ "ramp": {
+  "scale": "log",
+  "transparent_below": 1.4807397656113608e-05,
+  "full_at": 0.00010616521933116396,
+  "percentiles": [
+   90,
+   99.9
+  ]
+ },
+ "percentiles": {
+  "50": 4.778921720571816e-06,
+  "90": 1.4807397656113608e-05,
+  "99": 3.999950957222606e-05,
+  "99.9": 0.00010616521933116396
+ },
+ "max": 0.0004930285504087806
+}
