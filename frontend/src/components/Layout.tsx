@@ -9,6 +9,7 @@ import { prefersReducedMotion } from '../lib/motion'
 import Backdrop from './Backdrop'
 import BigWord from './BigWord'
 import Cursor from './Cursor'
+import SoundToggle from './SoundToggle'
 import { Wordmark } from './Logo'
 
 export const GITHUB_URL = 'https://github.com/Krish-0210/EmissionWatch'
@@ -178,6 +179,7 @@ export default function Layout() {
           <Link ref={brand} to="/" className="brand" onClick={close} aria-label="PanoptiCoal home" viewTransition>
             <Wordmark animated />
           </Link>
+          <SoundToggle className="nav-sound" />
           <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpen((o) => !o)}>
             {open ? 'Close' : 'Menu'}
           </button>

@@ -6,8 +6,13 @@
 // No React state; rects are read once per frame, then CSS variables are written.
 import { useEffect } from 'react'
 import { prefersReducedMotion } from './motion'
+import { sound } from './sound'
 
 const CARD = '.card, .glass'
+// Things that tick on hover and chirp on press.
+const SOUNDED = 'a[href], button, [role="button"], [role="tab"], .fchip, select, summary, input[type="range"], .leaflet-interactive'
+const soundKind = (el: Element) =>
+  el.matches('.card, .card *') ? 'card' : el.matches('.fchip, .chip, [role="tab"]') ? 'chip' : el.matches('button, .pill, [role="button"]') ? 'button' : 'link'
 
 export function useInteractions() {
   useEffect(() => {
@@ -80,7 +85,14 @@ export function useInteractions() {
       target = null
       if (!raf) raf = requestAnimationFrame(frame)
     }
+    let sounded: Element | null = null
+    const over = (e: PointerEvent) => {
+      const el = (e.target as Element | null)?.closest?.(SOUNDED) ?? null
+      if (el && el !== sounded && e.pointerType === 'mouse') sound.hover(soundKind(el))
+      sounded = el
+    }
     const down = (e: PointerEvent) => {
+      if ((e.target as Element | null)?.closest?.(SOUNDED)) sound.click()
       const el = (e.target as Element | null)?.closest<HTMLElement>('.pill, .ripple')
       if (!el || reduced) return
       const r = el.getBoundingClientRect()
@@ -103,7 +115,9 @@ export function useInteractions() {
       window.addEventListener('scroll', scroll, { passive: true })
     }
     window.addEventListener('pointerdown', down, { passive: true })
+    window.addEventListener('pointerover', over, { passive: true })
     return () => {
+      window.removeEventListener('pointerover', over)
       cancelAnimationFrame(raf)
       window.removeEventListener('pointermove', move)
       document.documentElement.removeEventListener('pointerleave', leave)

@@ -263,3 +263,5 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
 .nocase { text-transform: none; }
 .footer .linklike { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); font: inherit; }
 .footer .linklike:hover { color: var(--signal); }
+.nav-sound { margin-left: 8px; order: 3; }
+@media (max-width: 960px) { .nav-sound { order: 0; margin-left: auto; } .nav-toggle { margin-left: 8px; } }

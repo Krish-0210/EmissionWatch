@@ -13,6 +13,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/system.css'
+import './styles/fx.css'
 import App from './App.tsx'
 
 // Dev-only FPS / frame-time readout; tree-shaken from production builds.
