@@ -12,7 +12,8 @@ export default function SoundToggle({ className = '' }: { className?: string }) 
       aria-pressed={on}
       aria-label={on ? 'Sound on. Turn sound off' : 'Sound off. Turn sound on'}
       title={on ? 'Sound on' : 'Sound off'}
-      onClick={() => sound.toggle()}
+      data-sound-toggle
+      onClick={() => sound.press()}
     >
       <span className="st-eq" aria-hidden="true">
         <i />

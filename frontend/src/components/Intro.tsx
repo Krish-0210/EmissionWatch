@@ -5,6 +5,8 @@ import { fmtInt } from '../lib/format'
 import { HERO_VIEW, heroView, latLon, lookFix, vec } from '../lib/globeView'
 import { holdNav, introFinished } from '../lib/intro'
 import { setText } from '../lib/motion'
+import { sound } from '../lib/sound'
+import { useSoundOn, useSoundStarted } from '../lib/useSound'
 import { heroGlobeScreen } from '../three/layout'
 import { LogoMark } from './Logo'
 import '../styles/intro.css'
@@ -16,9 +18,12 @@ import '../styles/intro.css'
 //  2.1–2.7 s  a satellite streaks across, its scan line sweeping the globe
 //  2.5–3.3 s  the globe glides to the hero position, the nav drops in, the 3D globe takes over
 //      2.95 s hero copy: headline lines rise from a mask, lede and CTAs blur in, data chips appear
-// Boot beat: until the 3D globe has drawn its first frame (or 1.5 s pass) only a compositor-driven
-// CSS scan runs, so the 3D set-up (a long main-thread task) never freezes the particles. Click, key,
-// wheel or Skip fast-forwards to the hand-off.
+// Boot beat (viewfinder loader, ≥1.35 s and until the 3D globe has drawn its first frame, ≤1.9 s):
+// four crosshairs converge from the corners and spring out into a frame, the frame traces itself
+// clockwise like a progress bar, the eye is revealed through scan stripes, a rolling counter and the
+// tagline OBSERVE · COMPARE · FLAG appear; then the frame zooms out as the particles start. All CSS
+// transforms/opacity (compositor), so the 3D set-up (a long main-thread task) never freezes it.
+// Click, key, wheel or Skip fast-forwards to the hand-off. Sound accents play if sound is unlocked.
 // Canvas 2D, one path fill per colour/alpha bucket per frame.
 
 export type IntroBeat = 'warm' | 'nav' | 'land' | 'hero' | 'done'
@@ -138,6 +143,7 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
     return { w, h, gx: g.cx, gy: g.cy, gr: g.r * 0.985, R0: Math.min(g.r, 0.34 * Math.min(w, h)), narrow: w < 768 }
   })
   const skipped = useRef(false)
+  const [skippedEarly, setSkippedEarly] = useState(false)
   const started = useRef(false)
   const beatRef = useRef(onBeat)
   useEffect(() => {
@@ -184,11 +190,14 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
     if (reduced) return
     const el = root.current
     if (!el) return
-    const skip = () => {
+    // The sound button is not a skip.
+    const skip = (e?: Event) => {
+      if ((e?.target as Element | null)?.closest?.('.intro-sound')) return
       skipped.current = true
+      setSkippedEarly(true)
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab' && e.key !== 'Shift') skip()
+      if (e.key !== 'Tab' && e.key !== 'Shift') skip(e)
     }
     el.addEventListener('pointerdown', skip)
     window.addEventListener('keydown', onKey)
@@ -200,13 +209,20 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
     }
   }, [reduced])
 
-  // The frame loop starts once the 3D globe is ready (or after 1.2 s without it).
+  // The frame loop starts once the loader has played (1.35 s) and the 3D globe is ready, or at 1.9 s.
   const [waited, setWaited] = useState(false)
+  const [minDone, setMinDone] = useState(false)
   useEffect(() => {
-    const id = setTimeout(() => setWaited(true), 1500)
-    return () => clearTimeout(id)
+    const a = setTimeout(() => setMinDone(true), 1350)
+    const b = setTimeout(() => setWaited(true), 1900)
+    return () => {
+      clearTimeout(a)
+      clearTimeout(b)
+    }
   }, [])
-  const go = ready || waited
+  const go = (ready && minDone) || waited || skippedEarly
+  const soundOn = useSoundOn()
+  const soundStarted = useSoundStarted()
 
   useEffect(() => {
     if (!go || reduced || started.current) return
@@ -233,6 +249,7 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
     const fix = lookFix(narrow)
     const Cx = w / 2, Cy = narrow ? h * 0.46 : h / 2
     const fired = new Set<IntroBeat>()
+    const accents = new Set<string>()
     const beat = (b: IntroBeat) => {
       if (!fired.has(b)) {
         fired.add(b)
@@ -251,6 +268,20 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
       rt += dt
       if (skipped.current && t < T.skipTo) t = T.skipTo
       t += dt * (skipped.current ? 1.8 : 1)
+
+      // Sound accents (only audible once a gesture has unlocked audio)
+      if (t >= 650 && !accents.has('rise')) {
+        accents.add('rise')
+        sound.rise(1.1)
+      }
+      if (t >= 2100 && !accents.has('sat')) {
+        accents.add('sat')
+        sound.blip()
+      }
+      if (t >= T.nav && !accents.has('glide')) {
+        accents.add('glide')
+        sound.whoosh(0.9)
+      }
 
       // Beats
       if (t >= T.warm) beat('warm')
@@ -410,10 +441,43 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
   return createPortal(
     <div ref={root} className={`intro${reduced ? ' reduced' : ''}${go ? ' go' : ''}`} style={{ '--bg-a': 1 } as CSSProperties}>
       <canvas ref={canvas} className="intro-canvas" aria-hidden="true" />
-      <div className="intro-boot" aria-hidden="true">
-        <i />
-        <i />
-        <i />
+      <div className="vf" aria-hidden="true">
+        <div className="vf-frame">
+          <i className="vf-x vf-tl" />
+          <i className="vf-x vf-tr" />
+          <i className="vf-x vf-br" />
+          <i className="vf-x vf-bl" />
+          <i className="vf-edge vf-t" />
+          <i className="vf-edge vf-r" />
+          <i className="vf-edge vf-b" />
+          <i className="vf-edge vf-l" />
+          <div className="vf-eye">
+            <LogoMark size={92} />
+            <div className="vf-stripes">
+              {Array.from({ length: 10 }, (_, i) => (
+                <i key={i} style={{ '--i': i } as CSSProperties} />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="vf-tag">
+          <span>Observe</span>
+          <b>·</b>
+          <span>Compare</span>
+          <b>·</b>
+          <span>Flag</span>
+        </div>
+        <div className="vf-count mono">
+          <span className="vf-col c1">
+            <i>0123456789</i>
+          </span>
+          <span className="vf-col c2">
+            <i>0123456789</i>
+          </span>
+          <span className="vf-col c3">
+            <i>0123456789</i>
+          </span>
+        </div>
       </div>
       <div ref={eye} className="intro-eye" aria-hidden="true" style={{ width: eyeSize, height: eyeSize }}>
         <LogoMark size={eyeSize} animated />
@@ -427,7 +491,18 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
           <span ref={pct}>000</span>%
         </span>
       </div>
-      <button type="button" className="intro-skip" onClick={() => (skipped.current = true)}>
+      <button
+        type="button"
+        className={`intro-sound ${soundOn ? 'on' : 'off'}`}
+        aria-pressed={soundOn}
+        data-sound-toggle
+        // Before any gesture, pressing it starts the sound (the press is the gesture); after, it toggles.
+        onClick={() => sound.press()}
+      >
+        <span className="is-dot" aria-hidden="true" />
+        {!soundOn ? 'Sound off · tap for sound' : soundStarted ? 'Sound on · tap to mute' : 'Tap for sound'}
+      </button>
+      <button type="button" className="intro-skip" onClick={() => ((skipped.current = true), setSkippedEarly(true))}>
         Skip intro <span aria-hidden="true">→</span>
       </button>
       <span className="sr-only" role="status">

@@ -4,15 +4,53 @@
 .intro::before { content: ''; position: absolute; inset: 0; opacity: var(--bg-a, 1);
   background: radial-gradient(ellipse 70% 60% at 50% 46%, #0b1424 0%, #06090f 60%, #04060a 100%); }
 .intro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* Boot beat while the 3D globe sets up: concentric sensor rings expanding from the centre.
-   Transform/opacity only, so it keeps running on the compositor through main-thread work. */
-.intro-boot { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transition: opacity 0.4s ease; }
-.intro-boot i { position: absolute; left: -90px; top: -90px; width: 180px; height: 180px; border-radius: 50%;
-  border: 1px solid rgba(255, 138, 61, 0.55); opacity: 0; animation: boot-ring 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) infinite; will-change: transform, opacity; }
-.intro-boot i:nth-child(2) { animation-delay: 0.5s; border-color: rgba(124, 232, 216, 0.5); }
-.intro-boot i:nth-child(3) { animation-delay: 1s; }
-@keyframes boot-ring { 0% { transform: scale(0.1); opacity: 0; } 20% { opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
-.intro.go .intro-boot { opacity: 0; }
+/* Viewfinder loader (boot beat while the 3D globe sets up). Transform/opacity only, so it keeps running
+   on the compositor through main-thread work. Times are from mount; .go (particles start) zooms it out. */
+.vf { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.5s ease, transform 0.9s cubic-bezier(0.7, 0, 0.3, 1); }
+.vf-frame { position: absolute; left: 50%; top: 46%; width: 0; height: 0; }
+.vf-x { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; opacity: 0; will-change: transform;
+  animation: vf-in 0.3s ease 0.05s forwards, var(--vf-move) 0.8s cubic-bezier(0.75, 0, 0.2, 1) 0.05s both; }
+.vf-x::before, .vf-x::after { content: ''; position: absolute; background: rgba(232, 237, 242, 0.75); }
+.vf-x::before { left: 8.5px; top: 0; width: 1px; height: 18px; }
+.vf-x::after { top: 8.5px; left: 0; height: 1px; width: 18px; }
+.vf-tl { --vf-move: vf-tl; } .vf-tr { --vf-move: vf-tr; } .vf-br { --vf-move: vf-br; } .vf-bl { --vf-move: vf-bl; }
+@keyframes vf-in { to { opacity: 1; } }
+/* corner -> centre (converge) -> frame corner (spring out) */
+@keyframes vf-tl { 0% { transform: translate(-46vw, -40vh); } 55% { transform: translate(0, 0); } 100% { transform: translate(-112px, -112px); } }
+@keyframes vf-tr { 0% { transform: translate(46vw, -40vh); } 55% { transform: translate(0, 0); } 100% { transform: translate(112px, -112px); } }
+@keyframes vf-br { 0% { transform: translate(46vw, 44vh); } 55% { transform: translate(0, 0); } 100% { transform: translate(112px, 112px); } }
+@keyframes vf-bl { 0% { transform: translate(-46vw, 44vh); } 55% { transform: translate(0, 0); } 100% { transform: translate(-112px, 112px); } }
+/* frame edges trace clockwise (the progress bar) */
+.vf-edge { position: absolute; background: rgba(124, 232, 216, 0.7); box-shadow: 0 0 10px rgba(124, 232, 216, 0.5); will-change: transform; }
+.vf-t { left: -104px; top: -104px; width: 208px; height: 1px; transform-origin: 0 50%; transform: scaleX(0); animation: vf-sx 0.16s linear 0.72s forwards; }
+.vf-r { left: 103px; top: -104px; width: 1px; height: 208px; transform-origin: 50% 0; transform: scaleY(0); animation: vf-sy 0.16s linear 0.88s forwards; }
+.vf-b { left: -104px; top: 103px; width: 208px; height: 1px; transform-origin: 100% 50%; transform: scaleX(0); animation: vf-sx 0.16s linear 1.04s forwards; }
+.vf-l { left: -104px; top: -104px; width: 1px; height: 208px; transform-origin: 50% 100%; transform: scaleY(0); animation: vf-sy 0.16s linear 1.2s forwards; }
+@keyframes vf-sx { to { transform: scaleX(1); } }
+@keyframes vf-sy { to { transform: scaleY(1); } }
+/* the eye, revealed through horizontal scan stripes */
+.vf-eye { position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; color: #e8edf2; opacity: 0; animation: vf-in 0.2s ease 0.55s forwards;
+  filter: drop-shadow(0 0 14px rgba(124, 232, 216, 0.45)); }
+.vf-eye svg { display: block; }
+.vf-stripes { position: absolute; inset: -4px; display: flex; flex-direction: column; }
+.vf-stripes i { flex: 1; background: #070b11; transform-origin: 100% 50%; will-change: transform;
+  animation: vf-strip 0.42s cubic-bezier(0.6, 0, 0.2, 1) calc(0.58s + var(--i) * 40ms) forwards; }
+.vf-stripes i:nth-child(odd) { transform-origin: 0 50%; }
+@keyframes vf-strip { 0% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+.vf-tag { position: absolute; left: 50%; top: calc(46% + 132px); translate: -50% 0; display: flex; gap: 12px; align-items: center;
+  font-family: var(--font-display); font-size: 14px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--text);
+  opacity: 0; animation: vf-in 0.5s ease 0.8s forwards; white-space: nowrap; }
+.vf-tag b { color: var(--ember); font-weight: 400; }
+/* rolling counter: three digit columns spinning at different rates */
+.vf-count { position: absolute; left: 50%; bottom: 84px; translate: -50% 0; display: flex; gap: 2px; height: 14px; overflow: hidden;
+  font-size: 12px; line-height: 14px; color: var(--signal); opacity: 0; animation: vf-in 0.4s ease 0.4s forwards; }
+.vf-col { display: block; width: 0.62em; height: 14px; overflow: hidden; }
+.vf-col i { display: block; font-style: normal; width: 0.62em; word-break: break-all; line-height: 14px; will-change: transform; animation: vf-roll 1s steps(10) infinite; }
+.vf-col.c1 i { animation-duration: 2.4s; } .vf-col.c2 i { animation-duration: 0.9s; } .vf-col.c3 i { animation-duration: 0.31s; }
+@keyframes vf-roll { to { transform: translateY(-140px); } }
+/* hand-off: the viewfinder zooms past the viewer as the particles take over */
+.intro.go .vf { opacity: 0; transform: scale(2.6); }
+.intro.go .vf-count, .intro.go .vf-tag { opacity: 0; transition: opacity 0.2s; }
 .intro-eye { position: absolute; left: 0; top: 0; opacity: 0; color: #e8edf2; will-change: transform, opacity; pointer-events: none;
   filter: drop-shadow(0 0 18px rgba(124, 232, 216, 0.45)); }
 .intro-eye svg { width: 100%; height: 100%; }
@@ -34,13 +72,23 @@
   opacity: 0; animation: intro-in 0.4s ease 0.3s forwards;
 }
 .intro-skip:hover, .intro-skip:focus-visible { color: var(--text); border-color: var(--signal); }
+/* Sound hint (audio needs a gesture): a real toggle */
+.intro-sound {
+  position: absolute; left: var(--gutter); top: 22px; display: inline-flex; align-items: center; gap: 9px; padding: 10px 16px; border-radius: 999px; cursor: pointer;
+  background: rgba(6, 10, 15, 0.5); border: 1px solid var(--border-2); color: var(--muted);
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0; animation: intro-in 0.4s ease 0.3s forwards;
+}
+.intro-sound:hover, .intro-sound:focus-visible { color: var(--text); border-color: var(--signal); }
+.intro-sound .is-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.intro-sound.on .is-dot { background: var(--signal); box-shadow: 0 0 10px var(--signal); animation: live 1.1s ease-in-out infinite; }
 
 /* Once the glide starts the overlay stops catching input and its chrome leaves. */
 .intro.leaving { pointer-events: none; }
-.intro.leaving .intro-status, .intro.leaving .intro-skip { animation: none; opacity: 0; transition: opacity 0.35s ease; }
+.intro.leaving .intro-status, .intro.leaving .intro-skip, .intro.leaving .intro-sound { animation: none; opacity: 0; transition: opacity 0.35s ease; }
 @media (max-width: 767px) {
   .intro-status { bottom: 18px; max-width: calc(100% - 32px); font-size: 10px; gap: 10px; }
   .intro-skip { top: 14px; right: 16px; }
+  .intro-sound { top: 14px; left: 16px; padding: 10px 12px; font-size: 10px; }
 }
 
 /* Nav held off-screen during the intro, then drops in. */

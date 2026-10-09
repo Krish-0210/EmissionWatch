@@ -8,3 +8,11 @@ export const useSoundOn = () =>
     () => sound.enabled,
     () => false,
   )
+
+/** Whether a gesture has unlocked audio yet (the intro's hint reads this). */
+export const useSoundStarted = () =>
+  useSyncExternalStore(
+    (fn) => sound.subscribe(fn),
+    () => sound.started,
+    () => false,
+  )

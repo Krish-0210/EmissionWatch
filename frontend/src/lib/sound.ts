@@ -118,13 +118,23 @@ class SoundEngine {
 
   /** Call from a user gesture (pointerdown / keydown). Creates or resumes the context. */
   unlock() {
+    const first = !this.unlocked
     this.unlocked = true
-    if (!this.enabled) return
+    if (!this.enabled) {
+      if (first) this.listeners.forEach((f) => f())
+      return
+    }
     if (!this.ctx) this.build()
     const ctx = this.ctx
     if (!ctx) return
-    if (ctx.state !== 'running' && !document.hidden) void ctx.resume()
+    if (ctx.state !== 'running' && !document.hidden) void ctx.resume().then(() => this.listeners.forEach((f) => f()))
     if (!this.bedOn) this.startBed()
+    if (first) this.listeners.forEach((f) => f())
+  }
+
+  /** A gesture has happened (audio can play). */
+  get started() {
+    return this.unlocked
   }
 
   get ready() {
@@ -165,6 +175,12 @@ class SoundEngine {
 
   toggle() {
     this.setEnabled(!this.enabled)
+  }
+
+  /** What a sound switch does when pressed. */
+  press() {
+    if (this.enabled && !this.unlocked) this.unlock()
+    else this.toggle()
   }
 
   private build() {
@@ -636,9 +652,12 @@ class SoundEngine {
 
 export const sound = new SoundEngine()
 
-// First gesture anywhere unlocks audio (if the preference is on).
+// First gesture anywhere unlocks audio (if the preference is on). Sound switches
+// ([data-sound-toggle]) handle their own press: before any gesture it starts the sound, after it toggles.
 if (typeof window !== 'undefined') {
-  const first = () => sound.unlock()
+  const first = (e: Event) => {
+    if (!(e.target as Element | null)?.closest?.('[data-sound-toggle]')) sound.unlock()
+  }
   window.addEventListener('pointerdown', first, { capture: true, passive: true })
   window.addEventListener('keydown', first, { capture: true })
 }
