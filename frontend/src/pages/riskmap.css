@@ -34,6 +34,8 @@
 
 /* Map in a glowing frame: a conic gradient rotates behind a 1 px gap */
 .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 28px; align-items: start; }
+/* The map follows the ranked list down the page (desktop) */
+@media (min-width: 961px) { .map-layout > :first-child { position: sticky; top: calc(var(--nav-h) + 20px); } }
 .map-frame { position: relative; border-radius: calc(var(--radius) + 2px); padding: 1px; overflow: hidden; isolation: isolate; box-shadow: 0 0 60px -20px rgba(124, 232, 216, 0.35); }
 .map-frame::before {
   content: ''; position: absolute; left: 50%; top: 50%; width: 160%; aspect-ratio: 1; z-index: -1; translate: -50% -50%;

@@ -193,3 +193,49 @@ export function RingsCityScene({ className = '', label }: SceneProps) {
     </svg>
   )
 }
+
+/** A magnifier over a plant's plume: inside the lens, satellite pixels with one flagged cell. */
+export function MagnifierScene({ className = '', label }: SceneProps) {
+  const cells = Array.from({ length: 25 }, (_, i) => ({ c: i % 5, r: Math.floor(i / 5) }))
+  return (
+    <svg viewBox="0 0 400 300" className={`il ${className}`} {...a11y(label)}>
+      <defs>
+        <clipPath id="mg-lens">
+          <circle cx="232" cy="118" r="70" />
+        </clipPath>
+        <radialGradient id="mg-glass" cx="35%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#7ce8d8" stopOpacity="0.16" />
+          <stop offset="1" stopColor="#7ce8d8" stopOpacity="0.02" />
+        </radialGradient>
+      </defs>
+      <Stars n={12} w={400} h={120} seed={11} />
+      {/* Plant and plume */}
+      <path d="M20 262 H380" className="il-road" />
+      <g className="il-plant">
+        <path d="M70 262 V226 L96 214 V226 L122 214 V262 Z M132 262 V170 H144 V262 Z M156 262 V186 H166 V262 Z" />
+      </g>
+      <g className="il-puffs">
+        {[0, 1, 2, 3].map((i) => (
+          <circle key={i} cx={138 + (i % 2) * 22} cy="160" r="7" style={d(i * 0.85)} />
+        ))}
+      </g>
+      {/* The lens: pixel grid over the plume, one cell flagged */}
+      <g className="mg-lens">
+        <circle cx="232" cy="118" r="70" fill="url(#mg-glass)" />
+        <g clipPath="url(#mg-lens)">
+          {cells.map(({ c, r }) => (
+            <rect key={`${c}-${r}`} x={162 + c * 28} y={48 + r * 28} width={28} height={28} className={`mg-cell${c === 1 && r === 3 ? ' hot' : ''}`} />
+          ))}
+          <circle cx="205" cy="148" r="20" className="mg-plume" />
+        </g>
+        <circle cx="232" cy="118" r="70" className="mg-rim" />
+        <circle cx="232" cy="118" r="76" className="mg-rim faint" />
+        <path d="M282 168 L338 224" className="mg-handle" />
+      </g>
+      <g className="mg-tag">
+        <rect x="250" y="34" width="140" height="24" rx="12" />
+        <text x="320" y="50" textAnchor="middle">AUDIT, NOT VERDICT</text>
+      </g>
+    </svg>
+  )
+}

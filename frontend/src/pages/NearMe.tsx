@@ -164,12 +164,31 @@ export default function NearMe() {
         {error && <div className="alert err">Could not load data: {error}</div>}
 
         {!origin && data && (
-          <div className="near-empty reveal">
-            <IconTile name="scan" />
-            <p className="muted">
-              Pick your state or share your location above. The radar shows all {data.clusters.length} clusters by distance and
-              direction from {from.label} until you do.
-            </p>
+          <div className="near-empty-wrap">
+            <div>
+              <div className="near-empty reveal">
+                <IconTile name="scan" />
+                <p className="muted">
+                  Pick your state or share your location above. The radar shows all {data.clusters.length} clusters by distance and
+                  direction from {from.label} until you do.
+                </p>
+              </div>
+              <ol className="near-steps">
+                {[
+                  { icon: 'pin' as const, t: 'Choose where you are', b: 'A state, or your device location. Nothing leaves your browser.' },
+                  { icon: 'scan' as const, t: 'See the closest clusters', b: 'Ranked by distance, with direction, risk level and confidence.' },
+                  { icon: 'shield' as const, t: 'Read what it means', b: 'Whether you are inside a 20 km ring, and what a rating does and does not say.' },
+                ].map((s, i) => (
+                  <li key={s.t} className="card tilt reveal" style={{ '--d': `${i * 110}ms` } as CSSProperties}>
+                    <IconTile name={s.icon} />
+                    <span className="mono near-step-n">0{i + 1}</span>
+                    <h3>{s.t}</h3>
+                    <p className="muted small">{s.b}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <RingsCityScene className="near-empty-il reveal" label="A city inside measurement rings around a coal plant, with traffic on the road" />
           </div>
         )}
 

@@ -70,3 +70,14 @@
 .meaning-list li .icon { color: var(--signal); margin-top: 1px; }
 .meaning-list b { font-weight: 500; }
 @media (max-width: 860px) { .meaning { grid-template-columns: 1fr; } .meaning-il { max-width: 340px; } }
+
+/* Empty state: three steps + illustration */
+.near-empty-wrap { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+.near-steps { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.near-steps li { position: relative; }
+.near-steps h3 { margin: 16px 0 6px; font-size: 16px; }
+.near-steps p { margin: 0; }
+.near-step-n { position: absolute; right: 18px; top: 18px; font-size: 11px; color: var(--muted); }
+.near-empty-il { max-width: 440px; justify-self: center; }
+@media (max-width: 960px) { .near-empty-wrap { grid-template-columns: 1fr; } .near-empty-il { max-width: 340px; } }
+@media (max-width: 640px) { .near-steps { grid-template-columns: 1fr; } }

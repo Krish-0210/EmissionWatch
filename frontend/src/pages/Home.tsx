@@ -4,7 +4,7 @@ import { fetchClusters, fetchSummary, fetchTimeseries } from '../api'
 import BigWord from '../components/BigWord'
 import CountUp from '../components/CountUp'
 import { IconTile, type IconName } from '../components/Icons'
-import { InspectorScene } from '../components/Illustrations'
+import { InspectorScene, MagnifierScene } from '../components/Illustrations'
 import GlobePoster from '../components/GlobePoster'
 import HeroOrbit, { type OrbitChip } from '../components/HeroOrbit'
 import HomeStory from '../components/HomeStory'
@@ -371,6 +371,7 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
       <section className="section">
         <BigWord style={{ top: '0.1em', right: '-0.05em' }}>03</BigWord>
         <div className="container layer">
+          <div className="honest-wrap">
           <div className="honest reveal">
             <div className="micro ember">03 / Honest by design</div>
             <p className="display d-md mask" style={{ margin: '18px 0 22px' }}>
@@ -380,6 +381,8 @@ const HomeSections = memo(function HomeSections({ clusterCount, years, ticker }:
               Satellite pixels are coarse, clouds hide the monsoon months, and other sources also emit NO₂. Every score
               comes with a confidence level and the reasons behind it. <Link to="/limits">See the limits</Link>.
             </p>
+          </div>
+          <MagnifierScene className="honest-il reveal" label="A magnifier over a coal plant's plume, showing satellite pixels with one cell flagged for audit" />
           </div>
         </div>
       </section>
