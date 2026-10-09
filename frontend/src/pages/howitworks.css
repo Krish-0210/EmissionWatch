@@ -85,3 +85,4 @@
 .bt-notes p { margin: 0; }
 .bt-tag { display: inline-block; margin-right: 10px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(124, 232, 216, 0.4); color: var(--signal); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
 .bt-tag.ember { border-color: rgba(255, 138, 61, 0.5); color: var(--ember); }
+.bt-off { font-family: var(--font-mono); font-size: 11px; font-weight: 500; fill: #8fc0ff; }

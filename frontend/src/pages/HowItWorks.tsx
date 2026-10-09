@@ -73,7 +73,31 @@ const GEN = '#2a78d6'
 // Clusters the findings name: generation fell sharply and NO2 fell with it.
 const FELL_WITH = ['chandrapur', 'ramagundam', 'marwa']
 const EXCEPTION = 'mundra'
-const CLIP = 50 // % axis limit; larger changes are drawn to the edge and labelled
+const CLIP = 50 // % axis limit; larger changes are drawn as a broken bar with the true value printed on it
+
+// Generation bar: bars past the axis limit get a zig-zag break near the end and their real value.
+type BarShape = { x?: number; y?: number; width?: number; height?: number; fill?: string; fillOpacity?: number | string; stroke?: string; payload?: BacktestRow }
+function GenBar({ x = 0, y = 0, width = 0, height = 0, fill, fillOpacity, stroke, payload }: BarShape) {
+  const top = Math.min(y, y + height), h = Math.abs(height)
+  const v = payload?.gen_change_pct ?? 0
+  const off = Math.abs(v) > CLIP && h > 24 // (h grows during the entry animation)
+  const up = v > 0
+  const by = up ? top + 12 : top + h - 12 // break position, near the far end
+  const zig = `M${x - 2} ${by + 3} L${x + width / 3} ${by - 1} L${x + (2 * width) / 3} ${by + 3} L${x + width + 2} ${by - 1}`
+  return (
+    <g>
+      <g opacity={fillOpacity}>
+        <rect x={x} y={top} width={width} height={h} rx={2} fill={fill} stroke={stroke} />
+        {off && <path d={zig} transform="translate(0 -3)" stroke="#0e1217" strokeWidth={4} fill="none" />}
+      </g>
+      {off && (
+        <text x={x + width / 2} y={up ? top - 8 : top + h + 14} textAnchor="middle" className="bt-off">
+          {fmtPct(v)}
+        </text>
+      )}
+    </g>
+  )
+}
 
 function BtTip({ active, payload }: { active?: boolean; payload?: { payload: BacktestRow & { name: string } }[] }) {
   const r = payload?.[0]?.payload
@@ -131,14 +155,14 @@ function BacktestChart({ rows, names }: { rows: BacktestRow[]; names: Record<str
       <div style={{ height: 380, margin: '0 -6px' }}>
         {show && (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 18, right: 8, left: 0, bottom: 44 }} barGap={1} barCategoryGap="18%">
+            <BarChart data={data} margin={{ top: 26, right: 8, left: 0, bottom: 44 }} barGap={1} barCategoryGap="18%">
               <CartesianGrid stroke="#1c232b" vertical={false} />
               <XAxis dataKey="name" tick={AXIS} interval={0} angle={-35} textAnchor="end" stroke="#1c232b" />
               <YAxis tick={AXIS} width={44} domain={[-CLIP, CLIP]} ticks={[-50, -25, 0, 25, 50]} tickFormatter={(v: number) => `${v}%`} stroke="#1c232b" />
               <ReferenceLine y={0} stroke="#2a333d" />
               <Tooltip content={<BtTip />} cursor={{ fill: 'rgba(124,232,216,0.05)' }} />
               {(['gen', 'observed_change_pct', 'predicted_change_pct'] as const).map((k, j) => (
-                <Bar key={k} dataKey={k} name={k} fill={[GEN, NO2, PREDICTED][j]} radius={[2, 2, 2, 2]} isAnimationActive={!reduced} animationDuration={1100} animationBegin={j * 180}>
+                <Bar key={k} dataKey={k} name={k} fill={[GEN, NO2, PREDICTED][j]} radius={[2, 2, 2, 2]} shape={j === 0 ? GenBar : undefined} isAnimationActive={!reduced} animationDuration={1100} animationBegin={j * 180}>
                   {data.map((r) => (
                     <Cell key={r.cluster} fillOpacity={op(r.cluster)} stroke={focus && r.cluster === EXCEPTION ? '#e8edf2' : undefined} strokeWidth={1} />
                   ))}
@@ -167,7 +191,7 @@ function BacktestChart({ rows, names }: { rows: BacktestRow[]; names: Record<str
         )}
         {off.map((r) => (
           <p key={r.cluster} className="micro">
-            {r.name} generation {fmtPct(r.gen_change_pct)} is off this scale ({r.days_2019} days in 2019, {r.days_2020} in 2020).
+            {r.name} generation {fmtPct(r.gen_change_pct)} runs past the ±{CLIP}% scale, so its bar is broken ({r.days_2019} days in 2019, {r.days_2020} in 2020).
           </p>
         ))}
       </div>
