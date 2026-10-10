@@ -80,7 +80,8 @@ class EmissionWatchStack(Stack):
             handler="handlers.app.handler",
             code=lambda_.Code.from_asset(
                 str(API_DIR),
-                exclude=[".venv", ".venv/**", "tests", "tests/**", "**/__pycache__", ".pytest_cache", "pytest.ini", "requirements*.txt"],
+                exclude=[".venv", ".venv/**", "tests", "tests/**", "**/__pycache__", ".pytest_cache", "pytest.ini", "requirements*.txt",
+                         "local_server.py"],
             ),
             memory_size=256,
             timeout=Duration.seconds(10),

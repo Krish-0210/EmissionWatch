@@ -79,6 +79,21 @@ echo "VITE_API_URL=<ApiUrl>" > .env.local                    # gitignored (.env.
 npm run dev                                                  # http://localhost:5173, allowed by CORS
 ```
 
+### Local API (no AWS, nothing deployed)
+`api/local_server.py` runs the same Lambda handlers behind a plain HTTP server on `http://localhost:8787`, reading
+`pipeline/data/export/*.json` instead of S3 (re-read on every request). All 9 routes; CORS for localhost 5173/4173.
+`/clusters/{id}/wind` calls Open-Meteo as in Lambda (ERA5 fallback when offline); briefs are in template mode unless
+`BRIEF_MODE=bedrock` is set in the shell (needs AWS credentials with Bedrock access).
+```bash
+# terminal 1 (Git Bash)
+cd api && .venv/Scripts/python.exe local_server.py             # --port 8787 --data ../pipeline/data/export are the defaults
+# terminal 2
+cd frontend && VITE_API_URL=http://localhost:8787 npm run dev  # http://localhost:5173
+```
+`pipeline/data/export/` is gitignored: on a fresh clone run the exporter (step 1) or start the server with
+`--data ../frontend/public/data` (the committed copy, same files). Check: `curl -s http://localhost:8787/states | head -c 200`.
+A dev server that is already running keeps its old `VITE_API_URL`; the variable is read when Vite starts.
+
 ## 5. Amplify Hosting
 1. Push `main` to GitHub.
 2. Console → **AWS Amplify → Create new app → GitHub** → repo `Krish-0210/EmissionWatch`, branch `main`.
