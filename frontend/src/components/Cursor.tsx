@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from '../lib/gsap'
-import { HOLD_EXCLUDE, holdSeen, holdState } from '../lib/hold'
+import { HOLD_EXCLUDE, holdState } from '../lib/hold'
 import { useMediaQuery, useReducedMotion } from '../lib/motion'
 
 // Ring that trails the pointer (the native cursor stays), with states:
@@ -8,8 +8,8 @@ import { useMediaQuery, useReducedMotion } from '../lib/motion'
 //   view    big ring + label (cards, images; [data-cursor="view"|"open"], [data-cursor-label])
 //   drag    ring with arrows + DRAG (map, globe; [data-cursor="drag"])
 //   text    hidden over inputs
-//   hold    over a [data-hold] zone: a small HOLD TO SCAN hint (until the first full scan), and while
-//           holding a progress ring that fills with the charge; the ring pulses on release.
+//   hold    while holding a progress ring that fills with the charge; the ring pulses on release
+//           (the one-time "hold to scan" tip is HoldFX's HoldTip).
 // Fine pointer + desktop width only, off for reduced motion. No React state: pointer events store
 // the target, GSAP's ticker lerps and writes transforms.
 const LINK = 'a[href]'
@@ -49,12 +49,10 @@ export default function Cursor() {
     if (!fine || reduced || !el) return
     const ring = el.querySelector<HTMLElement>('.c-ring')!
     const label = el.querySelector<HTMLElement>('.c-label')!
-    const hint = el.querySelector<HTMLElement>('.c-hint')!
     const prog = el.querySelector<SVGCircleElement>('.c-prog circle')!
     let x = -100, y = -100, cx = -100, cy = -100, moving = false
     let lastTarget: EventTarget | null = null
     let state: State = 'default'
-    let showHint = !holdSeen()
     let lastLevel = -1
     let wasHolding = false
     const move = (e: PointerEvent) => {
@@ -74,7 +72,6 @@ export default function Cursor() {
           state = st.s
         }
         if (label.textContent !== st.label) label.textContent = st.label
-        el.classList.toggle('zone', st.zone && showHint)
       }
     }
     const leave = () => {
@@ -91,10 +88,6 @@ export default function Cursor() {
           el.classList.remove('pulse')
           void el.offsetWidth
           el.classList.add('pulse')
-          if (holdState.blastLevel > 0.5) {
-            showHint = false
-            el.classList.remove('zone')
-          }
         }
       }
       if (Math.abs(lv - lastLevel) > 0.002) {
@@ -109,7 +102,6 @@ export default function Cursor() {
       cy += dy * k
       const t = `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, 0)`
       ring.style.transform = t
-      hint.style.transform = `translate3d(${(cx + 24).toFixed(1)}px, ${(cy + 20).toFixed(1)}px, 0)`
     }
     gsap.ticker.add(tick)
     window.addEventListener('pointermove', move, { passive: true })
@@ -137,7 +129,6 @@ export default function Cursor() {
         </span>
         <span className="c-label" />
       </div>
-      <span className="c-hint">Hold to scan</span>
     </div>
   )
 }

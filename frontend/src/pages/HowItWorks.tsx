@@ -397,7 +397,16 @@ export default function HowItWorks() {
         word="Method"
         visual={<PipelineNodes steps={pipe} />}
         ticker={ticker}
-      />
+      >
+        <div className="row">
+          <Link to="/map" className="pill magnetic" viewTransition>
+            See the scores <span className="arrow" aria-hidden="true">→</span>
+          </Link>
+          <Link to="/limits" className="ulink" viewTransition>
+            What it cannot do <span className="arrow" aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </PageHero>
 
       <div className="hiw-stage" ref={stage}>
         <div className="hiw-sticky">

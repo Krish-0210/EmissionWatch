@@ -31,6 +31,8 @@ const HOOK = `(() => {
 const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--autoplay-policy=user-gesture-required'] }).catch(() => chromium.launch({ headless: true }))
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
 await ctx.addInitScript(HOOK)
+// Sound is off until chosen; these measurements are of the "Sound on" choice.
+await ctx.addInitScript(() => localStorage.getItem('pc-sound') || localStorage.setItem('pc-sound', 'on'))
 const page = await ctx.newPage()
 const errors = []
 page.on('pageerror', (e) => errors.push(e.message))

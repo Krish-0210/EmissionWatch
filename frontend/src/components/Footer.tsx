@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { fetchSummary, peekSummary } from '../api'
 import { GITHUB_URL } from '../lib/links'
 import { useInView } from '../lib/motion'
+import { useAsync } from '../lib/useAsync'
 import { Wordmark } from './Logo'
 import MaskLines from './MaskLines'
 import ScanWord from './ScanWord'
@@ -22,8 +24,19 @@ function IstClock() {
 // Footer: closing headline + CTAs, sources and project links (letters swap on hover), IST clock
 // with the satellite's overpass time, a pointer-following glow and the scan-line wordmark that
 // plays notes when you sweep across it.
+const PAGES = [
+  { to: '/', label: 'Home' },
+  { to: '/map', label: 'Risk map' },
+  { to: '/near-me', label: 'Coal plants near me' },
+  { to: '/how-it-works', label: 'How it works' },
+  { to: '/limits', label: 'Limits of this method' },
+]
+const FALLBACK_SOURCES = ['CEA daily generation reports', 'Sentinel-5P TROPOMI NO₂', 'ERA5 reanalysis', 'Global Energy Monitor']
+
 export default function Footer() {
   const navigate = useNavigate()
+  const summary = useAsync(fetchSummary, [], peekSummary)
+  const sources = summary.data?.sources
   const head = useRef<HTMLDivElement>(null)
   const inView = useInView(head)
   const root = useRef<HTMLElement>(null)
@@ -69,14 +82,31 @@ export default function Footer() {
         </div>
         <div>
           <div className="micro" style={{ marginBottom: 12 }}>
-            Sources
+            Pages
           </div>
           <ul>
-            <li>CEA daily generation reports · National Power Portal</li>
-            <li>ESA Sentinel-5P TROPOMI (Copernicus)</li>
-            <li>ECMWF ERA5 reanalysis</li>
-            <li>Global Energy Monitor · Natural Earth</li>
-            <li>Google Earth Engine</li>
+            {PAGES.map((p) => (
+              <li key={p.to}>
+                <Link to={p.to}>
+                  <SwapText text={p.label} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <div className="micro" style={{ marginBottom: 12 }}>
+            Data sources
+          </div>
+          <ul>
+            {sources
+              ? sources.map((s) => (
+                  <li key={s.id} title={`${s.name}: ${s.used_for}${s.license ? ` (${s.license})` : ''}`}>
+                    {s.name.split(/[,(]/)[0].trim()}
+                  </li>
+                ))
+              : FALLBACK_SOURCES.map((s) => <li key={s}>{s}</li>)}
+            <li>Basemap © Esri, © OpenStreetMap contributors</li>
           </ul>
         </div>
         <div>
@@ -90,21 +120,10 @@ export default function Footer() {
               </a>
             </li>
             <li>
-              <Link to="/how-it-works">
-                <SwapText text="How it works" />
-              </Link>
-            </li>
-            <li>
-              <Link to="/limits">
-                <SwapText text="Limits of this method" />
-              </Link>
-            </li>
-            <li>
               <button type="button" className="linklike" onClick={() => navigate('/', { state: { replayIntro: Date.now() } })}>
                 <SwapText text="Replay intro ↺" />
               </button>
             </li>
-            <li>Basemap © Esri, © OpenStreetMap contributors</li>
           </ul>
         </div>
       </div>

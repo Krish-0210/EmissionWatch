@@ -12,6 +12,7 @@ import Sparkline from '../components/Sparkline'
 import { useFlip } from '../lib/flip'
 import { CONF_LABEL, RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { prefersReducedMotion } from '../lib/motion'
+import { scrollToY } from '../lib/scroll'
 import { useAsync } from '../lib/useAsync'
 import './riskmap.css'
 
@@ -106,9 +107,25 @@ export default function RiskMap() {
         word="Map"
         visual={<RiskBeacons clusters={data.clusters} />}
         ticker={ticker}
-      />
+      >
+        <div className="row">
+          <button
+            type="button"
+            className="pill magnetic"
+            onClick={() => {
+              const el = document.getElementById('explore')
+              if (el) scrollToY(el.getBoundingClientRect().top + window.scrollY - 88, 0.9)
+            }}
+          >
+            Filter and explore <span className="arrow" aria-hidden="true">↓</span>
+          </button>
+          <Link to="/near-me" className="ulink" viewTransition>
+            Coal plants near me <span className="arrow" aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </PageHero>
 
-      <div className="container layer section-tight">
+      <div className="container layer section-tight" id="explore">
         <div className="filters reveal" role="group" aria-label="Filter clusters">
           <div className="fgroup">
             <span className="micro">Risk</span>

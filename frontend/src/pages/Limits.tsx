@@ -169,7 +169,16 @@ export default function Limits() {
         word="Limits"
         visual={<PixelGrid />}
         ticker={ticker}
-      />
+      >
+        <div className="row">
+          <Link to="/map" className="pill magnetic" viewTransition>
+            Explore the risk map <span className="arrow" aria-hidden="true">→</span>
+          </Link>
+          <Link to="/how-it-works" className="ulink" viewTransition>
+            How the method works <span className="arrow" aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </PageHero>
 
       <section className="container section-tight">
         <div style={{ marginBottom: 28 }}>

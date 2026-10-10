@@ -36,6 +36,24 @@ function Flyer({ target, onArrive }: { target?: ClusterSummary; onArrive?: () =>
   return null
 }
 
+// All clusters in view at any map size (a fixed centre/zoom cut off Mundra and Tuticorin on phones),
+// and a marker focused from the keyboard is panned into view.
+function FitAll({ clusters }: { clusters: ClusterSummary[] }) {
+  const map = useMap()
+  useEffect(() => {
+    if (clusters.length) map.fitBounds(L.latLngBounds(clusters.map((c) => [c.lat, c.lon] as [number, number])), { padding: [28, 28], maxZoom: 5 })
+    const onFocus = (e: FocusEvent) =>
+      map.eachLayer((l) => {
+        if (l instanceof L.Marker && l.getElement() === e.target) map.panInside(l.getLatLng(), { padding: [40, 40] })
+      })
+    const box = map.getContainer()
+    box.addEventListener('focusin', onFocus)
+    return () => box.removeEventListener('focusin', onFocus)
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- fit once, on the first set of clusters
+  }, [map])
+  return null
+}
+
 export default function ClusterMap({ clusters, highlight, dimmed, onHover, onSelect, flyTo, onArrive }: Props) {
   const icons = useMemo(
     () => Object.fromEntries(clusters.map((c) => [c.id, { off: icon(c, false, false), on: icon(c, true, false), dim: icon(c, false, true) }])),
@@ -72,6 +90,7 @@ export default function ClusterMap({ clusters, highlight, dimmed, onHover, onSel
           </Tooltip>
         </Marker>
       ))}
+      <FitAll clusters={clusters} />
       <Flyer target={flyTo} onArrive={onArrive} />
     </MapContainer>
   )

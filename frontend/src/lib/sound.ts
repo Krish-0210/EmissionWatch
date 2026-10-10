@@ -7,8 +7,8 @@
 //   pluck    footer scan lines, a minor-pentatonic "telemetry harp"
 // Everything sums into a limiter (DynamicsCompressor, ratio 20) so the blast is loud but capped.
 // The preference lives in localStorage ('pc-sound'); audio starts only after a user gesture
-// (browsers block autoplay) and the context suspends while the tab is hidden. Reduced motion
-// defaults to off unless the user turns it on.
+// (browsers block autoplay) and the context suspends while the tab is hidden. Off until the user
+// chooses (the intro asks "Sound on / Sound off"; the nav toggle is always there).
 
 const KEY = 'pc-sound'
 const VOLUME = 0.7 // master, moderate
@@ -17,16 +17,16 @@ const HOLD_FULL = 3.6 // seconds to full charge (matches lib/hold.ts)
 
 type Listener = () => void
 
-function readPref(): boolean {
+function storedPref(): 'on' | 'off' | null {
   try {
     const v = localStorage.getItem(KEY)
-    if (v === 'on') return true
-    if (v === 'off') return false
+    if (v === 'on' || v === 'off') return v
   } catch {
     /* storage blocked */
   }
-  return !(typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  return null
 }
+const readPref = () => storedPref() === 'on' // no choice yet = off
 
 function noiseBuffer(ctx: BaseAudioContext, seconds: number, pinkish = false) {
   const b = ctx.createBuffer(1, Math.floor(ctx.sampleRate * seconds), ctx.sampleRate)
@@ -134,6 +134,11 @@ class SoundEngine {
     if (first) this.listeners.forEach((f) => f())
   }
 
+  /** The user has made a sound choice (stored), so the intro need not ask. */
+  get chosen() {
+    return storedPref() !== null
+  }
+
   /** A gesture has happened (audio can play). */
   get started() {
     return this.unlocked
@@ -144,13 +149,16 @@ class SoundEngine {
   }
 
   setEnabled(on: boolean) {
-    if (on === this.enabled) return
-    this.enabled = on
     try {
       localStorage.setItem(KEY, on ? 'on' : 'off')
     } catch {
       /* storage blocked */
     }
+    if (on === this.enabled) {
+      this.listeners.forEach((f) => f())
+      return
+    }
+    this.enabled = on
     const ctx = this.ctx
     if (on) {
       // The toggle click is itself a gesture.

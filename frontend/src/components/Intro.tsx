@@ -223,6 +223,12 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
   const go = (ready && minDone) || waited || skippedEarly
   const soundOn = useSoundOn()
   const soundStarted = useSoundStarted()
+  // First visit: ask (no choice = off). Afterwards the same corner holds an on/off toggle.
+  const [asked, setAsked] = useState(() => sound.chosen)
+  const choose = (on: boolean) => {
+    sound.setEnabled(on)
+    setAsked(true)
+  }
 
   useEffect(() => {
     if (!go || reduced || started.current) return
@@ -491,17 +497,29 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
           <span ref={pct}>000</span>%
         </span>
       </div>
-      <button
-        type="button"
-        className={`intro-sound ${soundOn ? 'on' : 'off'}`}
-        aria-pressed={soundOn}
-        data-sound-toggle
-        // Before any gesture, pressing it starts the sound (the press is the gesture); after, it toggles.
-        onClick={() => sound.press()}
-      >
-        <span className="is-dot" aria-hidden="true" />
-        {!soundOn ? 'Sound off · tap for sound' : soundStarted ? 'Sound on · tap to mute' : 'Tap for sound'}
-      </button>
+      {asked ? (
+        <button
+          type="button"
+          className={`intro-sound ${soundOn ? 'on' : 'off'}`}
+          aria-pressed={soundOn}
+          data-sound-toggle
+          // Before any gesture, pressing it starts the sound (the press is the gesture); after, it toggles.
+          onClick={() => sound.press()}
+        >
+          <span className="is-dot" aria-hidden="true" />
+          {!soundOn ? 'Sound off · tap for sound' : soundStarted ? 'Sound on · tap to mute' : 'Tap for sound'}
+        </button>
+      ) : (
+        <div className="intro-sound intro-ask" role="group" aria-label="Play sound?">
+          <span className="ia-q">Sound?</span>
+          <button type="button" className="ia-btn" onClick={() => choose(true)}>
+            Sound on
+          </button>
+          <button type="button" className="ia-btn" onClick={() => choose(false)}>
+            Sound off
+          </button>
+        </div>
+      )}
       <button type="button" className="intro-skip" onClick={() => ((skipped.current = true), setSkippedEarly(true))}>
         Skip intro <span aria-hidden="true">→</span>
       </button>

@@ -99,6 +99,17 @@ export interface BacktestRow {
   error: number // predicted − observed, µmol/m²
 }
 
+// A data source credited on the site (summary.sources).
+export interface Source {
+  id: string
+  name: string
+  used_for: string
+  access: string
+  license: string | null
+  citation: string | null
+  doi: string | null
+}
+
 export interface SummaryFile {
   generated_at: string
   units: { coef: string; backtest: string }
@@ -106,6 +117,7 @@ export interface SummaryFile {
   clusters: { id: string; generation_coef: number; p: number }[]
   backtest: BacktestRow[]
   findings: string[]
+  sources: Source[]
 }
 
 // All coal plants >= 500 MW (GEM, operating units) with their state; plants_india.json / GET /plants.

@@ -40,4 +40,6 @@ export function markHoldSeen() {
   } catch {
     /* storage blocked */
   }
+  window.dispatchEvent(new Event(SEEN)) // HoldFX's tip hides
 }
+export const HOLD_SEEN_EVENT = SEEN

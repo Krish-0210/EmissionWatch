@@ -118,6 +118,15 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
     scan()
     const mo = new MutationObserver(scan)
     mo.observe(el, { childList: true, subtree: true })
+    // Keyboard focus never lands on something still waiting for its entrance: reveal it now.
+    const onFocus = (e: FocusEvent) => {
+      for (let n = e.target as Element | null; n && n !== el; n = n.parentElement)
+        if (n.matches('.reveal, .rule, .trig, .draw, .divider, .mask, .blur-in') && !n.classList.contains('in')) {
+          n.classList.add('in', 'focus-in')
+          io.unobserve(n)
+        }
+    }
+    el.addEventListener('focusin', onFocus)
 
     // Parallax runs on GSAP's ticker (after Lenis) only when the scroll position moved; all rects
     // are read before any write.
@@ -148,6 +157,7 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
       sio.disconnect()
       aio.disconnect()
       mo.disconnect()
+      el.removeEventListener('focusin', onFocus)
       window.removeEventListener('resize', onResize)
       gsap.ticker.remove(update)
     }

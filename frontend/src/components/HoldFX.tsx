@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { gsap } from '../lib/gsap'
-import { BLAST_MS, HOLD_EXCLUDE, HOLD_FULL, holdState, markHoldSeen } from '../lib/hold'
+import { BLAST_MS, HOLD_EXCLUDE, HOLD_FULL, HOLD_SEEN_EVENT, holdSeen, holdState, markHoldSeen } from '../lib/hold'
 import { useMediaQuery, useReducedMotion } from '../lib/motion'
 import { sound } from '../lib/sound'
 
@@ -126,6 +127,47 @@ function bolt(x0: number, y0: number, x1: number, y1: number, depth: number, out
   const my = (y0 + y1) / 2 + (r() - 0.5) * Math.hypot(x1 - x0, y1 - y0) * 0.35
   bolt(x0, y0, mx, my, depth - 1, out, r)
   bolt(mx, my, x1, y1, depth - 1, out, r)
+}
+
+// One-time tip (desktop): appears a moment after a page with a hold zone settles (after the intro),
+// until dismissed, a first full scan, or 14 s; never again after that.
+function HoldTip() {
+  const { pathname } = useLocation()
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    if (holdSeen()) return
+    let tries = 0
+    const id = window.setInterval(() => {
+      tries++
+      if (holdSeen() || tries > 20) return window.clearInterval(id)
+      if (tries < 3 || document.documentElement.classList.contains('intro-hold') || !document.querySelector('[data-hold]')) return
+      window.clearInterval(id)
+      setShow(true)
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [pathname])
+  useEffect(() => {
+    const hide = () => setShow(false)
+    window.addEventListener(HOLD_SEEN_EVENT, hide)
+    return () => window.removeEventListener(HOLD_SEEN_EVENT, hide)
+  }, [])
+  useEffect(() => {
+    if (!show) return
+    const id = window.setTimeout(markHoldSeen, 14000)
+    return () => window.clearTimeout(id)
+  }, [show])
+  if (!show) return null
+  return (
+    <div className="hold-tip" role="note">
+      <span className="ht-dot" aria-hidden="true" />
+      <span>
+        <b>Hold to scan:</b> press and hold on an empty part of the page header for a deeper scan.
+      </span>
+      <button type="button" className="ht-x" onClick={markHoldSeen}>
+        Got it
+      </button>
+    </div>
+  )
 }
 
 export default function HoldFX() {
@@ -675,6 +717,7 @@ export default function HoldFX() {
         <span className="hr-k">Scan depth</span> <span ref={depth}>000</span>%
         <span className="hr-sub">TROPOMI pixel 5.5 × 3.5 km</span>
       </div>
+      <HoldTip />
     </>
   )
 }

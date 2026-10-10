@@ -39,10 +39,26 @@
   text-shadow: var(--ca, 0px) 0 rgba(255, 90, 60, 0.6), calc(var(--ca, 0px) * -1) 0 rgba(124, 232, 216, 0.6);
 }
 
+/* One-time hold tip (HoldFX HoldTip) */
+.hold-tip {
+  position: fixed; left: var(--nav-pad); bottom: 24px; z-index: 2000; max-width: min(520px, calc(100vw - 48px));
+  display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 14px;
+  background: #0e1217; border: 1px solid rgba(124, 232, 216, 0.35); color: var(--muted); font-size: 14px; line-height: 1.4;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.8); animation: ht-in 0.5s var(--ease-out) both;
+}
+.hold-tip b { color: var(--text); font-weight: 500; }
+.ht-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 8px var(--ember); }
+.ht-x {
+  flex: none; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border-2); background: transparent; cursor: pointer;
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: -0.03em; text-transform: uppercase; color: var(--text); transition: border-color 0.2s, color 0.2s;
+}
+.ht-x:hover, .ht-x:focus-visible { border-color: var(--signal); color: var(--signal); }
+@keyframes ht-in { from { opacity: 0; translate: 0 12px; } }
+
 /* ---------- Cursor (components/Cursor.tsx) ---------- */
 .cursor { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 4000; opacity: 0; transition: opacity 0.3s; }
 .cursor.on { opacity: 1; }
-.c-ring, .c-hint { position: absolute; left: 0; top: 0; will-change: transform; }
+.c-ring { position: absolute; left: 0; top: 0; will-change: transform; }
 .c-circle {
   position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%;
   border: 1px solid rgba(124, 232, 216, 0.6); background: rgba(124, 232, 216, 0);
@@ -71,15 +87,6 @@
 .cursor.holding .c-circle { transform: scale(1.6); border-color: rgba(255, 138, 61, 0.45); background: rgba(255, 138, 61, 0.06); }
 .cursor.pulse .c-circle { animation: c-pulse 0.7s var(--ease-out); }
 @keyframes c-pulse { 0% { transform: scale(1.6); opacity: 1; border-color: var(--ember); } 60% { transform: scale(4.2); opacity: 0; } 61% { transform: scale(0.4); opacity: 0; } 100% { opacity: 1; } }
-.c-hint {
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--signal); white-space: nowrap;
-  padding: 5px 9px; border: 1px solid rgba(124, 232, 216, 0.35); border-radius: 999px; background: rgba(7, 9, 12, 0.7);
-  opacity: 0; transition: opacity 0.3s;
-}
-.c-hint::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 8px var(--ember); vertical-align: 1px; animation: c-blink 1.2s ease-in-out infinite; }
-@keyframes c-blink { 50% { opacity: 0.2; } }
-.cursor.zone .c-hint { opacity: 1; }
-.cursor.holding .c-hint { opacity: 0; }
 .holding .globe-tip, .holding .orbit-chip { opacity: 0 !important; transition: opacity 0.2s; }
 .hold-readout { text-align: right; }
 
@@ -170,6 +177,7 @@
   font-family: var(--font-ui); font-size: 12px; font-weight: 400; letter-spacing: -0.04em; text-transform: uppercase; color: var(--text); text-decoration: none;
   background: linear-gradient(var(--signal), var(--signal)) 0 100% / 100% 1px no-repeat; transition: color 0.25s;
 }
+button.ulink { border: 0; border-radius: 0; cursor: pointer; background-color: transparent; }
 .ulink:hover, .ulink:focus-visible { color: var(--signal); animation: ul-redraw 0.7s var(--ease-out); }
 @keyframes ul-redraw {
   0% { background-size: 100% 1px; background-position: 100% 100%; }

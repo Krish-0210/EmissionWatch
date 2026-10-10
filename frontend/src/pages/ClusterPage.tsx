@@ -12,6 +12,7 @@ import { Ticker, type TickerItem } from '../components/PageHero'
 import { fmt, fmtInt, fmtP, fmtPct, RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { prefersReducedMotion, useInView, useIsMobile, useReducedMotion } from '../lib/motion'
 import { useBackdropTone } from '../lib/backdrop'
+import { scrollToY } from '../lib/scroll'
 import { useAsync } from '../lib/useAsync'
 import { webglOk } from '../lib/webgl'
 import './cluster.css'
@@ -457,6 +458,13 @@ export default function ClusterPage() {
   const summary = useAsync(fetchSummary, [], peekSummary)
   const [tab, setTab] = useState('evidence')
   const c = detail.data
+  const details = useRef<HTMLElement>(null)
+  // Header actions: open a tab and bring the tab bar under the nav.
+  const openTab = (t: string) => {
+    setTab(t)
+    const el = details.current
+    if (el) scrollToY(el.getBoundingClientRect().top + window.scrollY - 96, 0.9)
+  }
   const bt = summary.data?.backtest.find((r) => r.cluster === id)
   useBackdropTone('tone', c?.risk_level)
 
@@ -496,10 +504,28 @@ export default function ClusterPage() {
         </BigWord>
         <div className="container layer cluster-head-grid">
           <div className="trig">
-            <Link to="/map" className="micro back" viewTransition>
-              ← Risk map
-            </Link>
-            <div className="micro" style={{ marginTop: 28 }}>
+            <div className="crumb-row">
+              <Link to="/map" className="back-link" viewTransition>
+                <span aria-hidden="true">←</span> Back to the risk map
+              </Link>
+              <nav className="crumbs micro" aria-label="Breadcrumb">
+                <ol>
+                  <li>
+                    <Link to="/" viewTransition>
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/map" viewTransition>
+                      Risk map
+                    </Link>
+                  </li>
+                  <li aria-current="page">{c.name}</li>
+                </ol>
+              </nav>
+            </div>
+            <p className="page-purpose">One cluster’s evidence: its audit risk score and why, satellite NO₂ against reported generation, its plants, and an inspection brief.</p>
+            <div className="micro" style={{ marginTop: 22 }}>
               {c.states.join(' · ')} · {c.n_plants} operating plant{c.n_plants === 1 ? '' : 's'} · {fmtInt(c.capacity_mw)} MW · as of {c.as_of}
             </div>
             <h1 className="display d-lg ch-title" style={{ viewTransitionName: `ct-${c.id}` } as CSSProperties}>
@@ -512,6 +538,14 @@ export default function ClusterPage() {
             <p className="lede reveal" style={{ '--d': '320ms' } as CSSProperties}>
               {c.headline}
             </p>
+            <div className="row reveal" style={{ marginTop: 22, '--d': '420ms' } as CSSProperties}>
+              <button type="button" className="pill magnetic" onClick={() => openTab('evidence')}>
+                See the evidence <span className="arrow" aria-hidden="true">↓</span>
+              </button>
+              <button type="button" className="ulink" onClick={() => openTab('brief')}>
+                Inspection brief &amp; RTI draft <span className="arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
           </div>
           <div className="reveal" style={{ '--d': '150ms' } as CSSProperties}>
             <HeroStage c={c} months={ts.data?.months} />
@@ -520,7 +554,7 @@ export default function ClusterPage() {
         <Ticker items={ticker} seconds={56} />
       </header>
 
-      <section className="container section-tight">
+      <section className="container section-tight" ref={details}>
         <Tabs tab={tab} setTab={setTab} />
         <div className="tab-panel" role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} key={tab}>
           {tab === 'evidence' && (
