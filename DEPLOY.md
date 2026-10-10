@@ -59,8 +59,8 @@ cd infra
 source .venv/Scripts/activate
 ACCOUNT=$(aws sts get-caller-identity --profile emissionwatch --query Account --output text)
 cdk bootstrap aws://$ACCOUNT/ap-south-1 --profile emissionwatch
-cdk deploy EmissionWatchStack --profile emissionwatch                          # briefs: template mode
-# or: cdk deploy EmissionWatchStack --profile emissionwatch -c brief_mode=bedrock
+cdk deploy PanoptiCoalStack --profile emissionwatch                          # briefs: template mode
+# or: cdk deploy PanoptiCoalStack --profile emissionwatch -c brief_mode=bedrock
 ```
 Context values are not remembered between deploys: repeat `-c brief_mode=bedrock` on every later deploy (step 6
 too), or set `"brief_mode": "bedrock"` under `context` in `infra/cdk.json`. A deploy without it switches back to
@@ -122,7 +122,7 @@ A dev server that is already running keeps its old `VITE_API_URL`; the variable 
 
 ## 5. Amplify Hosting
 1. Push `main` to GitHub.
-2. Console → **AWS Amplify → Create new app → GitHub** → repo `Krish-0210/EmissionWatch`, branch `main`.
+2. Console → **AWS Amplify → Create new app → GitHub** → repo `Krish-0210/PanoptiCoal`, branch `main`.
    Tick **"My app is a monorepo"**, app root `frontend`.
 3. Build settings (replace the generated `amplify.yml` with this):
    ```yaml
@@ -155,7 +155,7 @@ A dev server that is already running keeps its old `VITE_API_URL`; the variable 
 ## 6. Allow the Amplify domain in CORS
 ```bash
 cd infra && source .venv/Scripts/activate
-cdk deploy EmissionWatchStack --profile emissionwatch -c allowed_origins=https://main.d1234abcd.amplifyapp.com
+cdk deploy PanoptiCoalStack --profile emissionwatch -c allowed_origins=https://main.d1234abcd.amplifyapp.com
 ```
 (Comma-separate several origins. In bedrock mode add `-c brief_mode=bedrock` here too.)
 
@@ -179,5 +179,5 @@ After each deploy, check the `AllowedOrigins` stack output: it lists the origins
 
 ## Teardown
 ```bash
-cd infra && cdk destroy EmissionWatchStack --profile emissionwatch   # bucket is emptied and deleted
+cd infra && cdk destroy PanoptiCoalStack --profile emissionwatch   # bucket is emptied and deleted
 ```

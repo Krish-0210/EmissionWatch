@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 # What the stack uploads (infra EXPORT_DIR) and the local site reads: the committed frontend copy.
 EXPORT = ROOT / "frontend/public/data"
 PIPELINE_EXPORT = ROOT / "pipeline/data/export"  # gitignored; written by to_json together with EXPORT
-BUCKET = "emissionwatch-test-data"
+BUCKET = "panopticoal-test-data"
 CLUSTER_IDS = [c["id"] for c in json.loads((EXPORT / "clusters.json").read_text(encoding="utf-8"))["clusters"]]
 
 

@@ -2,12 +2,12 @@ import aws_cdk as core
 import aws_cdk.assertions as assertions
 import pytest
 
-from infra.emissionwatch_stack import EmissionWatchStack
+from infra.panopticoal_stack import PanoptiCoalStack
 
 
 def template(**context):
     app = core.App(context={"allowed_origins": "https://main.example.amplifyapp.com", **context})
-    stack = EmissionWatchStack(app, "test", env=core.Environment(account="123456789012", region="ap-south-1"))
+    stack = PanoptiCoalStack(app, "test", env=core.Environment(account="123456789012", region="ap-south-1"))
     return assertions.Template.from_stack(stack)
 
 

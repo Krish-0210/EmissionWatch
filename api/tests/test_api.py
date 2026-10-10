@@ -107,7 +107,7 @@ def test_unknown_route_404():
 
 def test_responses_are_cached(aws):
     call("GET", "/clusters/{id}", "talcher")
-    aws.delete_object(Bucket="emissionwatch-test-data", Key="data/cluster_talcher.json")
+    aws.delete_object(Bucket="panopticoal-test-data", Key="data/cluster_talcher.json")
     assert call("GET", "/clusters/{id}", "talcher")[0] == 200
 
 
@@ -218,10 +218,10 @@ def test_brief_names_panopticoal(bedrock):
     bedrock(error=RuntimeError("no Bedrock in tests"))
     status, b = call("POST", "/brief/{id}", "talcher")
     assert status == 200 and b["source"] == "template"
-    assert "PanoptiCoal" in b["markdown"] and "EmissionWatch" not in b["markdown"]
+    assert "PanoptiCoal" in b["markdown"]
     from handlers.brief import SYSTEM_PROMPT
 
-    assert "PanoptiCoal" in SYSTEM_PROMPT and "EmissionWatch" not in SYSTEM_PROMPT
+    assert "PanoptiCoal" in SYSTEM_PROMPT
 
 
 # ---------- BRIEF_MODE ----------
@@ -244,7 +244,7 @@ def test_brief_template_mode_is_default(cid, monkeypatch):
     assert status == 200 and set(b) == {"markdown", "source"}
     assert b["source"] == "auto"
     assert b["markdown"] == brief.template_brief(brief.build_facts(cid))
-    assert "PanoptiCoal" in b["markdown"] and "EmissionWatch" not in b["markdown"]
+    assert "PanoptiCoal" in b["markdown"]
 
 
 @pytest.mark.parametrize("mode,source", [("template", "auto"), (" TEMPLATE ", "auto"), ("nonsense", "auto"), ("Bedrock", "bedrock")])

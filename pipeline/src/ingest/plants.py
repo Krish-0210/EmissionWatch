@@ -38,7 +38,7 @@ def load_india_plants(path: Path = INDIA_CSV) -> pd.DataFrame:
 def fetch_gem_units(country: str = "India", page: int = 500) -> pd.DataFrame:
     """All coal units for a country from GEM's public assets API (one row per unit)."""
     session = requests.Session()
-    session.headers["User-Agent"] = "Mozilla/5.0 (EmissionWatch research pipeline)"  # the API rejects the default UA
+    session.headers["User-Agent"] = "Mozilla/5.0 (PanoptiCoal research pipeline)"  # the API rejects the default UA
     units, offset = [], 0
     while True:
         resp = session.get(GEM_ASSETS_URL, params={"asset_class": "coal-plants", "country": country,

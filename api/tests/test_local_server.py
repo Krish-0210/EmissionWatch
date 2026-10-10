@@ -43,8 +43,8 @@ def test_get_serves_the_file(server, path, file):
 
 def test_all_nine_routes_answer(server, aws):
     # the moto bucket is not used: empty it to prove the server reads files
-    for o in aws.list_objects_v2(Bucket="emissionwatch-test-data").get("Contents", []):
-        aws.delete_object(Bucket="emissionwatch-test-data", Key=o["Key"])
+    for o in aws.list_objects_v2(Bucket="panopticoal-test-data").get("Contents", []):
+        aws.delete_object(Bucket="panopticoal-test-data", Key=o["Key"])
     cid = CLUSTER_IDS[0]
     gets = ["/clusters", f"/clusters/{cid}", f"/clusters/{cid}/timeseries", f"/clusters/{cid}/wind", "/summary", "/plants", "/states"]
     assert len(gets) + 2 == len(local_server.ROUTES) == 9

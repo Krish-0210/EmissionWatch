@@ -90,7 +90,7 @@ def test_numbers_come_from_the_export(cid):
 def test_score_window_fallback(aws):
     c = detail("korba")
     c["flagged_periods"] = [{"start": "2026-04-16", "end": "2026-07-14", "peak_z": 0.24, "reason": "score_window"}]
-    aws.put_object(Bucket="emissionwatch-test-data", Key="data/cluster_korba.json", Body=json.dumps(c).encode())
+    aws.put_object(Bucket="panopticoal-test-data", Key="data/cluster_korba.json", Body=json.dumps(c).encode())
     txt = call("POST", "/rti/{id}", "korba")[1]["plain_text"]
     assert "latest 90-day window the score is based on" in txt and "16 Apr 2026 to 14 Jul 2026" in txt
     assert "standard deviations" not in txt

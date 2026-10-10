@@ -1,1 +1,1 @@
-"""EmissionWatch data pipeline."""
+"""PanoptiCoal data pipeline."""

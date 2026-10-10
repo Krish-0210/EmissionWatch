@@ -1,4 +1,4 @@
-# EmissionWatch
+# PanoptiCoal
 
 Satellite-verified accountability for India's coal power plants.
 
@@ -22,7 +22,7 @@ Python pipeline (Google Earth Engine + generation data) → S3 → API Gateway +
 - [CPCB CAAQMS](https://app.cpcbccr.com/): ground-level air-quality stations
 
 ## Limitations
-EmissionWatch flags anomalies that **warrant an audit**. A flag is not proof of fraud or violation. Sentinel-5P pixels are about 5.5 × 3.5 km, so plants close to each other cannot be separated and are assessed together as clusters.
+PanoptiCoal flags anomalies that **warrant an audit**. A flag is not proof of fraud or violation. Sentinel-5P pixels are about 5.5 × 3.5 km, so plants close to each other cannot be separated and are assessed together as clusters.
 
 ## Repo layout
 ```

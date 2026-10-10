@@ -1,4 +1,4 @@
-"""EmissionWatchStack: private S3 data bucket, API Lambda, HTTP API with CORS + throttling.
+"""PanoptiCoalStack: private S3 data bucket, API Lambda, HTTP API with CORS + throttling.
 
 Context (cdk.json or -c key=value):
     allowed_origins   comma-separated extra CORS origins (e.g. the Amplify domain)
@@ -34,7 +34,7 @@ LOCAL_ORIGINS = ["http://localhost:5173", "http://localhost:4173"]
 DEFAULT_MODEL_ID = "in.anthropic.claude-haiku-4-5-20251001-v1:0"
 
 
-class EmissionWatchStack(Stack):
+class PanoptiCoalStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -118,7 +118,7 @@ class EmissionWatchStack(Stack):
         api = apigw.HttpApi(
             self,
             "HttpApi",
-            api_name="emissionwatch-api",
+            api_name="panopticoal-api",
             create_default_stage=False,
             cors_preflight=apigw.CorsPreflightOptions(
                 allow_origins=origins,

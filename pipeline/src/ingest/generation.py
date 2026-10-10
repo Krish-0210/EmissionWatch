@@ -32,7 +32,7 @@ MISSING_LOG = RAW_DIR / "missing_dates.log"
 
 URL_TEMPLATE = "https://npp.gov.in/public-reports/cea/daily/dgr/{d:%d-%m-%Y}/dgr2-{d:%Y-%m-%d}.xls"
 XLS_MAGIC = b"\xd0\xcf\x11\xe0"  # OLE2 compound file; a missing report returns an HTML 404 page
-USER_AGENT = "Mozilla/5.0 (EmissionWatch research pipeline)"
+USER_AGENT = "Mozilla/5.0 (PanoptiCoal research pipeline)"
 
 # Old CSPGCL Korba East units (since retired). Never map them to Korba STPS (NTPC).
 EXCLUDED_NAMES = {"KORBA-II", "KORBA-III"}
