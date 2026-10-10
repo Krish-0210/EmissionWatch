@@ -64,6 +64,9 @@ def check(obj, spec, where: str, errs: list[str]):
     elif spec == "str":
         if not isinstance(obj, str):
             errs.append(f"{where}: expected string, got {obj!r}")
+    elif spec == "str|null":
+        if obj is not None and not isinstance(obj, str):
+            errs.append(f"{where}: expected string or null, got {obj!r}")
     else:  # num / num|null
         if obj is None and spec == "num|null":
             return
@@ -198,6 +201,39 @@ def test_summary_sources():
     ghsl = next(x for x in s["sources"] if x["id"] == "ghsl_pop")
     assert "GHS-POP R2023A" in ghsl["citation"] and ghsl["doi"] == "10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE"
     assert {"geonames", "open_meteo", "era5"} <= {x["id"] for x in s["sources"]}
+
+
+INDIA_PLANT = {"id": "str", "name": "str", "lat": "num", "lon": "num", "capacity_mw": "num", "state": "str",
+               "status": ("operating",), "cluster_id": "str|null"}
+STATE = {"code": "str", "name": "str", "lat": "num", "lon": "num", "plant_count": "num", "total_capacity_mw": "num",
+         "plant_ids": ["str"]}
+
+
+def test_plants_and_states_files():
+    """GET /plants and GET /states bodies (plants_india.json, states.json): types, and the two files agree."""
+    errs: list[str] = []
+    plants, states = load("plants_india.json"), load("states.json")
+    check(plants, {"boundaries": "str", "plants": [INDIA_PLANT]}, "plants_india.json", errs)
+    check(states, {"boundaries": "str", "states": [STATE]}, "states.json", errs)
+    assert not errs, errs
+    plants, states = plants["plants"], states["states"]
+    assert all(set(p) == set(INDIA_PLANT) for p in plants) and all(set(s) == set(STATE) for s in states)
+    ids = [p["id"] for p in plants]
+    assert len(set(ids)) == len(ids) and all(re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", i) for i in ids)
+    assert {p["cluster_id"] for p in plants} - {None} == set(CLUSTER_IDS)
+    # every state / union territory is present (also those without a plant) and every plant is in exactly one
+    by_name = {s["name"]: s for s in states}
+    assert len(states) == len(by_name) == 36 and {"Ladakh", "Telangana"} <= set(by_name)
+    assert by_name["Ladakh"]["plant_count"] == 0 and by_name["Ladakh"]["plant_ids"] == []
+    assert sorted(i for s in states for i in s["plant_ids"]) == sorted(ids)
+    for s in states:
+        members = [p for p in plants if p["state"] == s["name"]]
+        assert s["plant_count"] == len(members) == len(s["plant_ids"]) and {p["id"] for p in members} == set(s["plant_ids"])
+        assert abs(s["total_capacity_mw"] - sum(p["capacity_mw"] for p in members)) < 1e-6
+    # plants of an analysed cluster lie in one of that cluster's states (clusters.json)
+    cluster_states = {c["id"]: set(c["states"]) for c in load("clusters.json")["clusters"]}
+    assert all(p["state"] in cluster_states[p["cluster_id"]] for p in plants if p["cluster_id"])
+    assert "geoboundaries_ind_adm1" in {x["id"] for x in load("summary.json")["sources"]}
 
 
 @pytest.mark.parametrize("cid", CLUSTER_IDS)

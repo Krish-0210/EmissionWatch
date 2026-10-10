@@ -17,3 +17,11 @@ def timeseries(cid: str) -> str:
 
 def summary() -> str:
     return data.get_text("summary.json")
+
+
+def plants_india() -> str:
+    return data.get_text("plants_india.json")
+
+
+def states() -> str:
+    return data.get_text("states.json")

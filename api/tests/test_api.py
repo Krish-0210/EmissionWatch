@@ -70,6 +70,26 @@ def test_summary():
     assert s["findings"] and all(isinstance(f, str) for f in s["findings"])
 
 
+INDIA_PLANT_KEYS = {"id", "name", "lat", "lon", "capacity_mw", "state", "status", "cluster_id"}
+STATE_KEYS = {"code", "name", "lat", "lon", "plant_count", "total_capacity_mw", "plant_ids"}
+
+
+def test_plants_and_states():
+    status, p = call("GET", "/plants")
+    assert status == 200 and set(p) == {"boundaries", "plants"}
+    assert p["plants"] and all(set(x) == INDIA_PLANT_KEYS for x in p["plants"])
+    status, s = call("GET", "/states")
+    assert status == 200 and set(s) == {"boundaries", "states"}
+    assert len(s["states"]) == 36 and all(set(x) == STATE_KEYS for x in s["states"])
+    for route in ("/plants", "/states"):
+        assert handler(event("GET", route))["headers"]["cache-control"] == "public, max-age=300"
+
+
+@pytest.mark.parametrize("route,method", [("/plants", "POST"), ("/states", "POST"), ("/plants/{id}", "GET"), ("/states/{id}", "GET")])
+def test_plants_states_other_routes_404(route, method):
+    assert call(method, route, "odisha")[0] == 404
+
+
 @pytest.mark.parametrize("route,method", [("/clusters/{id}", "GET"), ("/clusters/{id}/timeseries", "GET"), ("/brief/{id}", "POST"),
                                           ("/clusters/{id}/wind", "GET"), ("/rti/{id}", "POST")])
 @pytest.mark.parametrize("cid", ["atlantis", "", "../summary", "TALCHER", "a" * 60])
@@ -81,7 +101,7 @@ def test_unknown_cluster_404(route, method, cid, bedrock):
 
 
 def test_unknown_route_404():
-    assert call("GET", "/plants")[0] == 404
+    assert call("GET", "/nowhere")[0] == 404
     assert call("DELETE", "/clusters")[0] == 404
 
 
@@ -165,7 +185,8 @@ def test_brief_without_bedrock_credentials_falls_back(monkeypatch):
 # ---------- Deployed API == local static site ----------
 @pytest.mark.parametrize(
     "route,cid,file",
-    [("/clusters", None, "clusters.json"), ("/summary", None, "summary.json")]
+    [("/clusters", None, "clusters.json"), ("/summary", None, "summary.json"),
+     ("/plants", None, "plants_india.json"), ("/states", None, "states.json")]
     + [("/clusters/{id}", c, f"cluster_{c}.json") for c in CLUSTER_IDS]
     + [("/clusters/{id}/timeseries", c, f"timeseries_{c}.json") for c in CLUSTER_IDS],
 )
@@ -179,9 +200,9 @@ def test_api_body_is_the_static_file(route, cid, file):
 
 def test_every_frontend_file_is_routable():
     """Each JSON file the static site can fetch has an API route (api.ts url() mapping; wind_{id}.json is the input of
-    GET /clusters/{id}/wind, whose ERA5 answer is its `trace`)."""
+    GET /clusters/{id}/wind, whose ERA5 answer is its `trace`; plants_india.json = GET /plants, states.json = GET /states)."""
     names = {p.name for p in EXPORT.glob("*.json")}
-    routable = {"clusters.json", "summary.json"} | {f"{k}_{c}.json" for c in CLUSTER_IDS for k in ("cluster", "timeseries", "wind")}
+    routable = {"clusters.json", "summary.json", "plants_india.json", "states.json"} | {f"{k}_{c}.json" for c in CLUSTER_IDS for k in ("cluster", "timeseries", "wind")}
     assert names == routable
 
 

@@ -62,6 +62,8 @@ curl -s -X POST $API/brief/talcher | head -c 400; echo                 # templat
                                                                        # bedrock mode: "bedrock" (or "template")
 curl -s $API/clusters/korba/wind | head -c 400; echo                   # "source": "live" (or "era5" if Open-Meteo failed)
 curl -s -X POST $API/rti/singrauli | head -c 300; echo                 # {"markdown": "# Draft RTI application: ...", "plain_text": ...}
+curl -s $API/plants | head -c 300; echo                                # {"boundaries": ..., "plants": [ ... (166 plants)
+curl -s $API/states | head -c 300; echo                                # {"boundaries": ..., "states": [ ... (36 states / UTs)
 ```
 `GET /clusters/{id}/wind` calls `https://api.open-meteo.com` from the Lambda (no key; the function is not in a VPC,
 so it has outbound internet by default). If that fails it answers from ERA5 (`"source": "era5"`, logged as
@@ -118,7 +120,7 @@ cdk deploy EmissionWatchStack --profile emissionwatch -c allowed_origins=https:/
 add `-c brief_mode=bedrock` here too.)
 
 ## Limits and cost guards
-- HTTP API throttling: 10 rps, burst 20 (all routes, including `/wind` and `/rti`); `POST /brief/{id}` 1 rps, burst 2.
+- HTTP API throttling: 10 rps, burst 20 (all routes, including `/wind`, `/rti`, `/plants` and `/states`); `POST /brief/{id}` 1 rps, burst 2.
 - Lambda: 256 MB, 10 s timeout. Template mode (default) makes no Bedrock calls; in bedrock mode the call times
   out after 7 s and falls back to the template.
 - Bucket is private (block public access, SSE-S3, TLS only); only the Lambda reads `data/*`.

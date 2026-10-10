@@ -11,6 +11,10 @@ Added (additive, not yet read by the frontend; FRONTEND_TODO.md):
     GET  /clusters/{id}/wind        -> {source: "live" | "era5", as_of, speed_kmh, bearing_deg, cone_polygon,
                                         towns_in_path, sentence, attribution} (handlers/wind.py)
     POST /rti/{id}                  -> {markdown, plain_text} (handlers/rti.py, template only)
+    GET  /plants                    -> plants_india.json: {boundaries, plants: [{id, name, lat, lon, capacity_mw, state,
+                                        status, cluster_id}]}, every Indian coal plant >= 500 MW
+    GET  /states                    -> states.json: {boundaries, states: [{code, name, lat, lon, plant_count,
+                                        total_capacity_mw, plant_ids}]}, all 36 states / union territories
 CORS and throttling are configured on the HTTP API (infra/), not here.
 """
 
@@ -46,6 +50,10 @@ def handler(event, context=None):
             return _resp(200, plants.timeseries(cid), cache=True)
         if route == "GET /summary":
             return _resp(200, plants.summary(), cache=True)
+        if route == "GET /plants":
+            return _resp(200, plants.plants_india(), cache=True)
+        if route == "GET /states":
+            return _resp(200, plants.states(), cache=True)
         if route == "POST /brief/{id}":
             return _resp(200, brief.make_brief(cid))
         if route == "GET /clusters/{id}/wind":
