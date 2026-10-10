@@ -99,10 +99,71 @@ re-fetch after 30 min is enough.
   (citation + DOI). `summary.sources` can also replace the hard-coded sources list in the footer/How it works.
 - Filter/sort by `primary_anomaly_type` is optional.
 
-## 5. Tests to update after wiring
+## 5. All coal plants by state (Near Me state-wise fix)
+
+Two new files, each also an API route (same bytes): `plants_india.json` = `GET /plants`, `states.json` = `GET /states`
+(Cache-Control 300 s like the other GETs). Neither has a timestamp.
+
+```ts
+export interface IndiaPlant {
+  id: string // slug of the GEM plant name, unique; NOT the registry id used in ClusterDetail.plants
+  name: string // GEM name, e.g. "Vindhyachal power station"
+  lat: number
+  lon: number
+  capacity_mw: number // operating capacity, >= 500
+  state: string // equals StateSummary.name
+  status: 'operating' // every row: the list is built from GEM operating units only
+  cluster_id: string | null // one of the 11 analysed clusters (links to /cluster/:id), else null
+}
+export interface PlantsIndiaFile {
+  boundaries: string // attribution for the state boundaries, show it once where states are used
+  plants: IndiaPlant[] // 166, largest capacity first
+}
+
+export interface StateSummary {
+  code: string // e.g. "IN-CT" (as in the boundary dataset; not always the current ISO 3166-2 code)
+  name: string // "Chhattisgarh"; 36 states / union territories, sorted by name
+  lat: number // centroid of the unit's largest polygon
+  lon: number
+  plant_count: number // 0 for 19 units (e.g. Ladakh, Kerala, Delhi): show "no coal plant >= 500 MW", not an error
+  total_capacity_mw: number
+  plant_ids: string[] // IndiaPlant.id, largest capacity first; [] when plant_count is 0
+}
+export interface StatesFile {
+  boundaries: string
+  states: StateSummary[]
+}
+```
+
+Fetchers. **When `VITE_API_URL` is unset they must fall back to the static files under `/data/`** (local dev and any
+build without the API), exactly like the existing fetchers:
+
+```ts
+// API: GET {API}/plants   | static: GET data/plants_india.json
+// API: GET {API}/states   | static: GET data/states.json
+export const fetchPlantsIndia = () =>
+  getJson<PlantsIndiaFile>(API_URL ? `${API_URL}/plants` : `${staticBase}plants_india.json`)
+export const fetchStates = () =>
+  getJson<StatesFile>(API_URL ? `${API_URL}/states` : `${staticBase}states.json`)
+```
+
+(Or extend the existing `url()` mapping with `plants -> plants_india.json` and `states -> states.json`.) The static
+files are part of the build (`public/data/`), so they are also reachable at `/data/*.json` on the deployed site.
+
+Notes for the UI:
+- Only plants >= 500 MW are listed, so a state with `plant_count` 0 can still have smaller plants: word it as
+  "no coal plant of 500 MW or more", not "no coal plants".
+- Only plants with a `cluster_id` have a risk score; the others have location and capacity only. Captive plants inside a
+  cluster's ring that are not in the registry (e.g. BALCO, Jharsuguda CPP) have `cluster_id: null`.
+- A state can hold plants of several clusters (Odisha: talcher + jharsuguda) and a cluster can span two states
+  (singrauli: Madhya Pradesh + Uttar Pradesh).
+- Credit the boundaries: `boundaries` string, or `summary.sources` entry `geoboundaries_ind_adm1` (CC BY 2.5 IN).
+
+## 6. Tests to update after wiring
 
 `api/tests/test_contract.py::test_specs_match_api_ts` compares `api.ts` interfaces with the API specs and already accepts the
 fields above in `ClusterSummary` / `ClusterDetail` / `SummaryFile`, so wiring them does not break it. Once they are
 in `api.ts`, make the check strict again: move `ADDED_SUMMARY` (and `flagged_periods`, `sources`) into the main
-specs there, drop the `may_add` allowance, and add `FlaggedPeriod`, `Source`, `WindTrace`, `WindTown`, `RtiDraft`
-to the parametrised list.
+specs there, drop the `may_add` allowance, and add `FlaggedPeriod`, `Source`, `WindTrace`, `WindTown`, `RtiDraft`,
+`IndiaPlant` (spec `INDIA_PLANT`), `PlantsIndiaFile`, `StateSummary` (spec `STATE`) and `StatesFile` to the
+parametrised list. The files themselves are already checked (`test_plants_and_states_files`).
