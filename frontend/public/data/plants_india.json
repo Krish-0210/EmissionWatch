@@ -1,0 +1,1665 @@
+{
+ "boundaries": "State and union territory boundaries: geoBoundaries gbOpen IND ADM1 (DataMeet India community), CC BY 2.5 IN",
+ "plants": [
+  {
+   "id": "vindhyachal-power-station",
+   "name": "Vindhyachal power station",
+   "lat": 24.0983,
+   "lon": 82.6719,
+   "capacity_mw": 4760.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "mundra-thermal-power-project-adani",
+   "name": "Mundra Thermal Power Project (Adani)",
+   "lat": 22.8235,
+   "lon": 69.5544,
+   "capacity_mw": 4620.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": "mundra"
+  },
+  {
+   "id": "ramagundam-power-station",
+   "name": "Ramagundam power station",
+   "lat": 18.7556,
+   "lon": 79.463,
+   "capacity_mw": 4200.0,
+   "state": "Telangana",
+   "status": "operating",
+   "cluster_id": "ramagundam"
+  },
+  {
+   "id": "tata-mundra-ultra-mega-power-project",
+   "name": "Tata Mundra Ultra Mega Power Project",
+   "lat": 22.8158,
+   "lon": 69.5281,
+   "capacity_mw": 4000.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": "mundra"
+  },
+  {
+   "id": "sasan-ultra-mega-power-project",
+   "name": "Sasan Ultra Mega Power Project",
+   "lat": 23.9775,
+   "lon": 82.6265,
+   "capacity_mw": 3960.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "tamnar-power-station",
+   "name": "Tamnar power station",
+   "lat": 22.0987,
+   "lon": 83.4513,
+   "capacity_mw": 3400.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "tiroda-thermal-power-project",
+   "name": "Tiroda Thermal Power Project",
+   "lat": 21.4125,
+   "lon": 79.9673,
+   "capacity_mw": 3300.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "talcher-kaniha-super-thermal-power-station",
+   "name": "Talcher Kaniha Super Thermal Power Station",
+   "lat": 21.0971,
+   "lon": 85.075,
+   "capacity_mw": 3000.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": "talcher"
+  },
+  {
+   "id": "rihand-power-station",
+   "name": "Rihand power station",
+   "lat": 24.027,
+   "lon": 82.7915,
+   "capacity_mw": 3000.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "sipat-power-station",
+   "name": "Sipat power station",
+   "lat": 22.1317,
+   "lon": 82.2904,
+   "capacity_mw": 2980.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "chandrapur-thermal-power-station",
+   "name": "Chandrapur Thermal Power Station",
+   "lat": 20.0063,
+   "lon": 79.29,
+   "capacity_mw": 2920.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": "chandrapur"
+  },
+  {
+   "id": "suratgarh-super-thermal-power-station",
+   "name": "Suratgarh Super Thermal Power Station",
+   "lat": 29.1721,
+   "lon": 74.0189,
+   "capacity_mw": 2820.0,
+   "state": "Rajasthan",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "korba-super-thermal-power-station-ntpc",
+   "name": "Korba Super Thermal Power Station (NTPC)",
+   "lat": 22.3876,
+   "lon": 82.6826,
+   "capacity_mw": 2600.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": "korba"
+  },
+  {
+   "id": "dr-narla-tata-rao-thermal-power-station",
+   "name": "Dr. Narla Tata Rao Thermal power station",
+   "lat": 16.5961,
+   "lon": 80.5381,
+   "capacity_mw": 2560.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "shree-singaji-thermal-power-project",
+   "name": "Shree Singaji Thermal Power Project",
+   "lat": 22.0991,
+   "lon": 76.5317,
+   "capacity_mw": 2520.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jharsuguda-sterlite-power-station",
+   "name": "Jharsuguda Sterlite power station",
+   "lat": 21.8157,
+   "lon": 84.042,
+   "capacity_mw": 2400.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": "jharsuguda"
+  },
+  {
+   "id": "sri-damodaram-sanjeevaiah-thermal-power-station",
+   "name": "Sri Damodaram Sanjeevaiah Thermal Power Station",
+   "lat": 14.3276,
+   "lon": 80.1221,
+   "capacity_mw": 2400.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kudgi-super-thermal-power-project",
+   "name": "Kudgi Super Thermal Power Project",
+   "lat": 16.4995,
+   "lon": 75.8346,
+   "capacity_mw": 2400.0,
+   "state": "Karnataka",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mejia-power-station",
+   "name": "Mejia power station",
+   "lat": 23.4639,
+   "lon": 87.1311,
+   "capacity_mw": 2340.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kahalgaon-super-thermal-power-plant",
+   "name": "Kahalgaon Super Thermal Power Plant",
+   "lat": 25.2369,
+   "lon": 87.2656,
+   "capacity_mw": 2340.0,
+   "state": "Bihar",
+   "status": "operating",
+   "cluster_id": "kahalgaon"
+  },
+  {
+   "id": "chhabra-thermal-power-station",
+   "name": "Chhabra Thermal Power Station",
+   "lat": 24.6286,
+   "lon": 77.0372,
+   "capacity_mw": 2320.0,
+   "state": "Rajasthan",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mauda-power-station",
+   "name": "Mauda power station",
+   "lat": 21.1807,
+   "lon": 79.3965,
+   "capacity_mw": 2320.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "obra-thermal-power-station",
+   "name": "Obra Thermal Power Station",
+   "lat": 24.4445,
+   "lon": 82.9801,
+   "capacity_mw": 2320.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "wanakbori-thermal-power-station",
+   "name": "Wanakbori Thermal Power Station",
+   "lat": 22.8752,
+   "lon": 73.361,
+   "capacity_mw": 2270.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "koradi-thermal-power-station",
+   "name": "Koradi Thermal Power Station",
+   "lat": 21.2366,
+   "lon": 79.0922,
+   "capacity_mw": 2190.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "farakka-power-station",
+   "name": "Farakka power station",
+   "lat": 24.7727,
+   "lon": 87.8937,
+   "capacity_mw": 2100.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "balco-korba-power-station",
+   "name": "BALCO Korba power station",
+   "lat": 22.3979,
+   "lon": 82.7406,
+   "capacity_mw": 2010.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "simhadri-power-station",
+   "name": "Simhadri power station",
+   "lat": 17.591,
+   "lon": 83.0917,
+   "capacity_mw": 2000.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "singrauli-super-thermal-power-station",
+   "name": "Singrauli Super Thermal Power Station",
+   "lat": 24.1042,
+   "lon": 82.7064,
+   "capacity_mw": 2000.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "nabinagar-super-thermal-power-project",
+   "name": "Nabinagar Super Thermal Power Project",
+   "lat": 24.776,
+   "lon": 84.158,
+   "capacity_mw": 1980.0,
+   "state": "Bihar",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "talwandi-sabo-power-project",
+   "name": "Talwandi Sabo Power Project",
+   "lat": 29.9246,
+   "lon": 75.2389,
+   "capacity_mw": 1980.0,
+   "state": "Punjab",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "lalitpur-power-project",
+   "name": "Lalitpur power project",
+   "lat": 24.7958,
+   "lon": 78.6469,
+   "capacity_mw": 1980.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bara-thermal-power-project",
+   "name": "Bara Thermal Power Project",
+   "lat": 25.1963,
+   "lon": 81.6585,
+   "capacity_mw": 1980.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "barh-i-power-station",
+   "name": "Barh I power station",
+   "lat": 25.4865,
+   "lon": 85.7452,
+   "capacity_mw": 1980.0,
+   "state": "Bihar",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "north-karanpura-power-station",
+   "name": "North Karanpura power station",
+   "lat": 23.8508,
+   "lon": 85.0124,
+   "capacity_mw": 1980.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "neyveli-thermal-power-station-ii",
+   "name": "Neyveli Thermal Power Station II",
+   "lat": 11.5565,
+   "lon": 79.4414,
+   "capacity_mw": 1970.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": "neyveli"
+  },
+  {
+   "id": "bhusawal-thermal-power-station",
+   "name": "Bhusawal Thermal Power Station",
+   "lat": 21.048,
+   "lon": 75.855,
+   "capacity_mw": 1870.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "north-chennai-thermal-power-station",
+   "name": "North Chennai Thermal Power Station",
+   "lat": 13.253,
+   "lon": 80.3278,
+   "capacity_mw": 1830.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "national-capital-dadri-thermal-power-plant",
+   "name": "National Capital Dadri Thermal Power Plant",
+   "lat": 28.603,
+   "lon": 77.6078,
+   "capacity_mw": 1820.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kothagudem-thermal-power-station",
+   "name": "Kothagudem Thermal Power Station",
+   "lat": 17.6219,
+   "lon": 80.6936,
+   "capacity_mw": 1800.0,
+   "state": "Telangana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "ksk-mahanadi-power-project",
+   "name": "KSK Mahanadi Power Project",
+   "lat": 21.9603,
+   "lon": 82.4091,
+   "capacity_mw": 1800.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "tanda-power-station",
+   "name": "Tanda power station",
+   "lat": 26.5893,
+   "lon": 82.6006,
+   "capacity_mw": 1760.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "ib-valley-thermal-power-station",
+   "name": "Ib Valley Thermal Power Station",
+   "lat": 21.6905,
+   "lon": 83.8601,
+   "capacity_mw": 1740.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": "jharsuguda"
+  },
+  {
+   "id": "raichur-thermal-power-station",
+   "name": "Raichur Thermal Power Station",
+   "lat": 16.3532,
+   "lon": 77.3422,
+   "capacity_mw": 1720.0,
+   "state": "Karnataka",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bellary-thermal-power-station",
+   "name": "Bellary Thermal Power Station",
+   "lat": 15.1932,
+   "lon": 76.7195,
+   "capacity_mw": 1700.0,
+   "state": "Karnataka",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "rayalaseema-thermal-power-project",
+   "name": "Rayalaseema Thermal Power Project",
+   "lat": 14.6973,
+   "lon": 78.4594,
+   "capacity_mw": 1650.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "anpara-power-station",
+   "name": "Anpara power station",
+   "lat": 24.202,
+   "lon": 82.7891,
+   "capacity_mw": 1630.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "lara-integrated-thermal-power-project",
+   "name": "Lara Integrated Thermal Power Project",
+   "lat": 21.7577,
+   "lon": 83.4575,
+   "capacity_mw": 1600.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "sagardighi-thermal-power-station",
+   "name": "Sagardighi Thermal Power Station",
+   "lat": 24.3688,
+   "lon": 88.104,
+   "capacity_mw": 1600.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "yadadri-power-station",
+   "name": "Yadadri power station",
+   "lat": 16.7082,
+   "lon": 79.5812,
+   "capacity_mw": 1600.0,
+   "state": "Telangana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "gadarwara-super-thermal-power-project",
+   "name": "Gadarwara Super Thermal Power Project",
+   "lat": 22.8618,
+   "lon": 78.8661,
+   "capacity_mw": 1600.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "yermarus-power-station",
+   "name": "Yermarus power station",
+   "lat": 16.2953,
+   "lon": 77.3561,
+   "capacity_mw": 1600.0,
+   "state": "Karnataka",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "darlipali-power-station",
+   "name": "Darlipali power station",
+   "lat": 21.9636,
+   "lon": 83.8919,
+   "capacity_mw": 1600.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": "jharsuguda"
+  },
+  {
+   "id": "adani-godda-power-station",
+   "name": "Adani Godda power station",
+   "lat": 24.8141,
+   "lon": 87.1355,
+   "capacity_mw": 1600.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "feroze-gandhi-unchahar-power-station",
+   "name": "Feroze Gandhi Unchahar Power Station",
+   "lat": 25.9133,
+   "lon": 81.3251,
+   "capacity_mw": 1550.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "vallur-thermal-power-plant",
+   "name": "Vallur Thermal Power Plant",
+   "lat": 13.2371,
+   "lon": 80.3018,
+   "capacity_mw": 1500.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "indira-gandhi-super-thermal-power-project",
+   "name": "Indira Gandhi Super Thermal Power Project",
+   "lat": 28.4851,
+   "lon": 76.3732,
+   "capacity_mw": 1500.0,
+   "state": "Haryana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "uchpinda-power-station",
+   "name": "Uchpinda power station",
+   "lat": 21.8864,
+   "lon": 83.1208,
+   "capacity_mw": 1440.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mettur-thermal-power-station",
+   "name": "Mettur Thermal Power Station",
+   "lat": 11.773,
+   "lon": 77.8154,
+   "capacity_mw": 1440.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "rajpura-thermal-power-project",
+   "name": "Rajpura Thermal Power Project",
+   "lat": 30.559,
+   "lon": 76.5776,
+   "capacity_mw": 1400.0,
+   "state": "Punjab",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "raikheda-power-station",
+   "name": "Raikheda power station",
+   "lat": 21.4499,
+   "lon": 81.8525,
+   "capacity_mw": 1370.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "amravati-thermal-power-project",
+   "name": "Amravati Thermal Power Project",
+   "lat": 21.0803,
+   "lon": 77.9012,
+   "capacity_mw": 1350.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "nasik-rattanindia-thermal-power-project",
+   "name": "Nasik RattanIndia Thermal Power Project",
+   "lat": 19.8667,
+   "lon": 74.0817,
+   "capacity_mw": 1350.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "khaperkheda-power-station",
+   "name": "Khaperkheda power station",
+   "lat": 21.2818,
+   "lon": 79.116,
+   "capacity_mw": 1340.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "hasdeo-thermal-power-station",
+   "name": "Hasdeo Thermal Power Station",
+   "lat": 22.4125,
+   "lon": 82.6822,
+   "capacity_mw": 1340.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": "korba"
+  },
+  {
+   "id": "sanjay-gandhi-power-station",
+   "name": "Sanjay Gandhi power station",
+   "lat": 23.3057,
+   "lon": 81.0648,
+   "capacity_mw": 1340.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "muthukur-mandal-power-station-painampuram",
+   "name": "Muthukur Mandal power station (Painampuram)",
+   "lat": 14.3512,
+   "lon": 80.1431,
+   "capacity_mw": 1320.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bander-power-station",
+   "name": "Bander power station",
+   "lat": 14.3512,
+   "lon": 80.1431,
+   "capacity_mw": 1320.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mahatma-gandhi-power-station",
+   "name": "Mahatma Gandhi power station",
+   "lat": 28.4881,
+   "lon": 76.3525,
+   "capacity_mw": 1320.0,
+   "state": "Haryana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "barh-ii-power-station",
+   "name": "Barh II power station",
+   "lat": 25.4865,
+   "lon": 85.7452,
+   "capacity_mw": 1320.0,
+   "state": "Bihar",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "khargone-power-station",
+   "name": "Khargone power station",
+   "lat": 22.0652,
+   "lon": 75.8519,
+   "capacity_mw": 1320.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "solapur-power-station",
+   "name": "Solapur power station",
+   "lat": 17.5513,
+   "lon": 75.9832,
+   "capacity_mw": 1320.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jaypee-nigrie-super-thermal-power-project",
+   "name": "Jaypee Nigrie Super Thermal Power Project",
+   "lat": 24.15,
+   "lon": 81.9045,
+   "capacity_mw": 1320.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jawaharpur-thermal-project",
+   "name": "Jawaharpur Thermal Project",
+   "lat": 27.4971,
+   "lon": 78.8261,
+   "capacity_mw": 1320.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "meja-thermal-power-project",
+   "name": "Meja Thermal Power Project",
+   "lat": 25.1459,
+   "lon": 81.9401,
+   "capacity_mw": 1320.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "khurja-power-station",
+   "name": "Khurja power station",
+   "lat": 28.1583,
+   "lon": 77.9083,
+   "capacity_mw": 1320.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kawai-thermal-power-project",
+   "name": "Kawai Thermal Power Project",
+   "lat": 24.778,
+   "lon": 76.7371,
+   "capacity_mw": 1320.0,
+   "state": "Rajasthan",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "ghatampur-power-station",
+   "name": "Ghatampur power station",
+   "lat": 25.975,
+   "lon": 80.1889,
+   "capacity_mw": 1320.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "harduaganj-power-station",
+   "name": "Harduaganj power station",
+   "lat": 28.0175,
+   "lon": 78.13,
+   "capacity_mw": 1270.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "anuppur-thermal-power-project",
+   "name": "Anuppur Thermal Power Project",
+   "lat": 23.0737,
+   "lon": 81.7843,
+   "capacity_mw": 1260.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kota-power-station",
+   "name": "Kota power station",
+   "lat": 25.171,
+   "lon": 75.817,
+   "capacity_mw": 1240.0,
+   "state": "Rajasthan",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jharsuguda-cpp-power-station",
+   "name": "Jharsuguda CPP power station",
+   "lat": 21.788,
+   "lon": 84.0544,
+   "capacity_mw": 1215.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "salaya-power-plant",
+   "name": "Salaya power plant",
+   "lat": 22.3049,
+   "lon": 69.7101,
+   "capacity_mw": 1200.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "rajiv-gandhi-thermal-power-project",
+   "name": "Rajiv Gandhi Thermal Power Project",
+   "lat": 29.347,
+   "lon": 75.8575,
+   "capacity_mw": 1200.0,
+   "state": "Haryana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "raghunathpur-thermal-power-station",
+   "name": "Raghunathpur Thermal Power Station",
+   "lat": 23.6219,
+   "lon": 86.6607,
+   "capacity_mw": 1200.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "udupi-power-station",
+   "name": "Udupi power station",
+   "lat": 13.1596,
+   "lon": 74.8002,
+   "capacity_mw": 1200.0,
+   "state": "Karnataka",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mutiara-coastal-energen-thermal-power-plant",
+   "name": "Mutiara Coastal Energen Thermal Power Plant",
+   "lat": 8.91272,
+   "lon": 78.145,
+   "capacity_mw": 1200.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": "tuticorin"
+  },
+  {
+   "id": "ratnagiri-power-plant",
+   "name": "Ratnagiri Power Plant",
+   "lat": 17.2964,
+   "lon": 73.2131,
+   "capacity_mw": 1200.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "baradarha-power-station",
+   "name": "Baradarha power station",
+   "lat": 21.9114,
+   "lon": 83.1889,
+   "capacity_mw": 1200.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "anpara-c-power-station",
+   "name": "Anpara-C power station",
+   "lat": 24.2038,
+   "lon": 82.7973,
+   "capacity_mw": 1200.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "rosa-thermal-power-plant",
+   "name": "Rosa Thermal Power Plant",
+   "lat": 27.8194,
+   "lon": 79.9372,
+   "capacity_mw": 1200.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kalisindh-thermal-power-station",
+   "name": "Kalisindh Thermal Power Station",
+   "lat": 24.5325,
+   "lon": 76.1004,
+   "capacity_mw": 1200.0,
+   "state": "Rajasthan",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "pegadapalli-jaipur-mandal-power-station",
+   "name": "Pegadapalli (Jaipur Mandal) power station",
+   "lat": 18.8271,
+   "lon": 79.5703,
+   "capacity_mw": 1200.0,
+   "state": "Telangana",
+   "status": "operating",
+   "cluster_id": "ramagundam"
+  },
+  {
+   "id": "cuddalore-il-fs-power-station",
+   "name": "Cuddalore IL&FS power station",
+   "lat": 11.5215,
+   "lon": 79.7515,
+   "capacity_mw": 1200.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mahan-super-thermal-power-project",
+   "name": "Mahan Super Thermal Power Project",
+   "lat": 24.0087,
+   "lon": 82.417,
+   "capacity_mw": 1200.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "angul-smelter-power-station",
+   "name": "Angul Smelter power station",
+   "lat": 20.849,
+   "lon": 85.1902,
+   "capacity_mw": 1200.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "angul-power-station",
+   "name": "Angul power station",
+   "lat": 21.127,
+   "lon": 84.9806,
+   "capacity_mw": 1200.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": "talcher"
+  },
+  {
+   "id": "ukai-thermal-power-station",
+   "name": "Ukai Thermal Power Station",
+   "lat": 21.2093,
+   "lon": 73.5574,
+   "capacity_mw": 1110.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kakatiya-thermal-power-project",
+   "name": "Kakatiya Thermal Power Project",
+   "lat": 18.3832,
+   "lon": 79.8272,
+   "capacity_mw": 1100.0,
+   "state": "Telangana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jsw-barmer-jalipa-kapurdi-power-station",
+   "name": "JSW Barmer Jalipa Kapurdi power station",
+   "lat": 25.8954,
+   "lon": 71.3299,
+   "capacity_mw": 1080.0,
+   "state": "Rajasthan",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bhadradri-power-station",
+   "name": "Bhadradri power station",
+   "lat": 18.0275,
+   "lon": 80.7356,
+   "capacity_mw": 1080.0,
+   "state": "Telangana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kamalanga-power-station",
+   "name": "Kamalanga power station",
+   "lat": 20.8706,
+   "lon": 85.267,
+   "capacity_mw": 1050.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "tuticorin-thermal-power-station",
+   "name": "Tuticorin Thermal Power Station",
+   "lat": 8.76252,
+   "lon": 78.176,
+   "capacity_mw": 1050.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": "tuticorin"
+  },
+  {
+   "id": "bakreswar-thermal-power-station",
+   "name": "Bakreswar Thermal Power Station",
+   "lat": 23.8292,
+   "lon": 87.451,
+   "capacity_mw": 1050.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "maithon-right-bank-thermal-power-station",
+   "name": "Maithon Right Bank Thermal Power Station",
+   "lat": 23.8209,
+   "lon": 86.76,
+   "capacity_mw": 1050.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "vizag-thermal-power-plant",
+   "name": "Vizag Thermal Power Plant",
+   "lat": 17.5636,
+   "lon": 83.1389,
+   "capacity_mw": 1040.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "meenakshi-energy-thermal-power-project",
+   "name": "Meenakshi Energy Thermal Power Project",
+   "lat": 14.2112,
+   "lon": 80.0901,
+   "capacity_mw": 1000.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "tuticorin-ntpl-power-station",
+   "name": "Tuticorin NTPL power station",
+   "lat": 8.76036,
+   "lon": 78.1711,
+   "capacity_mw": 1000.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": "tuticorin"
+  },
+  {
+   "id": "anpara-d-power-station",
+   "name": "Anpara-D power station",
+   "lat": 24.1963,
+   "lon": 82.8063,
+   "capacity_mw": 1000.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "new-neyveli-thermal-power-station",
+   "name": "New Neyveli Thermal Power Station",
+   "lat": 11.5471,
+   "lon": 79.4429,
+   "capacity_mw": 1000.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": "neyveli"
+  },
+  {
+   "id": "durgapur-steel-city-andal-power-station",
+   "name": "Durgapur Steel City Andal power station",
+   "lat": 23.58,
+   "lon": 87.2043,
+   "capacity_mw": 1000.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "koderma-thermal-power-station",
+   "name": "Koderma Thermal Power Station",
+   "lat": 24.3915,
+   "lon": 85.5619,
+   "capacity_mw": 1000.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "nabinagar-thermal-power-project",
+   "name": "Nabinagar Thermal Power Project",
+   "lat": 24.7051,
+   "lon": 84.0887,
+   "capacity_mw": 1000.0,
+   "state": "Bihar",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "marwa-power-station",
+   "name": "Marwa power station",
+   "lat": 22.0708,
+   "lon": 82.6022,
+   "capacity_mw": 1000.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": "marwa"
+  },
+  {
+   "id": "guru-hargobind-lehra-mohabbat-power-station",
+   "name": "Guru Hargobind Lehra Mohabbat Power Station",
+   "lat": 30.2666,
+   "lon": 75.1661,
+   "capacity_mw": 920.0,
+   "state": "Punjab",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "parichha-power-station",
+   "name": "Parichha power station",
+   "lat": 25.5136,
+   "lon": 78.7579,
+   "capacity_mw": 920.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "aditya-aluminium-power-station",
+   "name": "Aditya Aluminium power station",
+   "lat": 21.7401,
+   "lon": 84.0606,
+   "capacity_mw": 900.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mahan-aluminium-power-station",
+   "name": "Mahan Aluminium power station",
+   "lat": 24.2209,
+   "lon": 82.4372,
+   "capacity_mw": 900.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jsw-vijayanagar-toranagallu-power-station",
+   "name": "JSW Vijayanagar Toranagallu power station",
+   "lat": 15.1868,
+   "lon": 76.6621,
+   "capacity_mw": 860.0,
+   "state": "Karnataka",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "kolaghat-thermal-power-station",
+   "name": "Kolaghat Thermal Power Station",
+   "lat": 22.4166,
+   "lon": 87.871,
+   "capacity_mw": 840.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "ropar-power-station",
+   "name": "Ropar power station",
+   "lat": 31.0418,
+   "lon": 76.5845,
+   "capacity_mw": 840.0,
+   "state": "Punjab",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "angul-steel-power-station",
+   "name": "Angul Steel power station",
+   "lat": 20.8925,
+   "lon": 84.9904,
+   "capacity_mw": 810.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "patratu-jseb-power-station",
+   "name": "Patratu JSEB power station",
+   "lat": 23.64,
+   "lon": 85.2931,
+   "capacity_mw": 800.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "budge-budge-generating-station",
+   "name": "Budge Budge Generating Station",
+   "lat": 22.4703,
+   "lon": 88.1399,
+   "capacity_mw": 750.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "parli-thermal-power-station",
+   "name": "Parli Thermal Power Station",
+   "lat": 18.9076,
+   "lon": 76.543,
+   "capacity_mw": 750.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "trombay-power-station",
+   "name": "Trombay power station",
+   "lat": 19.0027,
+   "lon": 72.8979,
+   "capacity_mw": 750.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bongaigaon-power-station",
+   "name": "Bongaigaon power station",
+   "lat": 26.4444,
+   "lon": 90.3672,
+   "capacity_mw": 750.0,
+   "state": "Assam",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "renusagar-power-station",
+   "name": "Renusagar power station",
+   "lat": 24.1811,
+   "lon": 82.7913,
+   "capacity_mw": 725.7,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": "singrauli"
+  },
+  {
+   "id": "panipat-power-station",
+   "name": "Panipat power station",
+   "lat": 29.3975,
+   "lon": 76.8763,
+   "capacity_mw": 710.0,
+   "state": "Haryana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jharsuguda-ind-barath-power-station",
+   "name": "Jharsuguda Ind-Barath power station",
+   "lat": 21.6579,
+   "lon": 83.9195,
+   "capacity_mw": 700.0,
+   "state": "Odisha",
+   "status": "operating",
+   "cluster_id": "jharsuguda"
+  },
+  {
+   "id": "buxar-thermal-power-station",
+   "name": "Buxar Thermal Power Station",
+   "lat": 25.4623,
+   "lon": 83.8826,
+   "capacity_mw": 660.0,
+   "state": "Bihar",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "panki-thermal-power-station",
+   "name": "Panki Thermal Power Station",
+   "lat": 26.4766,
+   "lon": 80.241,
+   "capacity_mw": 660.0,
+   "state": "Uttar Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "nasik-mahagenco-thermal-power-station",
+   "name": "Nasik MAHAGENCO Thermal Power Station",
+   "lat": 19.9815,
+   "lon": 73.8921,
+   "capacity_mw": 630.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "gandhinagar-thermal-power-station",
+   "name": "Gandhinagar Thermal Power Station",
+   "lat": 23.2497,
+   "lon": 72.6739,
+   "capacity_mw": 610.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "haldia-energy-power-station",
+   "name": "Haldia Energy power station",
+   "lat": 22.0605,
+   "lon": 88.1097,
+   "capacity_mw": 600.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "adani-raigarh-thermal-power-plant",
+   "name": "Adani Raigarh Thermal Power Plant",
+   "lat": 21.7438,
+   "lon": 83.2741,
+   "capacity_mw": 600.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "simhapuri-thamminapatnam-power-station",
+   "name": "Simhapuri Thamminapatnam power station",
+   "lat": 14.2046,
+   "lon": 80.0866,
+   "capacity_mw": 600.0,
+   "state": "Andhra Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "ntpc-seoni-power-station",
+   "name": "NTPC Seoni power station",
+   "lat": 22.7355,
+   "lon": 79.9123,
+   "capacity_mw": 600.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "gmr-warora-energy-power-station",
+   "name": "GMR Warora Energy power station",
+   "lat": 20.2797,
+   "lon": 78.9754,
+   "capacity_mw": 600.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "korba-power-thermal-power-plant-adani",
+   "name": "Korba Power Thermal Power Plant (Adani)",
+   "lat": 22.2454,
+   "lon": 82.7246,
+   "capacity_mw": 600.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "binjkote-power-station",
+   "name": "Binjkote power station",
+   "lat": 22.0104,
+   "lon": 83.2058,
+   "capacity_mw": 600.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "raigarh-trn-power-project",
+   "name": "Raigarh TRN Power Project",
+   "lat": 21.9067,
+   "lon": 83.1286,
+   "capacity_mw": 600.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "athena-chhattisgarh-power-station",
+   "name": "Athena Chhattisgarh power station",
+   "lat": 21.9068,
+   "lon": 83.129,
+   "capacity_mw": 600.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "dhariwal-power-station",
+   "name": "Dhariwal power station",
+   "lat": 20.0106,
+   "lon": 79.2034,
+   "capacity_mw": 600.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": "chandrapur"
+  },
+  {
+   "id": "butibori-power-project",
+   "name": "Butibori Power Project",
+   "lat": 20.9286,
+   "lon": 78.9333,
+   "capacity_mw": 600.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "deenbandhu-chhotu-ram-thermal-power-plant",
+   "name": "Deenbandhu Chhotu Ram Thermal Power Plant",
+   "lat": 30.1075,
+   "lon": 77.3268,
+   "capacity_mw": 600.0,
+   "state": "Haryana",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bhilai-steel-power-station",
+   "name": "Bhilai Steel power station",
+   "lat": 21.184,
+   "lon": 81.4237,
+   "capacity_mw": 560.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "durgapur-projects-limited-power-station",
+   "name": "Durgapur Projects Limited power station",
+   "lat": 23.5211,
+   "lon": 87.3023,
+   "capacity_mw": 550.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "jojobera-power-plant",
+   "name": "Jojobera Power Plant",
+   "lat": 22.7554,
+   "lon": 86.2491,
+   "capacity_mw": 547.5,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "dongamahua-captive-power-plant",
+   "name": "Dongamahua Captive Power Plant",
+   "lat": 22.1279,
+   "lon": 83.5359,
+   "capacity_mw": 540.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "mahadev-prasad-super-thermal-power-plant",
+   "name": "Mahadev Prasad Super Thermal Power Plant",
+   "lat": 22.8365,
+   "lon": 86.0613,
+   "capacity_mw": 540.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "goindwal-sahib-thermal-power-plant",
+   "name": "Goindwal Sahib Thermal Power Plant",
+   "lat": 31.3841,
+   "lon": 75.1465,
+   "capacity_mw": 540.0,
+   "state": "Punjab",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "wardha-warora-power-plant",
+   "name": "Wardha Warora Power Plant",
+   "lat": 20.2724,
+   "lon": 78.9789,
+   "capacity_mw": 540.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "sepc-tuticorin-power-station",
+   "name": "SEPC Tuticorin power station",
+   "lat": 8.75531,
+   "lon": 78.158,
+   "capacity_mw": 525.0,
+   "state": "Tamil Nadu",
+   "status": "operating",
+   "cluster_id": "tuticorin"
+  },
+  {
+   "id": "bhavnagar-power-station",
+   "name": "Bhavnagar power station",
+   "lat": 21.5832,
+   "lon": 72.2222,
+   "capacity_mw": 500.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "dr-shyama-prasad-mukherjee-thermal-power-station",
+   "name": "Dr. Shyama Prasad Mukherjee Thermal Power Station",
+   "lat": 22.3682,
+   "lon": 82.722,
+   "capacity_mw": 500.0,
+   "state": "Chhattisgarh",
+   "status": "operating",
+   "cluster_id": "korba"
+  },
+  {
+   "id": "barauni-power-station",
+   "name": "Barauni power station",
+   "lat": 25.3914,
+   "lon": 86.0235,
+   "capacity_mw": 500.0,
+   "state": "Bihar",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bina-thermal-power-project",
+   "name": "Bina Thermal Power Project",
+   "lat": 24.3172,
+   "lon": 78.1336,
+   "capacity_mw": 500.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "paras-power-station",
+   "name": "Paras power station",
+   "lat": 20.7147,
+   "lon": 76.7948,
+   "capacity_mw": 500.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "dahanu-power-station",
+   "name": "Dahanu power station",
+   "lat": 19.9535,
+   "lon": 72.7487,
+   "capacity_mw": 500.0,
+   "state": "Maharashtra",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "satpura-thermal-power-station",
+   "name": "Satpura Thermal Power Station",
+   "lat": 22.1081,
+   "lon": 78.1771,
+   "capacity_mw": 500.0,
+   "state": "Madhya Pradesh",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "sikka-thermal-power-station",
+   "name": "Sikka Thermal Power Station",
+   "lat": 22.4208,
+   "lon": 69.8276,
+   "capacity_mw": 500.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "chandrapura-power-station",
+   "name": "Chandrapura power station",
+   "lat": 23.7413,
+   "lon": 86.1202,
+   "capacity_mw": 500.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "bokaro-thermal-power-station",
+   "name": "Bokaro Thermal Power Station",
+   "lat": 23.7829,
+   "lon": 85.8834,
+   "capacity_mw": 500.0,
+   "state": "Jharkhand",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "surat-lignite-power-plant",
+   "name": "Surat Lignite Power Plant",
+   "lat": 21.3973,
+   "lon": 73.107,
+   "capacity_mw": 500.0,
+   "state": "Gujarat",
+   "status": "operating",
+   "cluster_id": null
+  },
+  {
+   "id": "santaldih-thermal-power-station",
+   "name": "Santaldih Thermal Power Station",
+   "lat": 23.6013,
+   "lon": 86.4666,
+   "capacity_mw": 500.0,
+   "state": "West Bengal",
+   "status": "operating",
+   "cluster_id": null
+  }
+ ]
+}

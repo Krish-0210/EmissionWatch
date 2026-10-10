@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-10T04:10:22+00:00",
+ "generated_at": "2026-10-10T10:06:01+00:00",
  "units": {
   "coef": "µmol/m² NO2 enhancement per MU/day (enhancement); ratio units per MU/day (ratio)",
   "backtest": "µmol/m², means over valid days of Apr 1 - May 31; generation in MU/day"
@@ -316,6 +316,15 @@
    "license": "CC BY 4.0",
    "citation": "Weather data by Open-Meteo.com",
    "doi": null
+  },
+  {
+   "id": "geoboundaries_ind_adm1",
+   "name": "geoBoundaries gbOpen India ADM1 (states and union territories; source: DataMeet India community, Election Commission of India)",
+   "used_for": "state / union territory of each coal plant (plants_india.json, states.json) and state centroids",
+   "access": "geoboundaries.org/api/current/gbOpen/IND/ADM1 (boundaryID IND-ADM1-1811400)",
+   "license": "CC BY 2.5 IN",
+   "citation": "Runfola, D. et al. (2020): geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. Boundaries: DataMeet India community (github.com/datameet/maps).",
+   "doi": "10.1371/journal.pone.0231866"
   }
  ]
 }

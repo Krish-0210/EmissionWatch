@@ -1,0 +1,512 @@
+{
+ "boundaries": "State and union territory boundaries: geoBoundaries gbOpen IND ADM1 (DataMeet India community), CC BY 2.5 IN",
+ "states": [
+  {
+   "code": "IN-AN",
+   "name": "Andaman and Nicobar Islands",
+   "lat": 12.6028,
+   "lon": 92.8288,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-AP",
+   "name": "Andhra Pradesh",
+   "lat": 15.7564,
+   "lon": 79.966,
+   "plant_count": 9,
+   "total_capacity_mw": 13890.0,
+   "plant_ids": [
+    "dr-narla-tata-rao-thermal-power-station",
+    "sri-damodaram-sanjeevaiah-thermal-power-station",
+    "simhadri-power-station",
+    "rayalaseema-thermal-power-project",
+    "muthukur-mandal-power-station-painampuram",
+    "bander-power-station",
+    "vizag-thermal-power-plant",
+    "meenakshi-energy-thermal-power-project",
+    "simhapuri-thamminapatnam-power-station"
+   ]
+  },
+  {
+   "code": "IN-AR",
+   "name": "Arunachal Pradesh",
+   "lat": 28.036,
+   "lon": 94.6751,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-AS",
+   "name": "Assam",
+   "lat": 26.3547,
+   "lon": 92.8257,
+   "plant_count": 1,
+   "total_capacity_mw": 750.0,
+   "plant_ids": [
+    "bongaigaon-power-station"
+   ]
+  },
+  {
+   "code": "IN-BR",
+   "name": "Bihar",
+   "lat": 25.6795,
+   "lon": 85.6099,
+   "plant_count": 7,
+   "total_capacity_mw": 9780.0,
+   "plant_ids": [
+    "kahalgaon-super-thermal-power-plant",
+    "nabinagar-super-thermal-power-project",
+    "barh-i-power-station",
+    "barh-ii-power-station",
+    "nabinagar-thermal-power-project",
+    "buxar-thermal-power-station",
+    "barauni-power-station"
+   ]
+  },
+  {
+   "code": "IN-CH",
+   "name": "Chandigarh",
+   "lat": 30.7293,
+   "lon": 76.7805,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-CT",
+   "name": "Chhattisgarh",
+   "lat": 21.2665,
+   "lon": 82.0411,
+   "plant_count": 19,
+   "total_capacity_mw": 25340.0,
+   "plant_ids": [
+    "tamnar-power-station",
+    "sipat-power-station",
+    "korba-super-thermal-power-station-ntpc",
+    "balco-korba-power-station",
+    "ksk-mahanadi-power-project",
+    "lara-integrated-thermal-power-project",
+    "uchpinda-power-station",
+    "raikheda-power-station",
+    "hasdeo-thermal-power-station",
+    "baradarha-power-station",
+    "marwa-power-station",
+    "adani-raigarh-thermal-power-plant",
+    "korba-power-thermal-power-plant-adani",
+    "binjkote-power-station",
+    "raigarh-trn-power-project",
+    "athena-chhattisgarh-power-station",
+    "bhilai-steel-power-station",
+    "dongamahua-captive-power-plant",
+    "dr-shyama-prasad-mukherjee-thermal-power-station"
+   ]
+  },
+  {
+   "code": "IN-DH",
+   "name": "Dadra and Nagar Haveli and Daman and Diu",
+   "lat": 20.1931,
+   "lon": 73.0715,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-DL",
+   "name": "Delhi",
+   "lat": 28.6434,
+   "lon": 77.1155,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-GA",
+   "name": "Goa",
+   "lat": 15.3638,
+   "lon": 74.054,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-GJ",
+   "name": "Gujarat",
+   "lat": 22.6995,
+   "lon": 71.5724,
+   "plant_count": 9,
+   "total_capacity_mw": 15310.0,
+   "plant_ids": [
+    "mundra-thermal-power-project-adani",
+    "tata-mundra-ultra-mega-power-project",
+    "wanakbori-thermal-power-station",
+    "salaya-power-plant",
+    "ukai-thermal-power-station",
+    "gandhinagar-thermal-power-station",
+    "bhavnagar-power-station",
+    "sikka-thermal-power-station",
+    "surat-lignite-power-plant"
+   ]
+  },
+  {
+   "code": "IN-HR",
+   "name": "Haryana",
+   "lat": 29.1982,
+   "lon": 76.3402,
+   "plant_count": 5,
+   "total_capacity_mw": 5330.0,
+   "plant_ids": [
+    "indira-gandhi-super-thermal-power-project",
+    "mahatma-gandhi-power-station",
+    "rajiv-gandhi-thermal-power-project",
+    "panipat-power-station",
+    "deenbandhu-chhotu-ram-thermal-power-plant"
+   ]
+  },
+  {
+   "code": "IN-HP",
+   "name": "Himachal Pradesh",
+   "lat": 31.9261,
+   "lon": 77.2446,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-JK",
+   "name": "Jammu and Kashmir",
+   "lat": 33.6725,
+   "lon": 74.8572,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-JH",
+   "name": "Jharkhand",
+   "lat": 23.6563,
+   "lon": 85.5641,
+   "plant_count": 9,
+   "total_capacity_mw": 8517.5,
+   "plant_ids": [
+    "north-karanpura-power-station",
+    "adani-godda-power-station",
+    "maithon-right-bank-thermal-power-station",
+    "koderma-thermal-power-station",
+    "patratu-jseb-power-station",
+    "jojobera-power-plant",
+    "mahadev-prasad-super-thermal-power-plant",
+    "chandrapura-power-station",
+    "bokaro-thermal-power-station"
+   ]
+  },
+  {
+   "code": "IN-KA",
+   "name": "Karnataka",
+   "lat": 14.7103,
+   "lon": 76.1674,
+   "plant_count": 6,
+   "total_capacity_mw": 9480.0,
+   "plant_ids": [
+    "kudgi-super-thermal-power-project",
+    "raichur-thermal-power-station",
+    "bellary-thermal-power-station",
+    "yermarus-power-station",
+    "udupi-power-station",
+    "jsw-vijayanagar-toranagallu-power-station"
+   ]
+  },
+  {
+   "code": "IN-KL",
+   "name": "Kerala",
+   "lat": 10.4507,
+   "lon": 76.4085,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-LA",
+   "name": "Ladakh",
+   "lat": 34.9439,
+   "lon": 76.7965,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-LD",
+   "name": "Lakshadweep",
+   "lat": 10.8115,
+   "lon": 73.678,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-MP",
+   "name": "Madhya Pradesh",
+   "lat": 23.5382,
+   "lon": 78.289,
+   "plant_count": 13,
+   "total_capacity_mw": 21780.0,
+   "plant_ids": [
+    "vindhyachal-power-station",
+    "sasan-ultra-mega-power-project",
+    "shree-singaji-thermal-power-project",
+    "gadarwara-super-thermal-power-project",
+    "sanjay-gandhi-power-station",
+    "khargone-power-station",
+    "jaypee-nigrie-super-thermal-power-project",
+    "anuppur-thermal-power-project",
+    "mahan-super-thermal-power-project",
+    "mahan-aluminium-power-station",
+    "ntpc-seoni-power-station",
+    "bina-thermal-power-project",
+    "satpura-thermal-power-station"
+   ]
+  },
+  {
+   "code": "IN-MH",
+   "name": "Maharashtra",
+   "lat": 19.4515,
+   "lon": 76.1077,
+   "plant_count": 19,
+   "total_capacity_mw": 24630.0,
+   "plant_ids": [
+    "tiroda-thermal-power-project",
+    "chandrapur-thermal-power-station",
+    "mauda-power-station",
+    "koradi-thermal-power-station",
+    "bhusawal-thermal-power-station",
+    "amravati-thermal-power-project",
+    "nasik-rattanindia-thermal-power-project",
+    "khaperkheda-power-station",
+    "solapur-power-station",
+    "ratnagiri-power-plant",
+    "parli-thermal-power-station",
+    "trombay-power-station",
+    "nasik-mahagenco-thermal-power-station",
+    "gmr-warora-energy-power-station",
+    "dhariwal-power-station",
+    "butibori-power-project",
+    "wardha-warora-power-plant",
+    "paras-power-station",
+    "dahanu-power-station"
+   ]
+  },
+  {
+   "code": "IN-MN",
+   "name": "Manipur",
+   "lat": 24.735,
+   "lon": 93.8787,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-ML",
+   "name": "Meghalaya",
+   "lat": 25.5356,
+   "lon": 91.2773,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-MZ",
+   "name": "Mizoram",
+   "lat": 23.3077,
+   "lon": 92.8318,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-NL",
+   "name": "Nagaland",
+   "lat": 26.0629,
+   "lon": 94.4668,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-OR",
+   "name": "Odisha",
+   "lat": 20.5139,
+   "lon": 84.4303,
+   "plant_count": 11,
+   "total_capacity_mw": 15815.0,
+   "plant_ids": [
+    "talcher-kaniha-super-thermal-power-station",
+    "jharsuguda-sterlite-power-station",
+    "ib-valley-thermal-power-station",
+    "darlipali-power-station",
+    "jharsuguda-cpp-power-station",
+    "angul-smelter-power-station",
+    "angul-power-station",
+    "kamalanga-power-station",
+    "aditya-aluminium-power-station",
+    "angul-steel-power-station",
+    "jharsuguda-ind-barath-power-station"
+   ]
+  },
+  {
+   "code": "IN-PY",
+   "name": "Puducherry",
+   "lat": 10.9328,
+   "lon": 79.8034,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-PB",
+   "name": "Punjab",
+   "lat": 30.8425,
+   "lon": 75.4154,
+   "plant_count": 5,
+   "total_capacity_mw": 5680.0,
+   "plant_ids": [
+    "talwandi-sabo-power-project",
+    "rajpura-thermal-power-project",
+    "guru-hargobind-lehra-mohabbat-power-station",
+    "ropar-power-station",
+    "goindwal-sahib-thermal-power-plant"
+   ]
+  },
+  {
+   "code": "IN-RJ",
+   "name": "Rajasthan",
+   "lat": 26.5844,
+   "lon": 73.8497,
+   "plant_count": 6,
+   "total_capacity_mw": 9980.0,
+   "plant_ids": [
+    "suratgarh-super-thermal-power-station",
+    "chhabra-thermal-power-station",
+    "kawai-thermal-power-project",
+    "kota-power-station",
+    "kalisindh-thermal-power-station",
+    "jsw-barmer-jalipa-kapurdi-power-station"
+   ]
+  },
+  {
+   "code": "IN-SK",
+   "name": "Sikkim",
+   "lat": 27.5699,
+   "lon": 88.4734,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-TN",
+   "name": "Tamil Nadu",
+   "lat": 11.0146,
+   "lon": 78.409,
+   "plant_count": 10,
+   "total_capacity_mw": 12715.0,
+   "plant_ids": [
+    "neyveli-thermal-power-station-ii",
+    "north-chennai-thermal-power-station",
+    "vallur-thermal-power-plant",
+    "mettur-thermal-power-station",
+    "mutiara-coastal-energen-thermal-power-plant",
+    "cuddalore-il-fs-power-station",
+    "tuticorin-thermal-power-station",
+    "tuticorin-ntpl-power-station",
+    "new-neyveli-thermal-power-station",
+    "sepc-tuticorin-power-station"
+   ]
+  },
+  {
+   "code": "IN-TG",
+   "name": "Telangana",
+   "lat": 17.8008,
+   "lon": 79.0084,
+   "plant_count": 6,
+   "total_capacity_mw": 10980.0,
+   "plant_ids": [
+    "ramagundam-power-station",
+    "kothagudem-thermal-power-station",
+    "yadadri-power-station",
+    "pegadapalli-jaipur-mandal-power-station",
+    "kakatiya-thermal-power-project",
+    "bhadradri-power-station"
+   ]
+  },
+  {
+   "code": "IN-TR",
+   "name": "Tripura",
+   "lat": 23.7449,
+   "lon": 91.7392,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-UP",
+   "name": "Uttar Pradesh",
+   "lat": 26.9233,
+   "lon": 80.5662,
+   "plant_count": 20,
+   "total_capacity_mw": 30295.7,
+   "plant_ids": [
+    "rihand-power-station",
+    "obra-thermal-power-station",
+    "singrauli-super-thermal-power-station",
+    "lalitpur-power-project",
+    "bara-thermal-power-project",
+    "national-capital-dadri-thermal-power-plant",
+    "tanda-power-station",
+    "anpara-power-station",
+    "feroze-gandhi-unchahar-power-station",
+    "jawaharpur-thermal-project",
+    "meja-thermal-power-project",
+    "khurja-power-station",
+    "ghatampur-power-station",
+    "harduaganj-power-station",
+    "anpara-c-power-station",
+    "rosa-thermal-power-plant",
+    "anpara-d-power-station",
+    "parichha-power-station",
+    "renusagar-power-station",
+    "panki-thermal-power-station"
+   ]
+  },
+  {
+   "code": "IN-UT",
+   "name": "Uttarakhand",
+   "lat": 30.1565,
+   "lon": 79.2067,
+   "plant_count": 0,
+   "total_capacity_mw": 0,
+   "plant_ids": []
+  },
+  {
+   "code": "IN-WB",
+   "name": "West Bengal",
+   "lat": 23.8602,
+   "lon": 87.9689,
+   "plant_count": 11,
+   "total_capacity_mw": 12530.0,
+   "plant_ids": [
+    "mejia-power-station",
+    "farakka-power-station",
+    "sagardighi-thermal-power-station",
+    "raghunathpur-thermal-power-station",
+    "bakreswar-thermal-power-station",
+    "durgapur-steel-city-andal-power-station",
+    "kolaghat-thermal-power-station",
+    "budge-budge-generating-station",
+    "haldia-energy-power-station",
+    "durgapur-projects-limited-power-station",
+    "santaldih-thermal-power-station"
+   ]
+  }
+ ]
+}
