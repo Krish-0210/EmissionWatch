@@ -6,6 +6,7 @@ cluster_{id}.json equal to that cluster's row in clusters.json.
 
 import json
 import math
+import re
 
 import pytest
 
@@ -97,3 +98,44 @@ def test_summary_file():
     assert {r["cluster"] for r in s["backtest"]} <= set(CLUSTER_IDS) | {"POOLED"}
     assert {c["id"] for c in s["clusters"]} == set(CLUSTER_IDS)
     assert not errs, errs
+
+
+# ---------- The specs above against the live frontend/src/api.ts ----------
+API_TS = EXPORT.parents[1] / "src" / "api.ts"
+
+
+def ts_interfaces() -> dict[str, set[str]]:
+    """Top-level keys of every `export interface` in api.ts (inline object types are not descended; extends merged)."""
+    src = API_TS.read_text(encoding="utf-8")
+    out: dict[str, set[str]] = {}
+    for m in re.finditer(r"^export interface (\w+)(?: extends (\w+))? \{\n(.*?)^\}", src, re.M | re.S):
+        keys = set(re.findall(r"^  (\w+)\??:", m.group(3), re.M))
+        out[m.group(1)] = keys | out.get(m.group(2), set()) if m.group(2) else keys
+    return out
+
+
+@pytest.mark.parametrize(
+    "iface,spec",
+    [
+        ("ClusterSummary", SUMMARY),
+        ("ClustersFile", {"generated_at", "as_of", "clusters"}),
+        ("Plant", DETAIL["plants"][0]),
+        ("ModelStats", MS),
+        ("Signals", DETAIL["signals"]),
+        ("ClusterDetail", DETAIL),
+        ("MonthPoint", MONTH),
+        ("TimeseriesFile", {"id", "months"}),
+        ("BacktestRow", BACKTEST),
+        ("SummaryFile", SUMMARY_FILE),
+        ("Brief", {"markdown", "source"}),
+    ],
+)
+def test_specs_match_api_ts(iface, spec):
+    """Every field the frontend types declare is checked above, and nothing it does not declare."""
+    assert ts_interfaces()[iface] == set(spec)
+
+
+def test_brief_sources_match_api_ts():
+    src = API_TS.read_text(encoding="utf-8")
+    union = re.search(r"interface Brief \{.*?source: ([^\n/]+)", src, re.S).group(1)
+    assert set(re.findall(r"'(\w+)'", union)) == {"auto", "bedrock", "template"}  # what handlers/brief.py returns
