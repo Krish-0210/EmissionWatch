@@ -29,38 +29,40 @@
 .radar-scale { position: absolute; bottom: 7%; left: 0; right: 0; text-align: center; font-size: 10px; }
 .blip { opacity: 0; animation: blip-in 0.6s var(--ease-out) var(--d) forwards; }
 .blip-dot { fill: var(--c); filter: drop-shadow(0 0 4px var(--c)); }
-.blip:not(.hot) .blip-dot { opacity: 0.6; }
+.blip:not(.hot):not(.analysed) .blip-dot { opacity: 0.55; }
 .blip-ring { fill: none; stroke: var(--c); stroke-width: 0.8; transform-origin: center; transform-box: fill-box; opacity: 0; }
 .blip.hot .blip-ring { animation: blip-pulse 2.2s var(--ease-out) var(--d) infinite; }
 .blip-label { font-family: var(--font-mono); font-size: 5.5px; letter-spacing: 0.1em; fill: var(--text); }
 @keyframes blip-in { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; } }
 @keyframes blip-pulse { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
-.radar.mini { width: 100%; max-width: 280px; }
-.radar.mini .radar-scale { font-size: 9px; }
 
-/* Results: three cards around a mini radar */
-.near-results { margin-top: 8px; }
-.near-orbit { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px) minmax(0, 1fr); grid-template-areas: 'a r b' 'c r d'; gap: 18px 24px; align-items: center; }
-.near-center { grid-area: r; }
-.near-card.pos-0 { grid-area: a; --fx: 60px; }
-.near-card.pos-1 { grid-area: b; --fx: -60px; }
-.near-card.pos-2 { grid-area: c; --fx: 60px; }
-.near-sum { grid-area: d; --fx: -60px; opacity: 0; animation: fly-out 0.8s var(--ease-out) var(--d) forwards; }
-.near-sum dl { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; margin: 12px 0 0; }
-.near-sum dt { color: var(--muted); font-size: 14px; }
-.near-sum dd { margin: 0; text-align: right; font-size: 18px; }
-.near-card { display: block; color: var(--text); text-decoration: none; opacity: 0; transform: none;
-  animation: fly-out 0.8s var(--ease-out) var(--d) forwards; }
-.near-card:hover { color: var(--text); box-shadow: inset 0 2px 0 var(--c), 0 0 40px -16px var(--c); }
-@keyframes fly-out { from { opacity: 0; translate: var(--fx) 0; scale: 0.92; } to { opacity: 1; translate: none; scale: 1; } }
+/* Results: summary, analysed clusters, every plant */
+.near-head h2 { margin: 6px 0 8px; }
+.near-head p { max-width: 70ch; }
+.near-clusters { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 14px; margin: 22px 0 8px; }
+.near-score { display: flex; align-items: baseline; gap: 8px; margin: 2px 0 8px; }
+.near-score .mono { font-size: 40px; line-height: 1; letter-spacing: -0.04em; }
+.plant-list { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--border); }
+.plant-row { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 4px; border-bottom: 1px solid var(--border); }
+.plant-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.plant-name { font-size: 16px; color: var(--text); }
+.plant-main .micro { margin-top: 2px; }
+.plant-cluster { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; color: var(--text); text-decoration: none; padding: 6px 10px; border-radius: 12px; border: 1px solid transparent; transition: border-color 0.2s, background 0.2s; }
+.plant-cluster:hover, .plant-cluster:focus-visible { border-color: var(--border-2); background: rgba(124, 232, 216, 0.04); color: var(--text); }
+.plant-open { font-size: 13px; color: var(--signal); }
+.plant-na { color: var(--muted); text-align: right; }
+@media (max-width: 640px) { .plant-row { grid-template-columns: 12px minmax(0, 1fr); } .plant-cluster, .plant-na { grid-column: 2; justify-content: flex-start; text-align: left; padding-left: 0; } }
+.near-none { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
+.near-none h2 { margin: 0 0 12px; }
+.near-nearest { margin: 0 0 10px; }
+.near-credit { display: inline; }
+.blip.analysed .blip-dot { opacity: 1; }
+
+/* Cluster cards (Near Me) */
+.near-card { display: block; color: var(--text); text-decoration: none; }
+.near-card:hover { color: var(--text); box-shadow: inset 0 2px 0 var(--c); }
 .near-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-.near-top h2 { margin: 0; display: inline-block; }
-.near-dist { margin-bottom: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-@media (max-width: 900px) {
-  .near-orbit { grid-template-columns: 1fr; grid-template-areas: 'r' 'a' 'b' 'c' 'd'; }
-  .near-center { max-width: 240px; margin: 0 auto; width: 100%; }
-  .near-card, .near-sum { --fx: 0px !important; }
-}
+.near-top h2, .near-top h3 { margin: 0; display: inline-block; }
 
 /* What this means for you */
 .meaning { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(20px, 3vw, 40px); align-items: center; margin-top: 40px; }

@@ -108,6 +108,39 @@ export interface SummaryFile {
   findings: string[]
 }
 
+// All coal plants >= 500 MW (GEM, operating units) with their state; plants_india.json / GET /plants.
+export interface IndiaPlant {
+  id: string // slug of the GEM plant name; not the registry id used in ClusterDetail.plants
+  name: string
+  lat: number
+  lon: number
+  capacity_mw: number // operating capacity, >= 500
+  state: string // equals StateSummary.name
+  status: 'operating'
+  cluster_id: string | null // one of the analysed clusters (links to /cluster/:id), else null
+}
+
+export interface PlantsIndiaFile {
+  boundaries: string // attribution for the state boundaries
+  plants: IndiaPlant[] // largest capacity first
+}
+
+// states.json / GET /states: 36 states and union territories, sorted by name.
+export interface StateSummary {
+  code: string // e.g. "IN-CT"
+  name: string
+  lat: number // centroid of the unit's largest polygon
+  lon: number
+  plant_count: number // 0 = no coal plant of 500 MW or more listed
+  total_capacity_mw: number
+  plant_ids: string[] // IndiaPlant.id, largest capacity first
+}
+
+export interface StatesFile {
+  boundaries: string
+  states: StateSummary[]
+}
+
 export interface Brief {
   markdown: string
   source: 'bedrock' | 'template' | 'auto' // AI-written (Bedrock) or the deterministic fallback ('template'; 'auto' is treated the same)
@@ -119,6 +152,8 @@ export interface Brief {
 //   GET  {API}/clusters/{id}/timeseries  -> TimeseriesFile
 //   GET  {API}/summary                   -> SummaryFile
 //   POST {API}/brief/{id}                -> Brief {markdown, source}
+//   GET  {API}/plants                    -> PlantsIndiaFile   (static: plants_india.json)
+//   GET  {API}/states                    -> StatesFile        (static: states.json)
 const rawApi = import.meta.env.VITE_API_URL as string | undefined
 export const API_URL = rawApi ? rawApi.replace(/\/$/, '') : undefined
 export const briefAvailable = API_URL !== undefined
@@ -153,6 +188,8 @@ export const fetchCluster = (id: string) => getJson<ClusterDetail>(url(`/cluster
 export const fetchTimeseries = (id: string) =>
   getJson<TimeseriesFile>(url(`/clusters/${id}/timeseries`, `timeseries_${id}.json`))
 export const fetchSummary = () => getJson<SummaryFile>(url('/summary', 'summary.json'))
+export const fetchPlantsIndia = () => getJson<PlantsIndiaFile>(url('/plants', 'plants_india.json'))
+export const fetchStates = () => getJson<StatesFile>(url('/states', 'states.json'))
 
 export const peekClusters = () => peek<ClustersFile>(url('/clusters', 'clusters.json'))
 export const peekCluster = (id: string) => peek<ClusterDetail>(url(`/clusters/${id}`, `cluster_${id}.json`))
