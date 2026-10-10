@@ -8,7 +8,9 @@ unless noted.
 2. no2_world_2024.webp: the same 2024 mean worldwide, 2048 x 1024 (~0.18 degree). Log ramp:
    transparent below the 90th percentile, ember -> hot red, full at the 99.9th (no2_world_2024.json).
 3. earth_mask.webp: 2048 x 1024, lossless, drawn at 2x and downsampled (anti-aliased).
-   Red = land, green = country land borders (ne_110m_admin_0_boundary_lines_land), blue = India.
+   Red = land, green = country land borders, blue = India, all from Natural Earth 1:10m admin-0
+   countries, India point of view (ne_10m_admin_0_countries_ind, public domain). Borders are the
+   edges between different countries in a country-id raster, 3 px wide at 2x.
 4. night_lights.webp (3600 x 1800) and night_lights_1k.webp (1024 x 512): NASA Black Marble 2016,
    0.1 degree greyscale (public domain, NASA Earth Observatory). The dark floor is subtracted so only
    lights remain.
@@ -38,9 +40,9 @@ RES = 0.04
 NO2_BAND = "tropospheric_NO2_column_number_density"
 
 NE_BASE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/"
-NE_LAND = "ne_110m_land.geojson"
-NE_COUNTRIES = ["ne_110m_admin_0_countries_ind.geojson", "ne_110m_admin_0_countries.geojson"]
-NE_BORDERS = "ne_110m_admin_0_boundary_lines_land.geojson"
+# India point of view (Government of India map: all of J&K and Ladakh incl. Gilgit-Baltistan and
+# Aksai Chin, Arunachal Pradesh). Land, borders and India all come from this one file.
+NE_COUNTRIES_IND = "ne_10m_admin_0_countries_ind.geojson"
 EARTH_W, EARTH_H = 2048, 1024
 WORLD_W, WORLD_H = 2048, 1024
 
@@ -192,40 +194,44 @@ def export_no2_world() -> None:
     log.info("no2 world: p50 %.3g p90 %.3g p99 %.3g p99.9 %.3g max %.3g mol/m2", *p.values(), meta["max"])
 
 
-def _lines(geom: dict):
-    yield from ([geom["coordinates"]] if geom["type"] == "LineString" else geom["coordinates"])
-
-
 def export_earth() -> None:
     """Anti-aliased land / borders / India mask: drawn at 2x, downsampled with Lanczos."""
     W, H = EARTH_W * 2, EARTH_H * 2
     px = lambda ring: [((lon + 180) / 360 * W, (90 - lat) / 180 * H) for lon, lat in ring]
 
-    def fill(feats) -> Image.Image:
-        img = Image.new("L", (W, H), 0)
-        d = ImageDraw.Draw(img)
-        for f in feats:
-            for ext, holes in _rings(f["geometry"]):
-                d.polygon(px(ext), fill=255)
-                for hole in holes:
-                    d.polygon(px(hole), fill=0)
-        return img
+    countries = _fetch(NE_COUNTRIES_IND)
+    if countries is None:
+        raise RuntimeError(f"could not download {NE_COUNTRIES_IND}")
+    feats = countries["features"]
 
-    land, borders = _fetch(NE_LAND), _fetch(NE_BORDERS)
-    if land is None or borders is None:
-        raise RuntimeError("could not download Natural Earth land/borders")
-    land_img = fill(land["features"])
-    border_img = Image.new("L", (W, H), 0)
-    d = ImageDraw.Draw(border_img)
-    for f in borders["features"]:
-        for line in _lines(f["geometry"]):
-            d.line(px(line), fill=255, width=3)
-    india_img = Image.new("L", (W, H), 0)
-    for name in NE_COUNTRIES:
-        feats = [f for f in (_fetch(name) or {}).get("features", []) if f["properties"].get("ADM0_A3") == "IND"]
-        if feats:
-            india_img = fill(feats)
-            break
+    # Country-id raster; larger countries first so enclaves (drawn later) fill their holes.
+    def bbox_area(f) -> float:
+        pts = [p for ext, _ in _rings(f["geometry"]) for p in ext]
+        return (max(p[0] for p in pts) - min(p[0] for p in pts)) * (max(p[1] for p in pts) - min(p[1] for p in pts))
+
+    ids = Image.new("I", (W, H), 0)
+    d = ImageDraw.Draw(ids)
+    india_id = 0
+    for k, f in enumerate(sorted(feats, key=bbox_area, reverse=True), start=1):
+        if f["properties"].get("ADM0_A3") == "IND":
+            india_id = k
+        for ext, holes in _rings(f["geometry"]):
+            d.polygon(px(ext), fill=k)
+            for hole in holes:
+                d.polygon(px(hole), fill=0)
+    if not india_id:
+        raise RuntimeError("India (ADM0_A3 IND) not found")
+    lab = np.asarray(ids)
+
+    from scipy.ndimage import binary_dilation
+
+    edge = np.zeros(lab.shape, dtype=bool)
+    edge[:, :-1] |= (lab[:, :-1] != lab[:, 1:]) & (lab[:, :-1] > 0) & (lab[:, 1:] > 0)
+    edge[:-1, :] |= (lab[:-1, :] != lab[1:, :]) & (lab[:-1, :] > 0) & (lab[1:, :] > 0)
+    edge = binary_dilation(edge, np.ones((3, 3), dtype=bool))
+
+    as_img = lambda mask: Image.fromarray(np.where(mask, 255, 0).astype("uint8"), "L")
+    land_img, border_img, india_img = as_img(lab > 0), as_img(edge), as_img(lab == india_id)
     size = (EARTH_W, EARTH_H)
     out = Image.merge("RGB", tuple(im.resize(size, Image.LANCZOS) for im in (land_img, border_img, india_img)))
     out.save(OUT_DIR / "earth_mask.webp", lossless=True, method=6)

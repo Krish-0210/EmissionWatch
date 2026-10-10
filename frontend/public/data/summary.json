@@ -325,6 +325,15 @@
    "license": "CC BY 2.5 IN",
    "citation": "Runfola, D. et al. (2020): geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. Boundaries: DataMeet India community (github.com/datameet/maps).",
    "doi": "10.1371/journal.pone.0231866"
+  },
+  {
+   "id": "natural_earth_ind",
+   "name": "Natural Earth 1:10m admin-0 countries, India point of view (ne_10m_admin_0_countries_ind)",
+   "used_for": "land, country borders and India's outline on the globe (export/textures.py)",
+   "access": "github.com/nvkelso/natural-earth-vector",
+   "license": "public domain",
+   "citation": "Made with Natural Earth",
+   "doi": null
   }
  ]
 }

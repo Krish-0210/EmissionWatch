@@ -128,6 +128,9 @@ SOURCES = [
     {"id": "open_meteo", "name": "Open-Meteo forecast API", "used_for": "live 10 m wind for the wind trace (API only)",
      "access": "api.open-meteo.com", "license": "CC BY 4.0", "citation": "Weather data by Open-Meteo.com", "doi": None},
     states.SOURCE,
+    {"id": "natural_earth_ind", "name": "Natural Earth 1:10m admin-0 countries, India point of view (ne_10m_admin_0_countries_ind)",
+     "used_for": "land, country borders and India's outline on the globe (export/textures.py)",
+     "access": "github.com/nvkelso/natural-earth-vector", "license": "public domain", "citation": "Made with Natural Earth", "doi": None},
 ]
 
 
