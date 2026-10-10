@@ -118,13 +118,24 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
     scan()
     const mo = new MutationObserver(scan)
     mo.observe(el, { childList: true, subtree: true })
-    // Keyboard focus never lands on something still waiting for its entrance: reveal it now.
+    // Keyboard focus never lands on something still waiting for its entrance (reveal it now), under
+    // the sticky nav or below the fold (scroll it fully into view).
     const onFocus = (e: FocusEvent) => {
-      for (let n = e.target as Element | null; n && n !== el; n = n.parentElement)
+      const t = e.target as HTMLElement
+      for (let n: Element | null = t; n && n !== el; n = n.parentElement)
         if (n.matches('.reveal, .rule, .trig, .draw, .divider, .mask, .blur-in') && !n.classList.contains('in')) {
           n.classList.add('in', 'focus-in')
           io.unobserve(n)
         }
+      if (!t.matches?.(':focus-visible')) return
+      requestAnimationFrame(() => {
+        const r = t.getBoundingClientRect()
+        const top = (document.querySelector('.nav')?.getBoundingClientRect().bottom ?? 0) + 8
+        if (r.top >= top && r.bottom <= window.innerHeight - 8) return
+        const y = window.scrollY + r.top - Math.max(top, (window.innerHeight - r.height) / 2)
+        if (lenis) lenis.scrollTo(y, { immediate: true, force: true })
+        else window.scrollTo(0, y)
+      })
     }
     el.addEventListener('focusin', onFocus)
 

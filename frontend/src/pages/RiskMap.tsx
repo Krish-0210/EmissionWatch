@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import type { Confidence, RiskLevel, TimeseriesFile } from '../api'
-import { fetchCluster, fetchClusters, fetchTimeseries, peekClusters } from '../api'
-import { ConfidenceBadge, RiskBadge } from '../components/Badges'
+import { fetchCluster, fetchClusters, fetchSummary, fetchTimeseries, peekClusters, peekSummary } from '../api'
+import { AnomalyTag, ConfidenceBadge, RiskBadge } from '../components/Badges'
 import ClusterMap from '../components/ClusterMap'
 import CountUp from '../components/CountUp'
 import Icon from '../components/Icons'
 import PageHero, { Divider, type TickerItem } from '../components/PageHero'
 import RiskBeacons from '../components/RiskBeacons'
 import Sparkline from '../components/Sparkline'
+import WindPanel from '../components/WindPanel'
 import { useFlip } from '../lib/flip'
-import { CONF_LABEL, RISK_COLOR, RISK_LABEL } from '../lib/format'
+import { CONF_LABEL, fmtInt, RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { prefersReducedMotion } from '../lib/motion'
 import { scrollToY } from '../lib/scroll'
 import { useAsync } from '../lib/useAsync'
@@ -31,6 +32,9 @@ function Chip({ on, onClick, children, color }: { on: boolean; onClick: () => vo
 export default function RiskMap() {
   const { data, error } = useAsync(fetchClusters, [], peekClusters)
   const [hover, setHover] = useState<string>()
+  const [windPick, setWindPick] = useState<string>() // the wind panel follows the last hovered / focused cluster
+  const summary = useAsync(fetchSummary, [], peekSummary)
+  const pop = summary.data?.sources?.find((s) => s.id === 'ghsl_pop')
   const [flying, setFlying] = useState<string>()
   const [level, setLevel] = useState<RiskLevel | 'all'>('all')
   const [conf, setConf] = useState<Confidence | 'all'>('all')
@@ -180,6 +184,7 @@ export default function RiskMap() {
               ))}
               <span className="micro">Ring size = installed capacity · pulse speed = risk</span>
             </div>
+            <WindPanel clusters={ranked} id={windPick ?? ranked[0]?.id} onChange={setWindPick} />
           </div>
 
           <div>
@@ -197,10 +202,14 @@ export default function RiskMap() {
                     style={{ '--rc': RISK_COLOR[c.risk_level] } as CSSProperties}
                     onMouseEnter={() => {
                       setHover(c.id)
+                      setWindPick(c.id)
                       void fetchCluster(c.id)
                     }}
                     onMouseLeave={() => setHover(undefined)}
-                    onFocus={() => setHover(c.id)}
+                    onFocus={() => {
+                      setHover(c.id)
+                      setWindPick(c.id)
+                    }}
                     onBlur={() => setHover(undefined)}
                     onClick={(e) => {
                       if (e.metaKey || e.ctrlKey || e.shiftKey) return
@@ -217,6 +226,10 @@ export default function RiskMap() {
                       <span className="row" style={{ gap: 6, marginTop: 8 }}>
                         <RiskBadge level={c.risk_level} />
                         <ConfidenceBadge confidence={c.confidence} />
+                      </span>
+                      <span className="row rank-facts">
+                        <AnomalyTag c={c} />
+                        <span className="micro">~{fmtInt(c.population_20km)} people within 20 km</span>
                       </span>
                     </span>
                     <span className="rank-score">
@@ -236,6 +249,18 @@ export default function RiskMap() {
               ))}
             </ol>
             {!shown.length && <p className="muted small">No cluster matches these filters.</p>}
+            <p className="micro pop-credit">
+              People within 20 km: {pop ? pop.citation ?? pop.name : 'GHSL GHS-POP R2023A, 2020'} (a modelled grid, hence “~”)
+              {pop?.doi && (
+                <>
+                  {' '}
+                  ·{' '}
+                  <a href={`https://doi.org/${pop.doi}`} target="_blank" rel="noreferrer">
+                    doi:{pop.doi}
+                  </a>
+                </>
+              )}
+            </p>
           </div>
         </div>
         <Divider />

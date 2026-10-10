@@ -2,7 +2,7 @@
 
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
-html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+html { background: var(--bg); -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--nav-h) + 16px); }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 body {
@@ -140,6 +140,15 @@ main, .footer { overflow-x: clip; }
 }
 .card h3 { font-size: 22px; font-weight: 400; margin-bottom: 10px; }
 .card p:last-child { margin-bottom: 0; }
+
+/* Anomaly tag (components/Badges AnomalyTag): main signal behind a score */
+.atag {
+  display: inline-flex; align-items: center; min-height: 26px; padding: 3px 10px; border-radius: 8px; font-size: 12.5px; line-height: 1.3;
+  border: 1px solid var(--border-2); color: var(--muted); background: rgba(7, 9, 12, 0.5);
+}
+.atag.persistent_excess { color: #ffb48a; border-color: rgba(255, 138, 61, 0.45); }
+.atag.intensity_trend { color: #ffd78a; border-color: rgba(255, 194, 75, 0.4); }
+.atag.peer_intensity { color: #a9c8ff; border-color: rgba(120, 160, 255, 0.4); }
 
 /* Badges */
 .badge {

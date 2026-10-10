@@ -72,6 +72,8 @@
 @keyframes mk-pulse { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.8); opacity: 0; } }
 
 /* Animated legend */
+.rank-facts { gap: 8px 10px; margin-top: 8px; }
+.pop-credit { margin-top: 14px; text-transform: none; letter-spacing: 0.02em; line-height: 1.5; }
 .legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); margin-top: 16px; }
 .legend-item { display: inline-flex; align-items: center; gap: 8px; }
 .legend-item b { color: var(--text); font-weight: 500; }

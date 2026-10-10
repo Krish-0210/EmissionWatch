@@ -4,6 +4,8 @@
 
 export type RiskLevel = 'low' | 'medium' | 'high'
 export type Confidence = 'high' | 'medium' | 'low'
+// The signal adding the most points above the neutral 50; 'none' if none is above.
+export type AnomalyType = 'persistent_excess' | 'intensity_trend' | 'peer_intensity' | 'none'
 
 export interface ClusterSummary {
   id: string
@@ -17,6 +19,9 @@ export interface ClusterSummary {
   risk_level: RiskLevel
   confidence: Confidence
   headline: string
+  primary_anomaly_type: AnomalyType
+  primary_anomaly_label: string // plain-language label, the same for every cluster with that type
+  population_20km: number // people within 20 km of the centroid, GHSL GHS-POP 2020, rounded to 100
 }
 
 export interface ClustersFile {
@@ -55,8 +60,17 @@ export interface Signals {
   peer_intensity: { ratio: number; score: number } // generation coefficient / median of clusters
 }
 
+// A 90-day window with a high rolling residual z (or, when none, the latest score window).
+export interface FlaggedPeriod {
+  start: string // YYYY-MM-DD
+  end: string // YYYY-MM-DD
+  peak_z: number // highest 90-day rolling z in the period
+  reason: 'excess' | 'score_window'
+}
+
 export interface ClusterDetail extends ClusterSummary {
   as_of: string
+  flagged_periods: FlaggedPeriod[] // 1-3, newest first
   plants: Plant[]
   weights: { persistent_excess: number; intensity_trend: number; peer_intensity: number }
   signals: Signals
@@ -153,6 +167,33 @@ export interface StatesFile {
   states: StateSummary[]
 }
 
+export interface WindTown {
+  name: string
+  state: string
+  lat: number
+  lon: number
+  population: number
+  distance_km: number // from the cluster centroid
+  bearing_deg: number
+}
+
+// Where a cluster's plume is likely heading (direction only).
+export interface WindTrace {
+  source: 'live' | 'era5' // live = Open-Meteo current wind; era5 = latest ERA5 value (fallback)
+  as_of: string // 'YYYY-MM-DDTHH:MM+05:30'
+  speed_kmh: number
+  bearing_deg: number // direction the plume heads to (wind-from + 180), 0 = north, clockwise
+  cone_polygon: { type: 'Polygon'; coordinates: [number, number][][] } // GeoJSON [lon, lat]; bearing ± 30°, 75 km
+  towns_in_path: WindTown[] // up to 5 towns > 50,000 people inside the cone, nearest first
+  sentence: string
+  attribution: string // shown next to the overlay
+}
+
+export interface RtiDraft {
+  markdown: string
+  plain_text: string
+}
+
 export interface Brief {
   markdown: string
   source: 'bedrock' | 'template' | 'auto' // AI-written (Bedrock) or the deterministic fallback ('template'; 'auto' is treated the same)
@@ -164,6 +205,8 @@ export interface Brief {
 //   GET  {API}/clusters/{id}/timeseries  -> TimeseriesFile
 //   GET  {API}/summary                   -> SummaryFile
 //   POST {API}/brief/{id}                -> Brief {markdown, source}
+//   GET  {API}/clusters/{id}/wind        -> WindTrace         (static: wind_{id}.json .trace, always ERA5)
+//   POST {API}/rti/{id}                  -> RtiDraft          (API only)
 //   GET  {API}/plants                    -> PlantsIndiaFile   (static: plants_india.json)
 //   GET  {API}/states                    -> StatesFile        (static: states.json)
 const rawApi = import.meta.env.VITE_API_URL as string | undefined
@@ -207,6 +250,31 @@ export const peekClusters = () => peek<ClustersFile>(url('/clusters', 'clusters.
 export const peekCluster = (id: string) => peek<ClusterDetail>(url(`/clusters/${id}`, `cluster_${id}.json`))
 export const peekTimeseries = (id: string) => peek<TimeseriesFile>(url(`/clusters/${id}/timeseries`, `timeseries_${id}.json`))
 export const peekSummary = () => peek<SummaryFile>(url('/summary', 'summary.json'))
+
+// Wind changes, so it has its own cache that expires after 30 min (the API caches 30 min too).
+const WIND_TTL = 30 * 60 * 1000
+const windCache = new Map<string, { at: number; p: Promise<WindTrace> }>()
+export function fetchWind(id: string): Promise<WindTrace> {
+  const hit = windCache.get(id)
+  if (hit && Date.now() - hit.at < WIND_TTL) return hit.p
+  const href = API_URL ? `${API_URL}/clusters/${id}/wind` : `${staticBase}wind_${id}.json`
+  const p = fetch(href).then(async (res) => {
+    if (!res.ok) throw new Error(`${href}: HTTP ${res.status}`)
+    const v = await res.json()
+    return (API_URL ? v : v.trace) as WindTrace
+  })
+  p.catch(() => windCache.delete(id))
+  windCache.set(id, { at: Date.now(), p })
+  return p
+}
+
+// RTI request draft (template, no LLM); API only, like the brief.
+export async function generateRti(id: string): Promise<RtiDraft> {
+  if (!API_URL) throw new Error('RTI draft available in the deployed version')
+  const res = await fetch(`${API_URL}/rti/${id}`, { method: 'POST' })
+  if (!res.ok) throw new Error(`RTI draft request failed: HTTP ${res.status}`)
+  return res.json() as Promise<RtiDraft>
+}
 
 export async function generateBrief(id: string): Promise<Brief> {
   if (!API_URL) throw new Error('Brief generation available in deployed version')

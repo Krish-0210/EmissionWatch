@@ -125,6 +125,21 @@
 .brief-skeleton span:nth-child(2) { width: 85%; }
 .brief-skeleton span:nth-child(3) { width: 60%; }
 .brief h3 { font-size: 19px; margin-top: 1em; font-family: var(--font-display); font-weight: 500; }
+.brief h4 { font-size: 16px; margin: 1em 0 0.4em; font-family: var(--font-display); font-weight: 500; }
+.brief hr { border: 0; border-top: 1px dashed var(--border-2); margin: 22px 0; }
+.brief blockquote { margin: 0 0 1em; padding: 10px 14px; border-left: 2px solid var(--ember); background: rgba(255, 138, 61, 0.06); border-radius: 0 8px 8px 0; color: var(--text); }
+.brief blockquote p { margin: 0; }
+.pop-note { align-self: center; }
+/* Flagged periods + RTI draft (Brief tab) */
+.flagged { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--border); }
+.flagged ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.flagged li { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.flagged .mono { color: var(--text); }
+.rti-wrap { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--border); }
+.rti-wrap h3 { margin: 8px 0 8px; font-size: 22px; }
+.rti-wrap > p { max-width: 70ch; }
+.rti-doc { margin-top: 18px; }
+.rti-legal { margin: 18px 0 0; padding: 12px 14px; border: 1px solid rgba(255, 138, 61, 0.5); border-radius: 10px; color: #ffcfb0; font-weight: 500; }
 .typed:not(.done) .brief > :last-child::after { content: ''; display: inline-block; width: 8px; height: 1.1em; margin-left: 2px; vertical-align: -0.15em; background: var(--signal); animation: caret 0.8s steps(1) infinite; }
 @keyframes caret { 50% { opacity: 0; } }
 .brief-source { display: inline-block; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); margin-left: auto; }

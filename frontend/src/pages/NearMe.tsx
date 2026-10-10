@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useMemo, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import type { ClusterSummary, IndiaPlant, StateSummary } from '../api'
 import { fetchCluster, fetchClusters, fetchPlantsIndia, fetchStates, peekClusters } from '../api'
@@ -10,6 +10,9 @@ import { fmtInt, RISK_COLOR, RISK_LABEL } from '../lib/format'
 import { bearingDeg, distanceKm } from '../lib/geo'
 import { useAsync } from '../lib/useAsync'
 import './nearme.css'
+
+// Leaflet loads only when a wind panel is shown.
+const WindPanel = lazy(() => import('../components/WindPanel'))
 
 // Near Me: every coal plant of 500 MW or more (GEM, operating) by state or around the user's location.
 // Plants in one of the analysed clusters show its risk and link to it; the others are listed with
@@ -114,6 +117,7 @@ export default function NearMe() {
   const [place, setPlace] = useState<Place>()
   const [locating, setLocating] = useState(false)
   const [geoError, setGeoError] = useState<string>()
+  const [windPick, setWindPick] = useState<string>()
   const error = clusters.error ?? plantsF.error ?? statesF.error
   const states = statesF.data?.states
   const byCluster = useMemo(() => new Map((clusters.data?.clusters ?? []).map((c) => [c.id, c])), [clusters.data])
@@ -173,6 +177,9 @@ export default function NearMe() {
     place?.kind === 'me' && clusters.data
       ? clusters.data.clusters.map((c) => ({ c, km: distanceKm(place.lat, place.lon, c.lat, c.lon) })).sort((a, b) => a.km - b.km)[0]
       : undefined
+
+  // Wind: the analysed clusters in the results, or (around the user) the nearest analysed cluster.
+  const windClusters = hereClusters.length ? hereClusters : closestCluster ? [closestCluster.c] : []
 
   const ticker: TickerItem[] = useMemo(() => {
     if (!plants || !states || !clusters.data) return []
@@ -328,6 +335,11 @@ export default function NearMe() {
                       </Link>
                     ))}
                   </div>
+                )}
+                {windClusters.length > 0 && (
+                  <Suspense fallback={null}>
+                    <WindPanel clusters={windClusters} id={windPick ?? windClusters[0].id} onChange={setWindPick} title={windClusters.length > 1 ? 'Where their plumes are heading' : `Where ${windClusters[0].name}’s plume is heading`} />
+                  </Suspense>
                 )}
                 <ul className="plant-list">
                   {shown.map((n) => (
