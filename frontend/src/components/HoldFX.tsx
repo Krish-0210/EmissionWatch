@@ -4,19 +4,44 @@ import { BLAST_MS, HOLD_EXCLUDE, HOLD_FULL, holdState, markHoldSeen } from '../l
 import { useMediaQuery, useReducedMotion } from '../lib/motion'
 import { sound } from '../lib/sound'
 
-// "Hold to scan deeper" (click-and-hold, desktop only, off for reduced motion). Pressing on a
-// [data-hold] zone (not on a control) charges a scan over ~3.6 s:
+// "Hold to scan deeper" (click-and-hold, desktop only, off for reduced motion). Pressing still for
+// 400 ms on a [data-hold] zone (not on a control, the map or while selecting text) charges a scan
+// over ~3.6 s; a normal click never starts it:
 //   the page (nav + main + footer) tilts in 3D, zooms toward the pointer and starts to shake,
 //   headings split into red/teal fringes, a scanning lens opens with the satellite pixel grid
 //   inside it and NO₂ hotspot cells flaring, fracture lines grow out from the pointer and glass
 //   shards break away toward the viewer, warp streaks rush outward, and at full charge an arc
 //   crackles across the lens (the 3D globe's plumes flare and its camera dives, see GlobeScene).
-// Releasing fires a pulse: flash, a chromatic shockwave, sparks; shards fly back and the page
-// springs back to rest with overshoot. Sound: lib/sound holdStart / holdRelease.
-// One full-viewport Canvas 2D, drawn only while a hold or its release is running; DOM changes are
-// transforms on three elements plus a quantised CSS variable (few repaints).
+//   Every visible element (nav links, logo, buttons, headings, text, cards, chips, the globe's
+//   container) floats: its own smooth drift and tilt, gentle at first, growing with the charge.
+// Releasing fires a pulse: flash, a chromatic shockwave, sparks; shards fly back and the page and
+// every floating element spring back to rest with overshoot, on the blast's clock. Sound: lib/sound
+// holdStart / holdRelease. Escape, leaving the window, blur or hiding the tab release safely.
+// One full-viewport Canvas 2D, drawn only while a hold or its release is running. DOM changes are
+// transforms on the zone and nav, the individual translate/rotate properties on floating elements
+// (they compose with transforms other code writes) and a quantised CSS variable. will-change is set
+// 150 ms into a press (so layers are ready when the hold starts at 400 ms) and every inline style is
+// cleared when the release ends or the press turns out to be a click.
 
 const GRID = 16 // px, the lens pixel grid
+const ARM_MS = 400 // press this long (still) to start a hold
+const PREP_MS = 150 // promote layers this far into a press
+const MAX_FLOAT = 80
+// Candidates for floating; only the outermost visible match of a nested set floats.
+const FLOAT_SEL = [
+  '.proto-banner .micro', '.nav .brand', '.nav-links > a', '.nav-sound', '.nav-cta', '.nav-toggle',
+  '.globe-host', '.globe-poster', '.orbit-chip', '.bigword',
+  'h1', 'h2', 'h3', 'p', 'li', 'dl', 'table', 'figure', 'img', 'svg', 'canvas',
+  '.pill', '.ulink', '.chip', '.fchip', '.badge', '.micro', '.card', '.tab', '.ticker', '.leaflet-container', 'button', 'a',
+].join(', ')
+const FLOAT_SKIP = '.sr-only, .cursor, .ptx, .bd, .holdfx, .hold-readout, .hold-vignette, .skip, .story-panel:not(.on), .globe-tip'
+interface Float {
+  el: HTMLElement
+  ax: number; ay: number; fx: number; fy: number; p1: number; p2: number // drift amplitude, frequency, phase
+  ra: number; rf: number // tilt amplitude (deg), frequency
+  ux: number; uy: number // unit vector away from the press
+  x: number; y: number; r: number // last pose
+}
 const TAU = Math.PI * 2
 
 function rng(seed: number) {
@@ -124,6 +149,9 @@ export default function HoldFX() {
     let geo: Geo | null = null
     let zoneEl: HTMLElement | null = null
     let targets: { el: HTMLElement; left: number; top: number }[] = []
+    let floats: Float[] = []
+    let prepTimer = 0
+    let prepared = false
     let rel = { rz: 0, rx: 0, ry: 0, s: 0, tx: 0, ty: 0 }
     let lastCa = -1
     let boltPts: number[] = []
@@ -153,14 +181,90 @@ export default function HoldFX() {
         t.el.style.transform = `perspective(1400px) translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) rotateX(${rx.toFixed(3)}deg) rotateY(${ry.toFixed(3)}deg) rotateZ(${rz.toFixed(3)}deg) scale(${(1 + s).toFixed(4)})`
       }
     }
+    // The zone (a viewport-sized hero), the nav and the banner tilt; the visible elements float.
+    const pickTargets = () =>
+      [zoneEl, document.querySelector<HTMLElement>('.nav'), document.querySelector<HTMLElement>('.proto-banner')]
+        .filter((el): el is HTMLElement => !!el)
+        .map((el) => {
+          const b = el.getBoundingClientRect()
+          return { el, left: b.left, top: b.top }
+        })
+    const pickFloats = () => {
+      const out: Float[] = []
+      const picked = new Set<Element>()
+      const W0 = window.innerWidth, H0 = window.innerHeight
+      for (const el of document.body.querySelectorAll<HTMLElement>(FLOAT_SEL)) {
+        if (out.length >= MAX_FLOAT) break
+        if (el.closest(FLOAT_SKIP)) continue
+        let p = el.parentElement, inside = false
+        while (p && !inside) {
+          inside = picked.has(p)
+          p = p.parentElement
+        }
+        if (inside) continue
+        const b = el.getBoundingClientRect()
+        if (b.width < 4 || b.height < 4 || b.bottom < 0 || b.top > H0 || b.right < 0 || b.left > W0) continue
+        if (b.width * b.height > 0.9 * W0 * H0 && !el.matches('.globe-host, .leaflet-container')) continue
+        if (el.checkVisibility && !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue
+        picked.add(el)
+        const cx = b.left + b.width / 2 - holdState.x, cy = b.top + b.height / 2 - holdState.y
+        const d = Math.hypot(cx, cy) || 1
+        const small = Math.min(1, 140 / Math.max(b.width, b.height)) // big blocks drift and tilt less
+        out.push({
+          el,
+          ax: (0.6 + r()) * (0.55 + 0.45 * small), ay: (0.6 + r()) * (0.55 + 0.45 * small),
+          fx: 0.5 + r() * 0.9, fy: 0.45 + r() * 0.9, p1: r() * TAU, p2: r() * TAU,
+          ra: (r() < 0.5 ? -1 : 1) * (0.6 + r() * 2.4) * small, rf: 0.35 + r() * 0.7,
+          ux: cx / d, uy: cy / d, x: 0, y: 0, r: 0,
+        })
+      }
+      return out
+    }
+    // 150 ms into a press: pick and promote, so the hold itself starts without a layer hitch.
+    const prepare = () => {
+      if (phase !== 'armed' || prepared) return
+      prepared = true
+      targets = pickTargets()
+      floats = pickFloats()
+      for (const t of targets) t.el.style.willChange = 'transform'
+      for (const f of floats) f.el.style.willChange = 'translate, rotate'
+    }
+    // Gentle at first, growing with the charge: up to ~26 px drift and ~3 deg tilt, plus a lift away from the press.
+    const applyFloats = (level: number, tt: number) => {
+      const a = 26 * Math.pow(level, 1.35)
+      const lift = 12 * level * level
+      for (const f of floats) {
+        f.x = a * f.ax * Math.sin(tt * f.fx * Math.PI + f.p1) + lift * f.ux
+        f.y = a * f.ay * Math.sin(tt * f.fy * Math.PI + f.p2) + lift * f.uy - 4 * level
+        f.r = f.ra * level * Math.sin(tt * f.rf * Math.PI + f.p1 + f.p2)
+        f.el.style.translate = `${f.x.toFixed(2)}px ${f.y.toFixed(2)}px`
+        f.el.style.rotate = `${f.r.toFixed(3)}deg`
+      }
+    }
+    // Release: the last pose times the page's damped spring (k), plus a short push from the blast.
+    const releaseFloats = (k: number, ts: number, L: number) => {
+      const push = 14 * L * Math.exp(-7 * ts) * Math.sin(Math.min(Math.PI, ts * 16))
+      for (const f of floats) {
+        f.el.style.translate = `${(f.x * k + f.ux * push).toFixed(2)}px ${(f.y * k + f.uy * push).toFixed(2)}px`
+        f.el.style.rotate = `${(f.r * k).toFixed(3)}deg`
+      }
+    }
     const clearDom = () => {
       for (const t of targets) {
         t.el.style.transform = ''
         t.el.style.transformOrigin = ''
         t.el.style.willChange = ''
       }
+      for (const f of floats) {
+        f.el.style.translate = ''
+        f.el.style.rotate = ''
+        f.el.style.transition = ''
+        f.el.style.willChange = ''
+      }
       targets = []
-      zoneEl?.classList.remove('holding')
+      floats = []
+      prepared = false
+      zoneEl?.classList.remove('holding', 'hold-armed')
       zoneEl?.style.removeProperty('--ca')
       lastCa = -1
     }
@@ -175,14 +279,10 @@ export default function HoldFX() {
       geo = makeGeo(ox, oy, (Math.random() * 1e9) | 0)
       // Tilt the hold zone (a viewport-sized hero) and the nav, not the whole tall page: promoting
       // the full page to a transformed layer cost a ~200 ms frame on integrated GPUs.
-      targets = [zoneEl, document.querySelector<HTMLElement>('.nav'), document.querySelector<HTMLElement>('.proto-banner')]
-        .filter((el): el is HTMLElement => !!el)
-        .map((el) => {
-          const b = el.getBoundingClientRect()
-          el.style.willChange = 'transform'
-          return { el, left: b.left, top: b.top }
-        })
-      zoneEl?.classList.add('holding')
+      prepare()
+      // floating elements follow the frame loop exactly (no CSS transition lag on translate/rotate)
+      for (const f of floats) f.el.style.transition = 'none'
+      zoneEl?.classList.add('holding', 'hold-armed')
       window.getSelection()?.removeAllRanges()
       canvas.style.display = 'block'
       ro.style.display = 'block'
@@ -191,11 +291,16 @@ export default function HoldFX() {
       gsap.ticker.add(frame)
     }
 
+    // A press that ends, moves or selects text before 400 ms is a click: undo the preparation.
+    const disarm = () => {
+      window.clearTimeout(armTimer)
+      window.clearTimeout(prepTimer)
+      phase = 'idle'
+      clearDom()
+    }
     const release = () => {
       if (phase === 'armed') {
-        window.clearTimeout(armTimer)
-        phase = 'idle'
-        zoneEl?.classList.remove('hold-armed')
+        disarm()
         return
       }
       if (phase !== 'hold') return
@@ -244,6 +349,7 @@ export default function HoldFX() {
         const jx = a * (Math.sin(tt * 47.3) * 0.6 + Math.sin(tt * 91.7 + 1.3) * 0.4)
         const jy = a * (Math.sin(tt * 53.1 + 2.1) * 0.6 + Math.sin(tt * 83.9) * 0.4)
         applyDom(p.rz, p.rx, p.ry, p.s, p.tx + jx, p.ty + jy)
+        applyFloats(level, tt)
         rel = p
         setCa(4.5 * level)
         drawHold(g, level, x, y, tt, now)
@@ -265,6 +371,7 @@ export default function HoldFX() {
         const kick = 9 * L * Math.exp(-9 * ts)
         const kx = kick * Math.sin(ts * 70), ky = kick * Math.cos(ts * 61)
         applyDom(rel.rz * k, rel.rx * k, rel.ry * k, rel.s * k + 0.035 * L * Math.exp(-7 * ts) * Math.sin(ts * 22), rel.tx * k + kx, rel.ty * k + ky)
+        releaseFloats(k, ts, L)
         setCa(4.5 * L * Math.max(0, k) + 6 * L * Math.exp(-10 * ts))
         drawRelease(g, L, ox, oy, u, ts)
         ro.style.opacity = String(clamp01(1 - u * 4))
@@ -497,22 +604,22 @@ export default function HoldFX() {
       if (!t?.closest?.('[data-hold]') || t.closest(HOLD_EXCLUDE)) return
       phase = 'armed'
       zoneEl = t.closest<HTMLElement>('[data-hold]')
-      zoneEl?.classList.add('hold-armed')
       downX = holdState.x = e.clientX
       downY = holdState.y = e.clientY
+      prepTimer = window.setTimeout(prepare, PREP_MS)
       armTimer = window.setTimeout(() => {
-        if (phase === 'armed') begin()
-      }, 140)
+        if (phase !== 'armed') return
+        // text being selected (a drag or a double click) is not a hold
+        const sel = window.getSelection()
+        if (sel && !sel.isCollapsed && sel.toString().trim()) return disarm()
+        begin()
+      }, ARM_MS)
     }
     const move = (e: PointerEvent) => {
       if (phase === 'idle') return
       holdState.x = e.clientX
       holdState.y = e.clientY
-      if (phase === 'armed' && Math.hypot(e.clientX - downX, e.clientY - downY) > 8) {
-        window.clearTimeout(armTimer)
-        phase = 'idle'
-        zoneEl?.classList.remove('hold-armed')
-      }
+      if (phase === 'armed' && Math.hypot(e.clientX - downX, e.clientY - downY) > 8) disarm()
     }
     const up = () => release()
     const key = (e: KeyboardEvent) => {
@@ -532,6 +639,7 @@ export default function HoldFX() {
     window.addEventListener('pointerup', up)
     window.addEventListener('pointercancel', up)
     window.addEventListener('blur', up)
+    document.documentElement.addEventListener('mouseleave', up)
     window.addEventListener('keydown', key)
     window.addEventListener('click', click, true)
     document.addEventListener('visibilitychange', hide)
@@ -539,19 +647,20 @@ export default function HoldFX() {
     size()
     return () => {
       window.clearTimeout(armTimer)
+      window.clearTimeout(prepTimer)
       gsap.ticker.remove(frame)
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
       window.removeEventListener('pointercancel', up)
       window.removeEventListener('blur', up)
+      document.documentElement.removeEventListener('mouseleave', up)
       window.removeEventListener('keydown', key)
       window.removeEventListener('click', click, true)
       document.removeEventListener('visibilitychange', hide)
       window.removeEventListener('resize', size)
       if (phase === 'hold') sound.holdCancel()
       clearDom()
-      zoneEl?.classList.remove('hold-armed')
       holdState.holding = false
       holdState.level = 0
     }
