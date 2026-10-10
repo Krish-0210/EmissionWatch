@@ -133,6 +133,8 @@ class EmissionWatchStack(Stack):
             ("/clusters/{id}/timeseries", apigw.HttpMethod.GET),
             ("/summary", apigw.HttpMethod.GET),
             ("/brief/{id}", apigw.HttpMethod.POST),
+            ("/clusters/{id}/wind", apigw.HttpMethod.GET),  # live Open-Meteo (outbound HTTPS) with ERA5 fallback
+            ("/rti/{id}", apigw.HttpMethod.POST),  # template RTI draft, no Bedrock
         ]:
             api.add_routes(path=path, methods=[method], integration=integration)
 

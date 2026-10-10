@@ -26,6 +26,10 @@ In bedrock mode, if Bedrock fails for any reason the API still answers with the 
 ```bash
 cd pipeline && .venv/Scripts/python.exe -m src.export.to_json && cd ..
 ```
+The exporter also needs `pipeline/data/processed/population_20km.csv` (`python -m src.ingest.population`, Earth
+Engine, ~1 min) and the committed `pipeline/config/india_towns_50k.csv` (rebuild only with
+`python -m src.ingest.towns` after downloading GeoNames `cities15000.zip` + `admin1CodesASCII.txt` into
+`pipeline/data/raw/geonames/` and unzipping). It writes `wind_{id}.json` too.
 The exporter writes the same JSON to `pipeline/data/export/` (gitignored) and `frontend/public/data/` (committed).
 The stack uploads `frontend/public/data/*.json` (the files the local site reads), so the API serves exactly what
 local development serves; synth fails if `clusters.json` is missing. Commit the re-exported files before deploying.
@@ -56,7 +60,12 @@ curl -s $API/summary | head -c 200; echo
 curl -s -o /dev/null -w "%{http_code}\n" $API/clusters/atlantis        # 404
 curl -s -X POST $API/brief/talcher | head -c 400; echo                 # template mode: "source": "auto"
                                                                        # bedrock mode: "bedrock" (or "template")
+curl -s $API/clusters/korba/wind | head -c 400; echo                   # "source": "live" (or "era5" if Open-Meteo failed)
+curl -s -X POST $API/rti/singrauli | head -c 300; echo                 # {"markdown": "# Draft RTI application: ...", "plain_text": ...}
 ```
+`GET /clusters/{id}/wind` calls `https://api.open-meteo.com` from the Lambda (no key; the function is not in a VPC,
+so it has outbound internet by default). If that fails it answers from ERA5 (`"source": "era5"`, logged as
+"live forecast failed"). Open-Meteo's free API is for non-commercial use; answers are cached 30 min per cluster.
 Logs: `aws logs tail /aws/lambda/<function name> --follow --profile emissionwatch --region ap-south-1`
 (the function name is in the CloudFormation console; in bedrock mode a "Bedrock failed" warning explains any
 template fallback).
@@ -109,7 +118,7 @@ cdk deploy EmissionWatchStack --profile emissionwatch -c allowed_origins=https:/
 add `-c brief_mode=bedrock` here too.)
 
 ## Limits and cost guards
-- HTTP API throttling: 10 rps, burst 20; `POST /brief/{id}` 1 rps, burst 2.
+- HTTP API throttling: 10 rps, burst 20 (all routes, including `/wind` and `/rti`); `POST /brief/{id}` 1 rps, burst 2.
 - Lambda: 256 MB, 10 s timeout. Template mode (default) makes no Bedrock calls; in bedrock mode the call times
   out after 7 s and falls back to the template.
 - Bucket is private (block public access, SSE-S3, TLS only); only the Lambda reads `data/*`.

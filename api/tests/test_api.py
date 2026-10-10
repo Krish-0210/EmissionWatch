@@ -14,6 +14,9 @@ DETAIL_KEYS = SUMMARY_KEYS | {"as_of", "plants", "weights", "signals", "model", 
 PLANT_KEYS = {"id", "name", "state", "lat", "lon", "capacity_mw", "status"}
 MODEL_KEYS = {"coef", "t", "p", "partial_r2", "r2", "n"}
 MONTH_KEYS = {"month", "generation_mu", "expected_no2", "observed_no2", "residual", "valid_fraction"}
+# Additive fields (pipeline to_json; not in api.ts yet, see FRONTEND_TODO.md). Checked exactly so nothing else sneaks in.
+ADDED_SUMMARY_KEYS = {"primary_anomaly_type", "primary_anomaly_label", "population_20km"}
+ADDED_DETAIL_KEYS = ADDED_SUMMARY_KEYS | {"flagged_periods"}
 BACKTEST_KEYS = {"cluster", "gen_2019", "gen_2020", "days_2019", "days_2020", "observed_2019", "observed_2020", "predicted_2020", "gen_change_pct", "observed_change_pct", "predicted_change_pct", "error"}
 
 
@@ -27,7 +30,7 @@ def test_clusters_list():
     assert {"generated_at", "as_of", "clusters"} <= body.keys()
     assert [c["id"] for c in body["clusters"]] == CLUSTER_IDS
     for c in body["clusters"]:
-        assert set(c) == SUMMARY_KEYS
+        assert set(c) == SUMMARY_KEYS | ADDED_SUMMARY_KEYS
         assert c["risk_level"] in ("low", "medium", "high") and c["confidence"] in ("low", "medium", "high")
         assert 0 <= c["risk_score"] <= 100
 
@@ -36,7 +39,7 @@ def test_clusters_list():
 def test_cluster_detail(cid):
     status, c = call("GET", "/clusters/{id}", cid)
     assert status == 200
-    assert set(c) == DETAIL_KEYS and c["id"] == cid
+    assert set(c) == DETAIL_KEYS | ADDED_DETAIL_KEYS and c["id"] == cid
     assert c["plants"] and all(set(p) == PLANT_KEYS for p in c["plants"])
     assert set(c["weights"]) == {"persistent_excess", "intensity_trend", "peer_intensity"}
     s = c["signals"]
@@ -60,14 +63,15 @@ def test_timeseries(cid):
 def test_summary():
     status, s = call("GET", "/summary")
     assert status == 200
-    assert {"generated_at", "units", "pooled_model", "clusters", "backtest", "findings"} <= s.keys()
+    assert set(s) == {"generated_at", "units", "pooled_model", "clusters", "backtest", "findings", "sources"}
     assert set(s["pooled_model"]["enhancement"]) == MODEL_KEYS
     assert {c["id"] for c in s["clusters"]} == set(CLUSTER_IDS)
     assert all(set(r) == BACKTEST_KEYS for r in s["backtest"])
     assert s["findings"] and all(isinstance(f, str) for f in s["findings"])
 
 
-@pytest.mark.parametrize("route,method", [("/clusters/{id}", "GET"), ("/clusters/{id}/timeseries", "GET"), ("/brief/{id}", "POST")])
+@pytest.mark.parametrize("route,method", [("/clusters/{id}", "GET"), ("/clusters/{id}/timeseries", "GET"), ("/brief/{id}", "POST"),
+                                          ("/clusters/{id}/wind", "GET"), ("/rti/{id}", "POST")])
 @pytest.mark.parametrize("cid", ["atlantis", "", "../summary", "TALCHER", "a" * 60])
 def test_unknown_cluster_404(route, method, cid, bedrock):
     fake = bedrock(reply="unused")
@@ -174,9 +178,10 @@ def test_api_body_is_the_static_file(route, cid, file):
 
 
 def test_every_frontend_file_is_routable():
-    """Each JSON file the static site can fetch has an API route (api.ts url() mapping)."""
+    """Each JSON file the static site can fetch has an API route (api.ts url() mapping; wind_{id}.json is the input of
+    GET /clusters/{id}/wind, whose ERA5 answer is its `trace`)."""
     names = {p.name for p in EXPORT.glob("*.json")}
-    routable = {"clusters.json", "summary.json"} | {f"cluster_{c}.json" for c in CLUSTER_IDS} | {f"timeseries_{c}.json" for c in CLUSTER_IDS}
+    routable = {"clusters.json", "summary.json"} | {f"{k}_{c}.json" for c in CLUSTER_IDS for k in ("cluster", "timeseries", "wind")}
     assert names == routable
 
 

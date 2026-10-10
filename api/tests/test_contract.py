@@ -131,11 +131,81 @@ def ts_interfaces() -> dict[str, set[str]]:
     ],
 )
 def test_specs_match_api_ts(iface, spec):
-    """Every field the frontend types declare is checked above, and nothing it does not declare."""
-    assert ts_interfaces()[iface] == set(spec)
+    """Every field the frontend types declare is served, and api.ts declares nothing else except the documented
+    additive fields (FRONTEND_TODO.md), which it may adopt at any time."""
+    may_add = {"ClusterSummary": set(ADDED_SUMMARY), "ClusterDetail": set(ADDED_SUMMARY) | {"flagged_periods"},
+               "SummaryFile": {"sources"}}.get(iface, set())
+    keys = ts_interfaces()[iface]
+    assert set(spec) <= keys and keys - set(spec) <= may_add, (keys - set(spec)) - may_add or set(spec) - keys
 
 
 def test_brief_sources_match_api_ts():
     src = API_TS.read_text(encoding="utf-8")
     union = re.search(r"interface Brief \{.*?source: ([^\n/]+)", src, re.S).group(1)
     assert set(re.findall(r"'(\w+)'", union)) == {"auto", "bedrock", "template"}  # what handlers/brief.py returns
+
+
+# ---------- Additive fields (pipeline to_json; not in api.ts yet, see FRONTEND_TODO.md) ----------
+ANOMALY = ("persistent_excess", "intensity_trend", "peer_intensity", "none")
+ADDED_SUMMARY = {"primary_anomaly_type": ANOMALY, "primary_anomaly_label": "str", "population_20km": "num"}
+PERIOD = {"start": "str", "end": "str", "peak_z": "num", "reason": ("excess", "score_window")}
+SOURCE = {"id": "str", "name": "str", "used_for": "str", "access": "str"}
+TOWN = {"name": "str", "state": "str", "lat": "num", "lon": "num", "population": "num", "distance_km": "num", "bearing_deg": "num"}
+TRACE = {"source": ("era5",), "as_of": "str", "speed_kmh": "num", "bearing_deg": "num",
+         "cone_polygon": {"type": ("Polygon",), "coordinates": [[["num"]]]}, "towns_in_path": [TOWN], "sentence": "str",
+         "attribution": "str"}
+WIND_FILE = {"id": "str", "name": "str", "lat": "num", "lon": "num",
+             "era5": {"date": "str", "time_utc": "str", "speed_kmh": "num", "from_deg": "num"},
+             "cone": {"half_angle_deg": "num", "length_km": "num", "max_towns": "num", "min_town_population": "num"},
+             "towns_within_cone_length": [TOWN], "trace": TRACE}
+
+
+@pytest.mark.parametrize("cid", CLUSTER_IDS)
+def test_added_cluster_fields(cid):
+    errs: list[str] = []
+    det = load(f"cluster_{cid}.json")
+    check(det, ADDED_SUMMARY | {"flagged_periods": [PERIOD]}, f"cluster_{cid}", errs)
+    row = next(c for c in load("clusters.json")["clusters"] if c["id"] == cid)
+    check(row, ADDED_SUMMARY, f"clusters.json[{cid}]", errs)
+    errs += [f"cluster_{cid}.{k} != clusters.json" for k in ADDED_SUMMARY if det.get(k) != row.get(k)]
+    assert not errs, errs
+    # primary anomaly = the signal adding the most points above neutral 50 (risk_score - 50 = sum w (s - 50))
+    w, s = det["weights"], det["signals"]
+    points = {k: w[k] * (s[k]["score"] - 50) for k in ("persistent_excess", "intensity_trend", "peer_intensity")}
+    best = max(points, key=points.get)
+    assert det["primary_anomaly_type"] == (best if points[best] > 0 else "none")
+    assert abs(det["risk_score"] - 50 - sum(points.values())) < 0.01
+    assert isinstance(det["population_20km"], int) and det["population_20km"] > 0 and det["population_20km"] % 100 == 0
+    fp = det["flagged_periods"]
+    assert 1 <= len(fp) <= 3
+    for p in fp:
+        assert len(p["start"]) == len(p["end"]) == 10 and p["start"] < p["end"] <= det["as_of"]
+    assert [p["end"] for p in fp] == sorted((p["end"] for p in fp), reverse=True)
+
+
+def test_labels_are_consistent():
+    labels = {}
+    for c in load("clusters.json")["clusters"]:
+        labels.setdefault(c["primary_anomaly_type"], set()).add(c["primary_anomaly_label"])
+    assert all(len(v) == 1 for v in labels.values()), labels
+
+
+def test_summary_sources():
+    errs: list[str] = []
+    s = load("summary.json")
+    check(s, {"sources": [SOURCE]}, "summary.json", errs)
+    assert not errs, errs
+    ghsl = next(x for x in s["sources"] if x["id"] == "ghsl_pop")
+    assert "GHS-POP R2023A" in ghsl["citation"] and ghsl["doi"] == "10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE"
+    assert {"geonames", "open_meteo", "era5"} <= {x["id"] for x in s["sources"]}
+
+
+@pytest.mark.parametrize("cid", CLUSTER_IDS)
+def test_wind_file(cid):
+    errs: list[str] = []
+    w = load(f"wind_{cid}.json")
+    check(w, WIND_FILE, f"wind_{cid}", errs)
+    assert not errs, errs
+    assert w["id"] == cid
+    assert all(t["population"] > 50_000 and t["distance_km"] <= 75 for t in w["towns_within_cone_length"])
+    assert w["trace"]["bearing_deg"] == round((w["era5"]["from_deg"] + 180) % 360, 1)

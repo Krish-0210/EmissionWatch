@@ -39,8 +39,10 @@ def test_brief_mode_context():
 
 def test_routes_cors_throttle():
     t = template()
-    for key in ["GET /clusters", "GET /clusters/{id}", "GET /clusters/{id}/timeseries", "GET /summary", "POST /brief/{id}"]:
+    for key in ["GET /clusters", "GET /clusters/{id}", "GET /clusters/{id}/timeseries", "GET /summary", "POST /brief/{id}",
+                "GET /clusters/{id}/wind", "POST /rti/{id}"]:
         t.has_resource_properties("AWS::ApiGatewayV2::Route", {"RouteKey": key})
+    assert len(t.find_resources("AWS::ApiGatewayV2::Route")) == 7
     t.has_resource_properties("AWS::ApiGatewayV2::Api", {"CorsConfiguration": assertions.Match.object_like({
         "AllowOrigins": ["http://localhost:5173", "http://localhost:4173", "https://main.example.amplifyapp.com"]})})
     t.has_resource_properties("AWS::ApiGatewayV2::Stage", {

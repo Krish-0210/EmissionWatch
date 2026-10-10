@@ -26,10 +26,12 @@ def aws(monkeypatch):
     monkeypatch.setenv("DATA_PREFIX", "data/")
     monkeypatch.setenv("BEDROCK_MODEL_ID", "in.anthropic.claude-haiku-4-5-20251001-v1:0")
     monkeypatch.delenv("BRIEF_MODE", raising=False)  # default: template
-    from handlers import brief, data
+    from handlers import brief, data, wind
 
     data.clear_cache()
+    wind.clear_cache()
     brief._bedrock = None
+    monkeypatch.setattr(wind.urllib.request, "urlopen", _no_network)  # tests never reach Open-Meteo
     with mock_aws():
         s3 = boto3.client("s3", region_name="ap-south-1")
         s3.create_bucket(Bucket=BUCKET, CreateBucketConfiguration={"LocationConstraint": "ap-south-1"})
@@ -37,6 +39,44 @@ def aws(monkeypatch):
             s3.put_object(Bucket=BUCKET, Key=f"data/{f.name}", Body=f.read_bytes())
         yield s3
     data.clear_cache()
+
+
+def _no_network(*a, **kw):
+    raise OSError("network disabled in tests")
+
+
+class FakeResponse:
+    def __init__(self, body: bytes):
+        self.body = body
+
+    def read(self):
+        return self.body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+@pytest.fixture
+def open_meteo(monkeypatch):
+    """install(body=dict | bytes, error=Exception) -> list of requested URLs; replaces urlopen in handlers.wind."""
+    from handlers import wind
+
+    def install(body=None, error: Exception | None = None):
+        calls = []
+
+        def fake(req, timeout=None):
+            calls.append((req.full_url, timeout))
+            if error:
+                raise error
+            return FakeResponse(body if isinstance(body, bytes) else json.dumps(body).encode())
+
+        monkeypatch.setattr(wind.urllib.request, "urlopen", fake)
+        return calls
+
+    return install
 
 
 class FakeBedrock:
