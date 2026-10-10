@@ -272,13 +272,12 @@ export default function Home() {
               <span className="live-dot" aria-hidden="true" /> Live data · {clusters.data?.clusters.length ?? 11} clusters · {years}
             </div>
             <h1 className="display d-xl hero-title">
-              {/* Sentinel-5P flies at about 824 km */}
+              {/* No rotating last word: the tagline always reads in full. */}
               <MaskLines
                 lines={['Coal plants report', 'their own pollution.', 'We watch from space.']}
                 accentFrom={2}
                 delay={120}
                 step={150}
-                rotate={{ line: 2, words: ['space.', 'orbit.', '824 km up.'] }}
               />
             </h1>
             <p className="lede hero-lede">
