@@ -87,6 +87,38 @@ def persistent_excess(resid: pd.DataFrame) -> pd.DataFrame:
     return pd.concat(out, ignore_index=True)
 
 
+FLAG_Z, FLAG_YEARS, FLAG_MAX, FLAG_GAP_DAYS = 1.5, 3, 3, 30
+
+
+def flagged_periods(rolling: pd.DataFrame, cluster: str) -> list[dict]:
+    """Periods when the persistent-excess signal was high, newest first (for the RTI draft and the frontend).
+
+    A day is flagged when its 90-day rolling z (risk_rolling_daily) is >= FLAG_Z (excess sub-score >= 93).
+    Each flagged day stands for the ROLL_DAYS window that ends on it, so a run of flagged days covers
+    [first flagged day - (ROLL_DAYS - 1), last flagged day]. Windows that overlap or are <= FLAG_GAP_DAYS
+    apart are merged. Only windows ending in the last FLAG_YEARS years of data are kept, at most FLAG_MAX.
+    If none, the latest score window is returned with reason "score_window" (what the current score uses).
+    """
+    g = rolling[(rolling["cluster"] == cluster)].dropna(subset=["rolling_z"]).sort_values("date")
+    end_of_data = g["date"].max()
+    win = pd.Timedelta(days=ROLL_DAYS - 1)
+    periods: list[dict] = []
+    for d, z in zip(g["date"], g["rolling_z"]):
+        if z < FLAG_Z:
+            continue
+        if periods and d - win <= periods[-1]["end"] + pd.Timedelta(days=FLAG_GAP_DAYS):
+            periods[-1]["end"] = d
+            periods[-1]["peak_z"] = max(periods[-1]["peak_z"], z)
+        else:
+            periods.append({"start": d - win, "end": d, "peak_z": z})
+    recent = [p for p in periods if p["end"] >= end_of_data - pd.DateOffset(years=FLAG_YEARS)][::-1][:FLAG_MAX]
+    if not recent:
+        last = g.iloc[-1]
+        recent = [{"start": last["date"] - win, "end": last["date"], "peak_z": last["rolling_z"], "reason": "score_window"}]
+    return [{"start": f"{p['start']:%Y-%m-%d}", "end": f"{p['end']:%Y-%m-%d}", "peak_z": round(float(p["peak_z"]), 2),
+             "reason": p.get("reason", "excess")} for p in recent]
+
+
 def yearly_coefficients(g: pd.DataFrame) -> pd.DataFrame:
     """Generation coefficient per year (with year intercepts and the model.py controls), HAC errors."""
     g = g.assign(year=g["date"].dt.year)

@@ -4,8 +4,18 @@ Contract: frontend/src/api.ts. Writes to pipeline/data/export/ and copies to fro
   clusters.json            all clusters: location, capacity, score, level, confidence, headline
   cluster_{id}.json        + plants, signals, model stats, confidence notes, coverage
   timeseries_{id}.json     monthly generation_mu, expected_no2, observed_no2, residual, valid_fraction
-  summary.json             pooled model, per-cluster generation coef/p, lockdown backtest, findings
+  summary.json             pooled model, per-cluster generation coef/p, lockdown backtest, findings, sources
+  wind_{id}.json           latest ERA5 wind, direction cone, towns (export/wind.py; read by GET /clusters/{id}/wind)
 Also copies docs/figures/backtest.png to frontend/public/data/.
+
+Additive fields (not yet in api.ts; FRONTEND_TODO.md):
+  clusters.json rows + cluster_{id}.json: primary_anomaly_type, primary_anomaly_label, population_20km
+  cluster_{id}.json: flagged_periods (risk_score.flagged_periods)
+  summary.json: sources
+primary_anomaly_type: the signal adding the most points above the neutral 50 (risk_score - 50 = sum of
+weight x (sub-score - 50)); "none" when no signal is above neutral.
+population_20km needs data/processed/population_20km.csv (python -m src.ingest.population, GEE) and the wind
+files need config/india_towns_50k.csv (python -m src.ingest.towns) and weather_daily.parquet.
 
 expected/observed/residual are monthly means of the daily model (residuals_daily.parquet) over valid
 days, in µmol/m²; months without a valid day are null. valid_fraction is from no2_monthly.parquet.
@@ -24,6 +34,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.export import wind
+from src.ingest import population, towns
 from src.ingest.satellite import cluster_centroids, load_plants
 from src.process import model
 from src.process.cluster_monthly import MIN_DAYS_SHARE
@@ -82,6 +94,40 @@ FINDINGS = [
 ]
 
 
+ANOMALY_LABELS = {
+    "persistent_excess": "Recent excess: NO₂ above what reported generation and weather predict",
+    "intensity_trend": "Rising NO₂ per unit of electricity over the years",
+    "peer_intensity": "More NO₂ per unit of electricity than peer clusters",
+    "none": "No signal above the neutral level",
+}
+SIGNAL_SCORES = {"persistent_excess": "excess_score", "intensity_trend": "trend_score", "peer_intensity": "peer_score"}
+
+
+def primary_anomaly(s: dict) -> str:
+    points = {k: risk_score.WEIGHTS[col] * (s[col] - 50) for k, col in SIGNAL_SCORES.items()}
+    best = max(points, key=points.get)
+    return best if points[best] > 0 else "none"
+
+
+SOURCES = [
+    {"id": "cea_dgr", "name": "CEA Daily Generation Report (DGR Subreport-2), National Power Portal",
+     "used_for": "reported daily generation per plant", "access": "npp.gov.in", "license": None, "citation": None, "doi": None},
+    {"id": "s5p_no2", "name": "Sentinel-5P TROPOMI tropospheric NO2 (OFFL L3), Copernicus / ESA",
+     "used_for": "NO2 enhancement around each cluster", "access": "Google Earth Engine COPERNICUS/S5P/OFFL/L3_NO2",
+     "license": None, "citation": None, "doi": None},
+    {"id": "era5", "name": "ERA5 hourly reanalysis, Copernicus Climate Change Service / ECMWF",
+     "used_for": "10 m wind and boundary-layer height (model controls, wind trace)", "access": "Google Earth Engine ECMWF/ERA5/HOURLY",
+     "license": None, "citation": None, "doi": None},
+    {"id": "gem", "name": "Global Energy Monitor, Global Coal Plant Tracker", "used_for": "plant coordinates, capacity in each ring",
+     "access": "gem.wiki", "license": None, "citation": None, "doi": None},
+    population.SOURCE,
+    {"id": "geonames", "name": "GeoNames cities15000", "used_for": "towns over 50,000 people in the wind trace",
+     "access": "download.geonames.org/export/dump", "license": "CC BY 4.0", "citation": towns.ATTRIBUTION, "doi": None},
+    {"id": "open_meteo", "name": "Open-Meteo forecast API", "used_for": "live 10 m wind for the wind trace (API only)",
+     "access": "api.open-meteo.com", "license": "CC BY 4.0", "citation": "Weather data by Open-Meteo.com", "doi": None},
+]
+
+
 def build_summary(res: pd.DataFrame) -> dict:
     """Pooled model, per-cluster generation coefficients, lockdown backtest and headline findings."""
     enh = res[res["target"] == "enhancement_umol"]
@@ -97,6 +143,7 @@ def build_summary(res: pd.DataFrame) -> dict:
                      for r in enh[~enh["cluster"].str.startswith("POOLED")].to_dict("records")],
         "backtest": backtest.to_dict("records"),
         "findings": FINDINGS,
+        "sources": [{k: src.get(k) for k in ("id", "name", "used_for", "access", "license", "citation", "doi")} for src in SOURCES],
     }
 
 
@@ -111,6 +158,9 @@ def run() -> list[Path]:
     gen = pd.read_parquet(PROCESSED / "generation_monthly.parquet").query("entity_type == 'cluster'")
     no2 = pd.read_parquet(PROCESSED / "no2_monthly.parquet").query("entity_type == 'cluster'")
     as_of = pd.to_datetime(scores["as_of"]).max().strftime("%Y-%m-%d")
+    rolling = pd.read_parquet(risk_score.ROLLING_PATH)
+    pop = pd.read_csv(population.OUT_PATH).set_index("cluster")["population_20km"]
+    era5, town_table = wind.latest_era5(), wind.load_towns()
 
     summaries, written = [], []
     for s in scores.sort_values("cluster").to_dict("records"):
@@ -123,6 +173,8 @@ def run() -> list[Path]:
             "capacity_mw": sum(p["capacity_mw"] for p in operating), "n_plants": len(operating),
             "risk_score": s["risk_score"], "risk_level": s["risk_level"], "confidence": s["confidence"],
             "headline": s["headline"],
+            "primary_anomaly_type": (kind := primary_anomaly(s)), "primary_anomaly_label": ANOMALY_LABELS[kind],
+            "population_20km": int(pop[cid]),
         }
         summaries.append(summary)
         y = yearly[yearly["cluster"] == cid][["year", "coef", "se", "days"]].to_dict("records")
@@ -146,9 +198,11 @@ def run() -> list[Path]:
             "coverage": {"recent_valid_days": int(s["recent_days"]), "ring_capacity_mw": s["ring_mw"],
                          "unreported_capacity_mw": s["unreported_mw"],
                          "unreported_plants": [n for n in unreported.split("; ") if n]},
+            "flagged_periods": risk_score.flagged_periods(rolling, cid),
         }
         for name, obj in ((f"cluster_{cid}.json", detail),
-                          (f"timeseries_{cid}.json", {"id": cid, "months": monthly_series(cid, resid, gen, no2)})):
+                          (f"timeseries_{cid}.json", {"id": cid, "months": monthly_series(cid, resid, gen, no2)}),
+                          (f"wind_{cid}.json", wind.build(cid, summary["name"], lat, lon, era5, town_table))):
             write(EXPORT_DIR / name, obj)
             written.append(EXPORT_DIR / name)
 
