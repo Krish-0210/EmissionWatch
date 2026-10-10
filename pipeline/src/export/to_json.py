@@ -6,6 +6,8 @@ Contract: frontend/src/api.ts. Writes to pipeline/data/export/ and copies to fro
   timeseries_{id}.json     monthly generation_mu, expected_no2, observed_no2, residual, valid_fraction
   summary.json             pooled model, per-cluster generation coef/p, lockdown backtest, findings, sources
   wind_{id}.json           latest ERA5 wind, direction cone, towns (export/wind.py; read by GET /clusters/{id}/wind)
+  plants_india.json        every Indian coal plant >= 500 MW with its state and cluster_id (export/plants_india.py)
+  states.json              all 36 states / union territories: centroid, plant count, capacity, plant ids
 Also copies docs/figures/backtest.png to frontend/public/data/.
 
 Additive fields (not yet in api.ts; FRONTEND_TODO.md):
@@ -34,8 +36,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.export import wind
-from src.ingest import population, towns
+from src.export import plants_india, wind
+from src.ingest import population, states, towns
 from src.ingest.satellite import cluster_centroids, load_plants
 from src.process import model
 from src.process.cluster_monthly import MIN_DAYS_SHARE
@@ -125,6 +127,7 @@ SOURCES = [
      "access": "download.geonames.org/export/dump", "license": "CC BY 4.0", "citation": towns.ATTRIBUTION, "doi": None},
     {"id": "open_meteo", "name": "Open-Meteo forecast API", "used_for": "live 10 m wind for the wind trace (API only)",
      "access": "api.open-meteo.com", "license": "CC BY 4.0", "citation": "Weather data by Open-Meteo.com", "doi": None},
+    states.SOURCE,
 ]
 
 
@@ -211,6 +214,9 @@ def run() -> list[Path]:
     written.append(EXPORT_DIR / "clusters.json")
     write(EXPORT_DIR / "summary.json", build_summary(res))
     written.append(EXPORT_DIR / "summary.json")
+    for name, obj in zip(("plants_india.json", "states.json"), plants_india.build(plants)):
+        write(EXPORT_DIR / name, obj)
+        written.append(EXPORT_DIR / name)
 
     FRONTEND_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copy2(BACKTEST_PNG, FRONTEND_DIR / BACKTEST_PNG.name)
