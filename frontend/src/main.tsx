@@ -16,8 +16,8 @@ import './styles/system.css'
 import './styles/fx.css'
 import App from './App.tsx'
 
-// Dev-only FPS / frame-time readout; tree-shaken from production builds.
-if (import.meta.env.DEV) void import('./dev/fpsMeter')
+// FPS / frame-time readout: dev server, or ?debug=1 (a separate lazy chunk, never loaded otherwise).
+if (import.meta.env.DEV || new URLSearchParams(location.search).get('debug') === '1') void import('./dev/fpsMeter')
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

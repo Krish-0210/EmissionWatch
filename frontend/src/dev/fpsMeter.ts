@@ -1,5 +1,5 @@
-// Dev-only FPS / frame-time readout (imported from main.tsx behind import.meta.env.DEV, so it is
-// dropped from the production build). Shows FPS, mean and p95 frame time over the last second,
+// FPS / frame-time readout, imported from main.tsx only on the dev server or with ?debug=1 (a lazy
+// chunk, so a normal production page never loads it). Shows FPS, mean and p95 frame time over the last second,
 // and the worst FPS of the last 10 s. The latest sample is also in data-fps on the element.
 const el = document.createElement('div')
 el.setAttribute('aria-hidden', 'true')
