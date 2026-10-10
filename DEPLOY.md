@@ -35,6 +35,25 @@ The stack uploads `frontend/public/data/*.json` (the files the local site reads)
 local development serves; synth fails if `clusters.json` is missing. Commit the re-exported files before deploying.
 
 ## 2. Bootstrap and deploy
+Create the infra venv first (once per clone; `infra/.venv` is gitignored, so a fresh clone has none). Python 3.12.
+```bash
+# Git Bash
+cd infra
+python -m venv .venv
+source .venv/Scripts/activate
+pip install -r requirements.txt
+cd ..
+```
+```bat
+:: Windows cmd
+cd infra
+python -m venv .venv
+.venv\Scripts\activate.bat
+pip install -r requirements.txt
+cd ..
+```
+No other gitignored file is needed: the stack uploads the committed `frontend/public/data/*.json`, and the Lambda
+uses only boto3 from its runtime. In cmd, activate with `.venv\Scripts\activate.bat` instead of `source ...` below.
 ```bash
 cd infra
 source .venv/Scripts/activate
@@ -138,8 +157,19 @@ A dev server that is already running keeps its old `VITE_API_URL`; the variable 
 cd infra && source .venv/Scripts/activate
 cdk deploy EmissionWatchStack --profile emissionwatch -c allowed_origins=https://main.d1234abcd.amplifyapp.com
 ```
-(Comma-separate several origins. Add it to `cdk.json` → `context.allowed_origins` to make it stick. In bedrock mode
-add `-c brief_mode=bedrock` here too.)
+(Comma-separate several origins. In bedrock mode add `-c brief_mode=bedrock` here too.)
+
+**`allowed_origins` must be passed on EVERY deploy.** Context values are not remembered: a later
+`cdk deploy` without `-c allowed_origins=...` redeploys the API with only the two localhost origins, so the Amplify
+origin is dropped without any warning and the live site's API calls fail with CORS errors. Either repeat the flag on
+every deploy, or set it once in `infra/cdk.json` under `context`:
+```json
+"context": {
+  "allowed_origins": "https://main.d1234abcd.amplifyapp.com",
+  ...
+}
+```
+After each deploy, check the `AllowedOrigins` stack output: it lists the origins that were applied.
 
 ## Limits and cost guards
 - HTTP API throttling: 10 rps, burst 20 (all routes, including `/wind`, `/rti`, `/plants` and `/states`); `POST /brief/{id}` 1 rps, burst 2.
