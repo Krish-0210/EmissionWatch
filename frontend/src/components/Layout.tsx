@@ -269,7 +269,7 @@ export default function Layout() {
       <Backdrop variant={backdropFor(pathname)} />
       <div className="proto-banner" role="note">
         <span className="micro">
-          <b>Prototype</b> · research demo on public data · indicative, not an official assessment
+          <b>Screening tool</b> · built on public data · indicative, not an official assessment
         </span>
       </div>
       <header className={`nav${open ? ' menu-open' : ''}`}>
