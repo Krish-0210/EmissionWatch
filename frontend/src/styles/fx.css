@@ -81,9 +81,17 @@
 .cursor[data-state='drag'] .c-arrows { opacity: 1; }
 .cursor[data-state='drag'] .c-arrows b:first-child { transform: translateX(-4px); }
 .cursor[data-state='drag'] .c-arrows b:last-child { transform: translateX(4px); }
-.c-prog { position: absolute; left: -32px; top: -32px; width: 64px; height: 64px; transform: rotate(-90deg); opacity: 0; transition: opacity 0.2s; overflow: visible; }
-.c-prog circle { fill: none; stroke: var(--ember); stroke-width: 2; stroke-linecap: round; filter: drop-shadow(0 0 4px rgba(255, 138, 61, 0.8)); }
-.cursor.holding .c-prog { opacity: 1; }
+.c-prog { position: absolute; left: -32px; top: -32px; width: 64px; height: 64px; transform: rotate(-90deg); opacity: 0; transition: opacity 0.15s; overflow: visible; color: var(--signal); }
+.c-prog circle { fill: none; }
+.c-track { stroke: rgba(124, 232, 216, 0.4); stroke-width: 1; }
+.c-bar { stroke: currentColor; stroke-width: 2; stroke-linecap: round; filter: drop-shadow(0 0 4px currentColor); }
+.cursor.hint .c-prog, .cursor.holding .c-prog { opacity: 1; }
+/* "Hold to scan" hint under the ring (Cursor.tsx: same eligibility as the hold, lib/hold holdZoneFor) */
+.c-hint {
+  position: absolute; left: 0; top: 40px; transform: translateX(-50%); opacity: 0; transition: opacity 0.15s;
+  font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal); white-space: nowrap;
+}
+.cursor.hint .c-hint { opacity: 1; }
 .cursor.holding .c-circle { transform: scale(1.6); border-color: rgba(255, 138, 61, 0.45); background: rgba(255, 138, 61, 0.06); }
 .cursor.pulse .c-circle { animation: c-pulse 0.7s var(--ease-out); }
 @keyframes c-pulse { 0% { transform: scale(1.6); opacity: 1; border-color: var(--ember); } 60% { transform: scale(4.2); opacity: 0; } 61% { transform: scale(0.4); opacity: 0; } 100% { opacity: 1; } }

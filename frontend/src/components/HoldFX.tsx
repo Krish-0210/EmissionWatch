@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { gsap } from '../lib/gsap'
-import { BLAST_MS, HOLD_EXCLUDE, HOLD_FULL, HOLD_SEEN_EVENT, holdSeen, holdState, markHoldSeen } from '../lib/hold'
+import { BLAST_MS, HOLD_FULL, HOLD_SEEN_EVENT, holdSeen, holdState, holdZoneFor, markHoldSeen } from '../lib/hold'
 import { useMediaQuery, useReducedMotion } from '../lib/motion'
 import { sound } from '../lib/sound'
 
 // "Hold to scan deeper" (click-and-hold, desktop only, off for reduced motion). Pressing still for
-// 400 ms on a [data-hold] zone (not on a control, the map or while selecting text) charges a scan
+// 400 ms on a [data-hold] zone (not on a control, the map or text: lib/hold holdZoneFor) charges a scan
 // over ~3.6 s; a normal click never starts it:
 //   the page (nav + main + footer) tilts in 3D, zooms toward the pointer and starts to shake,
 //   headings split into red/teal fringes, a scanning lens opens with the satellite pixel grid
@@ -642,10 +642,10 @@ export default function HoldFX() {
 
     const down = (e: PointerEvent) => {
       if (e.button !== 0 || e.pointerType !== 'mouse' || phase !== 'idle') return
-      const t = e.target as Element | null
-      if (!t?.closest?.('[data-hold]') || t.closest(HOLD_EXCLUDE)) return
+      const zone = holdZoneFor(e.target)
+      if (!zone) return
       phase = 'armed'
-      zoneEl = t.closest<HTMLElement>('[data-hold]')
+      zoneEl = zone
       downX = holdState.x = e.clientX
       downY = holdState.y = e.clientY
       prepTimer = window.setTimeout(prepare, PREP_MS)

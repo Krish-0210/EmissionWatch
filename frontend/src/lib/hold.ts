@@ -8,6 +8,23 @@ export const BLAST_MS = 1300 // release animation length
 export const HOLD_EXCLUDE =
   'a, button, input, select, textarea, label, summary, [role="button"], [role="tab"], [role="slider"], [contenteditable], .leaflet-container, .recharts-wrapper, .globe-tip, .orbit-chip, [data-nohold]'
 
+/** Text under the pointer: the element itself holds non-blank text that can be selected. */
+function onText(el: Element) {
+  for (const n of el.childNodes)
+    if (n.nodeType === Node.TEXT_NODE && n.textContent?.trim()) return getComputedStyle(el).userSelect !== 'none'
+  return false
+}
+
+/** The [data-hold] zone a press on `t` would charge, or null (outside a zone, or on a control, the map
+ *  or text). The one eligibility test: HoldFX starts holds with it and the cursor's "hold to scan"
+ *  hint shows with it, so the two never disagree. */
+export function holdZoneFor(t: EventTarget | null): HTMLElement | null {
+  if (!(t instanceof Element)) return null
+  const zone = t.closest<HTMLElement>('[data-hold]')
+  if (!zone || t.closest(HOLD_EXCLUDE) || onText(t)) return null
+  return zone
+}
+
 export const holdState = {
   /** 0..1 charge while holding (eased); falls back to 0 after release. */
   level: 0,
