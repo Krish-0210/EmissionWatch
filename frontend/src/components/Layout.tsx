@@ -5,7 +5,6 @@ import { backdropFor } from '../lib/backdrop'
 import { setLenis } from '../lib/scroll'
 import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useInteractions } from '../lib/interactions'
-import { GITHUB_URL } from '../lib/links'
 import { prefersReducedMotion } from '../lib/motion'
 import { scramble } from '../lib/scramble'
 import Backdrop from './Backdrop'
@@ -26,14 +25,6 @@ const LINKS = [
   { to: '/how-it-works', label: 'How It Works' },
   { to: '/limits', label: 'Limits' },
 ]
-
-function GitHubIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
-      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-    </svg>
-  )
-}
 
 let lenis: Lenis | null = null // mirrored in lib/scroll for page-level scrollTo
 
@@ -221,6 +212,30 @@ export default function Layout() {
 
   const open = openAt === pathname
   const close = () => setOpenAt(null)
+  const toggle = useRef<HTMLButtonElement>(null)
+  const menu = useRef<HTMLDivElement>(null)
+  // Menu open: page scroll locked, focus on the first link, Escape closes (focus back on the button).
+  useEffect(() => {
+    if (!open) return
+    const root = document.documentElement
+    root.style.overflow = 'hidden'
+    lenis?.stop()
+    // the menu starts under the bar, wherever the bar is (the prototype banner can push it down)
+    const bar = document.querySelector('.nav')?.getBoundingClientRect()
+    if (bar && menu.current) menu.current.style.paddingTop = `${Math.round(bar.bottom + 28)}px`
+    menu.current?.querySelector<HTMLElement>('a')?.focus({ preventScroll: true })
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpenAt(null)
+      toggle.current?.focus()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      root.style.overflow = ''
+      lenis?.start()
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open])
 
   return (
     <>
@@ -236,33 +251,61 @@ export default function Layout() {
           <b>Prototype</b> · research demo on public data · indicative, not an official assessment
         </span>
       </div>
-      <header className="nav">
-        <div className="container nav-inner">
+      <header className={`nav${open ? ' menu-open' : ''}`}>
+        <div className="nav-inner">
           <Link ref={brand} to="/" className="brand" onClick={close} aria-label="PanoptiCoal home" viewTransition>
             <Wordmark animated />
           </Link>
-          <SoundToggle className="nav-sound" />
-          <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" onClick={() => setOpenAt((o) => (o === pathname ? null : pathname))}>
-            {open ? 'Close' : 'Menu'}
-          </button>
-          <nav id="nav-links" className={`nav-links${open ? ' open' : ''}`} aria-label="Main">
+          <nav className="nav-links" aria-label="Main">
             {LINKS.map((l) => (
-              <NavLink key={l.to} to={l.to} end={l.end} onClick={close} viewTransition>
+              <NavLink key={l.to} to={l.to} end={l.end} viewTransition>
                 <SwapText text={l.label} />
               </NavLink>
             ))}
-            <a className="nav-gh" href={GITHUB_URL} target="_blank" rel="noreferrer" aria-label="GitHub repository">
-              <GitHubIcon />
-            </a>
-            <Link to="/map" className="pill magnetic" onClick={close} viewTransition>
+          </nav>
+          <div className="nav-right">
+            <Link to="/map" className="pill magnetic nav-cta" onClick={close} viewTransition>
               Explore the map <span className="arrow" aria-hidden="true">→</span>
             </Link>
-          </nav>
+            <SoundToggle className="nav-sound" />
+            <button
+              ref={toggle}
+              type="button"
+              className="nav-toggle"
+              aria-expanded={open}
+              aria-controls="nav-menu"
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              onClick={() => setOpenAt((o) => (o === pathname ? null : pathname))}
+            >
+              <span className="nt-icon" aria-hidden="true">
+                <i />
+                <i />
+              </span>
+              <span aria-hidden="true">{open ? 'Close' : 'Menu'}</span>
+            </button>
+          </div>
         </div>
         <div className="scroll-progress" aria-hidden="true">
           <i ref={progress} />
         </div>
       </header>
+      {/* Below 1024 px the links live in a full-screen menu */}
+      <div ref={menu} id="nav-menu" className={`nav-menu${open ? ' open' : ''}`} inert={!open}>
+        <nav className="nm-links" aria-label="Main menu">
+          {LINKS.map((l, i) => (
+            <NavLink key={l.to} to={l.to} end={l.end} className="nm-link" onClick={close} style={{ '--i': i } as React.CSSProperties} viewTransition>
+              <span className="nm-n">{String(i + 1).padStart(2, '0')}</span>
+              {l.label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="nm-foot">
+          <Link to="/map" className="pill" onClick={close} viewTransition>
+            Explore the map <span className="arrow" aria-hidden="true">→</span>
+          </Link>
+          <p className="micro">Satellite NO₂ vs reported generation for India’s coal plant clusters.</p>
+        </div>
+      </div>
       <main id="main" ref={main}>
         <div className="page" key={pathname}>
           <Outlet />
