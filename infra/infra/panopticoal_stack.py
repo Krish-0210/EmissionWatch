@@ -128,6 +128,7 @@ class PanoptiCoalStack(Stack):
             ),
         )
         integration = integrations.HttpLambdaIntegration("ApiIntegration", fn)
+        routes = []
         for path, method in [
             ("/clusters", apigw.HttpMethod.GET),
             ("/clusters/{id}", apigw.HttpMethod.GET),
@@ -139,7 +140,7 @@ class PanoptiCoalStack(Stack):
             ("/plants", apigw.HttpMethod.GET),  # plants_india.json
             ("/states", apigw.HttpMethod.GET),  # states.json
         ]:
-            api.add_routes(path=path, methods=[method], integration=integration)
+            routes += api.add_routes(path=path, methods=[method], integration=integration)
 
         # Throttling protects credits: 10 rps / burst 20 overall, briefs (Bedrock) 1 rps / burst 2.
         stage = apigw.HttpStage(
@@ -153,6 +154,8 @@ class PanoptiCoalStack(Stack):
         stage.node.default_child.add_property_override(
             "RouteSettings", {"POST /brief/{id}": {"ThrottlingRateLimit": 1, "ThrottlingBurstLimit": 2}}
         )
+        # RouteSettings names a route key, so the stage must be created after the routes.
+        stage.node.add_dependency(*routes)
 
         CfnOutput(self, "ApiUrl", value=api.api_endpoint, description="Set as VITE_API_URL")
         CfnOutput(self, "BucketName", value=bucket.bucket_name)
