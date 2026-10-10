@@ -90,6 +90,13 @@ cd api && .venv/Scripts/python.exe local_server.py             # --port 8787 --d
 # terminal 2
 cd frontend && VITE_API_URL=http://localhost:8787 npm run dev  # http://localhost:5173
 ```
+Windows cmd (from the repo root; two windows):
+```bat
+python api\local_server.py
+cd frontend && set VITE_API_URL=http://localhost:8787&& npm run dev
+```
+`python` must be the API venv (`api\.venv\Scripts\activate` first, or call `api\.venv\Scripts\python.exe api\local_server.py`):
+the handlers import boto3. In cmd, a space before `&&` would become part of the variable's value, hence `8787&&`.
 `pipeline/data/export/` is gitignored: on a fresh clone run the exporter (step 1) or start the server with
 `--data ../frontend/public/data` (the committed copy, same files). Check: `curl -s http://localhost:8787/states | head -c 200`.
 A dev server that is already running keeps its old `VITE_API_URL`; the variable is read when Vite starts.
