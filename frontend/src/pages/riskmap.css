@@ -82,7 +82,7 @@
 .list-head { margin-bottom: 12px; }
 .rank-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .rank-item { display: grid; grid-template-columns: 30px 1fr auto; gap: 6px 12px; align-items: center; padding: 14px 16px; text-decoration: none; color: var(--text); }
-.rank-item:hover, .rank-item.hl { color: var(--text); box-shadow: inset 3px 0 0 var(--rc), 0 0 30px -12px var(--rc); }
+.rank-item:hover, .rank-item.hl { color: var(--text); box-shadow: inset 3px 0 0 var(--rc); background-color: rgba(124, 232, 216, 0.03); }
 .rank-pos { color: var(--muted); font-size: 12px; }
 .rank-name { font-size: 16px; font-weight: 500; display: inline-block; }
 .rank-score { text-align: right; }

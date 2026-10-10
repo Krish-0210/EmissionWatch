@@ -20,7 +20,8 @@ interface Props {
 // Renders from GSAP's ticker (the same loop that drives Lenis and ScrollTrigger), and only when
 // the scene reports motion (auto-rotate, drag, scroll or parallax still settling), it is on
 // screen, the tab is visible and the intro is not holding it. onFirstFrame fires after the first
-// render (programs linked), which is when the intro starts its clock.
+// render (programs linked), which is when the intro starts its clock. Capped at ~60 fps: on 120/144 Hz
+// screens a globe frame on every refresh left no GPU time for the page around it.
 function Driver({ control, live, onFirstFrame }: { control: MutableRefObject<GlobeControl>; live: MutableRefObject<boolean>; onFirstFrame?: () => void }) {
   const get = useThree((s) => s.get)
   const size = useThree((s) => s.size)
@@ -31,9 +32,13 @@ function Driver({ control, live, onFirstFrame }: { control: MutableRefObject<Glo
   }, [size, dpr])
   const first = useRef(onFirstFrame)
   useEffect(() => {
+    let last = -1
     const tick = (time: number) => {
       const c = control.current
       if (!live.current || !(dirty.current || (c.active && !c.paused) || holdBusy())) return
+      // gsap time is in seconds; 15 ms leaves headroom for 60 Hz frames that arrive slightly early
+      if (time - last < 0.015) return
+      last = time
       dirty.current = false
       advance(time, true, get())
       if (first.current) {
@@ -205,10 +210,9 @@ function GlobeCanvas({ clusters, focusId, control, lite, onReady }: Props) {
         }}
       >
         <PerformanceMonitor
-          // Decide every ~1.5 s. On 60 Hz screens step up only when pinned at vsync; on high-refresh
-          // screens keep at least 60 fps.
+          // Decide every ~1.5 s; renders are capped at 60 fps, so step up only when pinned at the cap.
           iterations={6}
-          bounds={(refresh) => (refresh > 100 ? [60, 90] : [50, 58])}
+          bounds={() => [50, 58]}
           flipflops={4}
           // No bloom pass: on an integrated GPU it halved the frame rate and its shader compile was a
           // long frame; the scene's additive Halo sprite gives the glow instead.

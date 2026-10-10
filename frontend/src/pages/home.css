@@ -26,10 +26,10 @@
 /* Hero entrance (after the intro, or on load): eyebrow, headline lines from a mask (MaskLines),
    then lede and CTAs blur into focus. */
 .hero .hero-micro { opacity: 0; translate: -10px 0; transition: opacity 0.6s var(--ease-out), translate 0.8s var(--ease-out); }
-.hero .hero-lede, .hero > .row { opacity: 0; filter: blur(12px); translate: 0 8px; transition: opacity 0.9s var(--ease-out), filter 0.9s var(--ease-out), translate 0.9s var(--ease-out); }
+.hero .hero-lede, .hero > .row { opacity: 0; translate: 0 12px; transition: opacity 0.9s var(--ease-out), translate 0.9s var(--ease-out); }
 .hero.in .hero-micro { opacity: 1; translate: none; }
-.hero.in .hero-lede { opacity: 1; filter: none; translate: none; transition-delay: 0.62s; }
-.hero.in > .row { opacity: 1; filter: none; translate: none; transition-delay: 0.78s; }
+.hero.in .hero-lede { opacity: 1; translate: none; transition-delay: 0.62s; }
+.hero.in > .row { opacity: 1; translate: none; transition-delay: 0.78s; }
 .hero .scroll-cue { opacity: 0; transition: opacity 0.8s ease 1.4s; }
 .hero.in .scroll-cue { opacity: 1; }
 .hero-title .ml.acc { margin-top: 0.08em; }
@@ -68,7 +68,9 @@
   position: absolute; left: var(--gutter); bottom: 0; width: min(460px, calc(100% - 2 * var(--gutter)));
   padding: 26px; border-radius: var(--radius); border: 1px solid var(--border);
   background: rgba(10, 13, 17, 0.9);
-  opacity: 0; transform: translateY(24px); transition: opacity 0.22s ease-in, transform 0.22s ease-in;
+  /* 0.001, not 0, and a layer of its own: hidden panels stay rasterised, so a step change is a compositor-only
+     fade (a panel that first rasterised when it appeared cost a 60-100 ms frame) */
+  opacity: 0.001; transform: translateY(24px); will-change: opacity, transform; transition: opacity 0.22s ease-in, transform 0.22s ease-in;
 }
 .story-panel.wide { width: min(620px, calc(100% - 2 * var(--gutter))); }
 .story-panel.on { opacity: 1; transform: none; pointer-events: auto; transition: opacity 0.6s var(--ease-out) 0.18s, transform 0.6s var(--ease-out) 0.18s; }

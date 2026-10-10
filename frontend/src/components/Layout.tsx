@@ -62,6 +62,8 @@ function useSmoothScroll() {
   }, [])
 }
 
+const LOOPING = 'svg.il, svg.la, svg.pipe, svg.method-scene, svg.beacons, svg.rings-poster, .ticker'
+
 // Adds .in to .reveal / .rule elements as they enter the viewport, and drifts [data-parallax]
 // elements relative to their section. Watches the DOM so lazily loaded content is picked up.
 function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: string) {
@@ -90,8 +92,12 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
         }),
       { rootMargin: '0px 0px -8% 0px' },
     )
+    // Graphics with looping CSS animations run only while on screen (an off-screen SVG animation still
+    // repaints its layer every frame).
+    const aio = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('anim-off', !e.isIntersecting)), { rootMargin: '80px 0px' })
     const seen = new WeakSet<Element>()
     const seenS = new WeakSet<Element>()
+    const seenA = new WeakSet<Element>()
     let para: HTMLElement[] = []
     let dirty = true
     let lastY = -1
@@ -109,6 +115,12 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
             sio.observe(n)
           }
         })
+      el.querySelectorAll(LOOPING).forEach((n) => {
+        if (!seenA.has(n)) {
+          seenA.add(n)
+          aio.observe(n)
+        }
+      })
       para = Array.from(el.querySelectorAll<HTMLElement>('[data-parallax]'))
       dirty = true
     }
@@ -143,6 +155,7 @@ function useRevealAndParallax(root: React.RefObject<HTMLElement | null>, key: st
     return () => {
       io.disconnect()
       sio.disconnect()
+      aio.disconnect()
       mo.disconnect()
       window.removeEventListener('resize', onResize)
       gsap.ticker.remove(update)

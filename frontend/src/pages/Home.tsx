@@ -31,6 +31,9 @@ import './home.css'
 // done during the intro's boot beat.
 const globeChunk = shouldPlayIntro() && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? import('../three/GlobeCanvas') : null
 const GlobeCanvas = lazy(() => globeChunk ?? import('../three/GlobeCanvas'))
+// The WebGL probe (the page's first GPU context: ~300 ms on integrated graphics) runs now, before
+// the first paint, instead of freezing the intro's loader once it is on screen.
+if (globeChunk) webglOk()
 
 const PROBLEMS: { title: string; body: string; icon: IconName }[] = [
   {

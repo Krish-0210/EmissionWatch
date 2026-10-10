@@ -16,7 +16,7 @@ await p.addInitScript(() => {
   }
   requestAnimationFrame(f)
 })
-await p.goto('http://localhost:4173/' + path, { waitUntil: 'commit' })
+await p.goto((process.env.BASE ?? 'http://localhost:4173') + '/' + path, { waitUntil: 'commit' })
 await p.waitForFunction(() => window.__long, null, { timeout: 15000 })
 console.log(JSON.stringify(await p.evaluate(() => window.__long)))
 console.log('renderer', await p.evaluate(() => { const g = document.createElement('canvas').getContext('webgl'); const d = g.getExtension('WEBGL_debug_renderer_info'); return d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : '?' }))

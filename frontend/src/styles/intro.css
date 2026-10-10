@@ -93,7 +93,7 @@
 
 /* Nav held off-screen during the intro, then drops in. */
 .nav, .proto-banner { transition: transform 0.8s var(--ease-out), opacity 0.6s ease; }
-/* opacity just above 0 keeps the nav's backdrop-filter layer alive, so showing it costs no new layer */
+/* opacity just above 0 keeps the nav's layer alive, so showing it costs no new layer */
 .intro-hold .nav, .intro-hold .proto-banner { transform: translate3d(0, -130%, 0); opacity: 0.001; }
 
 /* Reduced motion: dark veil, quick fade. */

@@ -207,6 +207,12 @@ export function MagnifierScene({ className = '', label }: SceneProps) {
           <stop offset="0" stopColor="#7ce8d8" stopOpacity="0.16" />
           <stop offset="1" stopColor="#7ce8d8" stopOpacity="0.02" />
         </radialGradient>
+        {/* soft plume as a gradient, not a blur filter (the lens animates, so it repaints every frame) */}
+        <radialGradient id="mg-plume">
+          <stop offset="0" stopColor="#ff8a3d" stopOpacity="0.5" />
+          <stop offset="0.55" stopColor="#ff8a3d" stopOpacity="0.22" />
+          <stop offset="1" stopColor="#ff8a3d" stopOpacity="0" />
+        </radialGradient>
       </defs>
       <Stars n={12} w={400} h={120} seed={11} />
       {/* Plant and plume */}
@@ -226,7 +232,7 @@ export function MagnifierScene({ className = '', label }: SceneProps) {
           {cells.map(({ c, r }) => (
             <rect key={`${c}-${r}`} x={162 + c * 28} y={48 + r * 28} width={28} height={28} className={`mg-cell${c === 1 && r === 3 ? ' hot' : ''}`} />
           ))}
-          <circle cx="205" cy="148" r="20" className="mg-plume" />
+          <circle cx="205" cy="148" r="28" fill="url(#mg-plume)" />
         </g>
         <circle cx="232" cy="118" r="70" className="mg-rim" />
         <circle cx="232" cy="118" r="76" className="mg-rim faint" />

@@ -1,8 +1,8 @@
-import { useRef } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { MonthPoint } from '../api'
 import { fmt } from '../lib/format'
-import { useInView, useReducedMotion } from '../lib/motion'
+import { useReducedMotion } from '../lib/motion'
 
 const GEN = '#2a78d6'
 const NO2 = '#ff8a3d'
@@ -48,12 +48,38 @@ function MonthTip({ active, payload }: { active?: boolean; payload?: { payload: 
   )
 }
 
-// Charts mount (and draw in) once scrolled into view.
+// Charts mount while the browser is idle after the page loads (or as they come near the viewport,
+// whichever is first), as a transition so React renders them in slices: mounting Recharts during a
+// scroll cost 40-80 ms frames. A chart that is on screen when it mounts draws its lines in.
+type Idle = { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }
 function useDrawIn() {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref)
+  const [state, setState] = useState({ show: false, onScreen: false })
   const reduced = useReducedMotion()
-  return { ref, show: inView, animate: !reduced }
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let done = false
+    const mount = () => {
+      if (done) return
+      done = true
+      io.disconnect()
+      const r = el.getBoundingClientRect()
+      const onScreen = r.top < window.innerHeight && r.bottom > 0
+      startTransition(() => setState({ show: true, onScreen }))
+    }
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && mount(), { rootMargin: '0px 0px 25% 0px' })
+    io.observe(el)
+    const w = window as Idle
+    const id = w.requestIdleCallback ? w.requestIdleCallback(mount, { timeout: 2500 }) : window.setTimeout(mount, 1200)
+    return () => {
+      done = true
+      io.disconnect()
+      if (w.cancelIdleCallback) w.cancelIdleCallback(id)
+      else window.clearTimeout(id)
+    }
+  }, [])
+  return { ref, show: state.show, animate: !reduced && state.onScreen }
 }
 
 export function No2Chart({ months }: { months: MonthPoint[] }) {
