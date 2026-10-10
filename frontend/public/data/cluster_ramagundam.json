@@ -12,6 +12,9 @@
  "risk_level": "low",
  "confidence": "medium",
  "headline": "Ramagundam is low risk: over the last 90 days NO₂ ran 1.1 SD below what reported generation and weather predict, NO₂ per unit of electricity has been falling about 19% a year, and it is 0.6× the peer median per unit generated (medium confidence).",
+ "primary_anomaly_type": "none",
+ "primary_anomaly_label": "No signal above the neutral level",
+ "population_20km": 681200,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -129,5 +132,19 @@
   "ring_capacity_mw": 5400.0,
   "unreported_capacity_mw": 0.0,
   "unreported_plants": []
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2024-02-27",
+   "end": "2024-08-13",
+   "peak_z": 3.09,
+   "reason": "excess"
+  },
+  {
+   "start": "2023-01-03",
+   "end": "2023-11-26",
+   "peak_z": 2.76,
+   "reason": "excess"
+  }
+ ]
 }

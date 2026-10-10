@@ -1,0 +1,133 @@
+{
+ "id": "tuticorin",
+ "name": "Tuticorin",
+ "lat": 8.79773,
+ "lon": 78.1625,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 23.4,
+  "from_deg": 116.1
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Thoothukudi",
+   "state": "Tamil Nadu",
+   "lat": 8.76735,
+   "lon": 78.1342,
+   "population": 410760,
+   "distance_km": 4.6,
+   "bearing_deg": 222.6
+  },
+  {
+   "name": "Kovilpatti",
+   "state": "Tamil Nadu",
+   "lat": 9.17167,
+   "lon": 77.8699,
+   "population": 95057,
+   "distance_km": 52.6,
+   "bearing_deg": 322.3
+  },
+  {
+   "name": "Tirunelveli",
+   "state": "Tamil Nadu",
+   "lat": 8.72742,
+   "lon": 77.6838,
+   "population": 1435844,
+   "distance_km": 53.2,
+   "bearing_deg": 261.6
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 23.4,
+  "bearing_deg": 296.1,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      78.1625,
+      8.7977
+     ],
+     [
+      77.4816,
+      8.7512
+     ],
+     [
+      77.4801,
+      8.8101
+     ],
+     [
+      77.4837,
+      8.8688
+     ],
+     [
+      77.4925,
+      8.927
+     ],
+     [
+      77.5064,
+      8.9842
+     ],
+     [
+      77.5253,
+      9.04
+     ],
+     [
+      77.5491,
+      9.094
+     ],
+     [
+      77.5775,
+      9.1457
+     ],
+     [
+      77.6104,
+      9.1947
+     ],
+     [
+      77.6476,
+      9.2408
+     ],
+     [
+      77.6886,
+      9.2834
+     ],
+     [
+      77.7333,
+      9.3224
+     ],
+     [
+      77.7812,
+      9.3574
+     ],
+     [
+      78.1625,
+      8.7977
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [
+   {
+    "name": "Kovilpatti",
+    "state": "Tamil Nadu",
+    "lat": 9.17167,
+    "lon": 77.8699,
+    "population": 95057,
+    "distance_km": 52.6,
+    "bearing_deg": 322.3
+   }
+  ],
+  "sentence": "The Tuticorin cluster's plume is likely heading north-west toward Kovilpatti (wind 23 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

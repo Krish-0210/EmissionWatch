@@ -1,0 +1,114 @@
+{
+ "id": "marwa",
+ "name": "Marwa",
+ "lat": 22.0708,
+ "lon": 82.6022,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 7.8,
+  "from_deg": 318.1
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Korba",
+   "state": "Chhattisgarh",
+   "lat": 22.3458,
+   "lon": 82.6963,
+   "population": 419146,
+   "distance_km": 32.1,
+   "bearing_deg": 17.6
+  },
+  {
+   "name": "Bilaspur",
+   "state": "Chhattisgarh",
+   "lat": 22.08,
+   "lon": 82.1554,
+   "population": 365579,
+   "distance_km": 46.0,
+   "bearing_deg": 271.4
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 7.8,
+  "bearing_deg": 138.1,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      82.6022,
+      22.0708
+     ],
+     [
+      83.293,
+      21.8598
+     ],
+     [
+      83.2704,
+      21.8048
+     ],
+     [
+      83.2428,
+      21.7519
+     ],
+     [
+      83.2103,
+      21.7013
+     ],
+     [
+      83.1733,
+      21.6536
+     ],
+     [
+      83.1319,
+      21.6091
+     ],
+     [
+      83.0866,
+      21.5681
+     ],
+     [
+      83.0376,
+      21.5308
+     ],
+     [
+      82.9853,
+      21.4977
+     ],
+     [
+      82.9301,
+      21.469
+     ],
+     [
+      82.8725,
+      21.4448
+     ],
+     [
+      82.8128,
+      21.4253
+     ],
+     [
+      82.7516,
+      21.4107
+     ],
+     [
+      82.6022,
+      22.0708
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [],
+  "sentence": "The Marwa cluster's plume is likely heading south-east; no town of over 50,000 people lies within 75 km in that direction (wind 8 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

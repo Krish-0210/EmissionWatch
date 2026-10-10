@@ -1,0 +1,95 @@
+{
+ "id": "talcher",
+ "name": "Talcher",
+ "lat": 21.1121,
+ "lon": 85.0278,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 7.5,
+  "from_deg": 326.4
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 7.5,
+  "bearing_deg": 146.4,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      85.0278,
+      21.1121
+     ],
+     [
+      85.6741,
+      20.811
+     ],
+     [
+      85.6435,
+      20.7596
+     ],
+     [
+      85.6082,
+      20.7109
+     ],
+     [
+      85.5685,
+      20.6652
+     ],
+     [
+      85.5248,
+      20.6229
+     ],
+     [
+      85.4773,
+      20.5844
+     ],
+     [
+      85.4264,
+      20.5498
+     ],
+     [
+      85.3725,
+      20.5196
+     ],
+     [
+      85.3161,
+      20.4938
+     ],
+     [
+      85.2574,
+      20.4727
+     ],
+     [
+      85.1971,
+      20.4564
+     ],
+     [
+      85.1354,
+      20.4452
+     ],
+     [
+      85.073,
+      20.4389
+     ],
+     [
+      85.0278,
+      21.1121
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [],
+  "sentence": "The Talcher cluster's plume is likely heading south-east; no town of over 50,000 people lies within 75 km in that direction (wind 8 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

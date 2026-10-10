@@ -12,6 +12,9 @@
  "risk_level": "high",
  "confidence": "high",
  "headline": "Chandrapur is high risk: over the last 90 days NO₂ ran 1.5 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (high confidence).",
+ "primary_anomaly_type": "persistent_excess",
+ "primary_anomaly_label": "Recent excess: NO₂ above what reported generation and weather predict",
+ "population_20km": 717400,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -127,5 +130,25 @@
   "ring_capacity_mw": 3520.0,
   "unreported_capacity_mw": 0.0,
   "unreported_plants": []
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2025-10-10",
+   "end": "2026-07-14",
+   "peak_z": 2.08,
+   "reason": "excess"
+  },
+  {
+   "start": "2025-02-25",
+   "end": "2025-06-06",
+   "peak_z": 1.59,
+   "reason": "excess"
+  },
+  {
+   "start": "2023-07-22",
+   "end": "2023-11-04",
+   "peak_z": 2.34,
+   "reason": "excess"
+  }
+ ]
 }

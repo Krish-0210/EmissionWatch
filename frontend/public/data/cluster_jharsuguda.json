@@ -12,6 +12,9 @@
  "risk_level": "high",
  "confidence": "medium",
  "headline": "Jharsuguda is high risk: over the last 90 days NO₂ ran 1.2 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.3× the peer median per unit generated (medium confidence).",
+ "primary_anomaly_type": "persistent_excess",
+ "primary_anomaly_label": "Recent excess: NO₂ above what reported generation and weather predict",
+ "population_20km": 499700,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -150,5 +153,25 @@
    "Jharsuguda CPP power station",
    "Aditya Aluminium power station"
   ]
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2026-01-13",
+   "end": "2026-04-24",
+   "peak_z": 2.29,
+   "reason": "excess"
+  },
+  {
+   "start": "2025-01-03",
+   "end": "2025-04-06",
+   "peak_z": 1.74,
+   "reason": "excess"
+  },
+  {
+   "start": "2023-10-25",
+   "end": "2024-02-28",
+   "peak_z": 1.9,
+   "reason": "excess"
+  }
+ ]
 }

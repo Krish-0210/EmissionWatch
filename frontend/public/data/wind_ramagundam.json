@@ -1,0 +1,169 @@
+{
+ "id": "ramagundam",
+ "name": "Ramagundam",
+ "lat": 18.7913,
+ "lon": 79.5166,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 7.4,
+  "from_deg": 23.7
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Ramgundam",
+   "state": "Telangana",
+   "lat": 18.8008,
+   "lon": 79.4521,
+   "population": 452261,
+   "distance_km": 6.9,
+   "bearing_deg": 278.9
+  },
+  {
+   "name": "Mancherial",
+   "state": "Telangana",
+   "lat": 18.8707,
+   "lon": 79.4286,
+   "population": 89935,
+   "distance_km": 12.8,
+   "bearing_deg": 313.7
+  },
+  {
+   "name": "Mandamarri",
+   "state": "Telangana",
+   "lat": 18.9651,
+   "lon": 79.4748,
+   "population": 66176,
+   "distance_km": 19.8,
+   "bearing_deg": 347.2
+  },
+  {
+   "name": "Bellampalli",
+   "state": "Telangana",
+   "lat": 19.0558,
+   "lon": 79.493,
+   "population": 66660,
+   "distance_km": 29.5,
+   "bearing_deg": 355.2
+  },
+  {
+   "name": "Karimnagar",
+   "state": "Telangana",
+   "lat": 18.4392,
+   "lon": 79.1286,
+   "population": 289821,
+   "distance_km": 56.6,
+   "bearing_deg": 226.3
+  },
+  {
+   "name": "Kagaznagar",
+   "state": "Telangana",
+   "lat": 19.3316,
+   "lon": 79.466,
+   "population": 57583,
+   "distance_km": 60.3,
+   "bearing_deg": 355.0
+  },
+  {
+   "name": "Jagtial",
+   "state": "Telangana",
+   "lat": 18.7947,
+   "lon": 78.9166,
+   "population": 103930,
+   "distance_km": 63.2,
+   "bearing_deg": 270.4
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 7.4,
+  "bearing_deg": 203.7,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      79.5166,
+      18.7913
+     ],
+     [
+      79.5945,
+      18.1209
+     ],
+     [
+      79.5327,
+      18.117
+     ],
+     [
+      79.4708,
+      18.1182
+     ],
+     [
+      79.4093,
+      18.1245
+     ],
+     [
+      79.3485,
+      18.1359
+     ],
+     [
+      79.289,
+      18.1523
+     ],
+     [
+      79.2313,
+      18.1735
+     ],
+     [
+      79.1756,
+      18.1994
+     ],
+     [
+      79.1226,
+      18.2297
+     ],
+     [
+      79.0725,
+      18.2644
+     ],
+     [
+      79.0258,
+      18.303
+     ],
+     [
+      78.9828,
+      18.3454
+     ],
+     [
+      78.9438,
+      18.3911
+     ],
+     [
+      79.5166,
+      18.7913
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [
+   {
+    "name": "Karimnagar",
+    "state": "Telangana",
+    "lat": 18.4392,
+    "lon": 79.1286,
+    "population": 289821,
+    "distance_km": 56.6,
+    "bearing_deg": 226.3
+   }
+  ],
+  "sentence": "The Ramagundam cluster's plume is likely heading south-west toward Karimnagar (wind 7 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

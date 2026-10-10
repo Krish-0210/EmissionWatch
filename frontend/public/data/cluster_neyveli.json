@@ -12,6 +12,9 @@
  "risk_level": "high",
  "confidence": "high",
  "headline": "Neyveli is high risk: over the last 90 days NO₂ ran 1.3 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.7× the peer median per unit generated (high confidence).",
+ "primary_anomaly_type": "persistent_excess",
+ "primary_anomaly_label": "Recent excess: NO₂ above what reported generation and weather predict",
+ "population_20km": 967700,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -154,5 +157,13 @@
   "ring_capacity_mw": 2970.0,
   "unreported_capacity_mw": 0.0,
   "unreported_plants": []
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2025-11-02",
+   "end": "2026-05-05",
+   "peak_z": 2.01,
+   "reason": "excess"
+  }
+ ]
 }

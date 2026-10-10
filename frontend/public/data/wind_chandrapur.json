@@ -1,0 +1,142 @@
+{
+ "id": "chandrapur",
+ "name": "Chandrapur",
+ "lat": 20.0084,
+ "lon": 79.2467,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 6.9,
+  "from_deg": 350.2
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Chandrapur",
+   "state": "Maharashtra",
+   "lat": 19.9508,
+   "lon": 79.2952,
+   "population": 328351,
+   "distance_km": 8.2,
+   "bearing_deg": 141.6
+  },
+  {
+   "name": "Bhadravati",
+   "state": "Maharashtra",
+   "lat": 20.1001,
+   "lon": 79.1144,
+   "population": 60565,
+   "distance_km": 17.2,
+   "bearing_deg": 306.4
+  },
+  {
+   "name": "Wani",
+   "state": "Maharashtra",
+   "lat": 20.0551,
+   "lon": 78.9531,
+   "population": 58840,
+   "distance_km": 31.1,
+   "bearing_deg": 279.7
+  },
+  {
+   "name": "Hinganghat",
+   "state": "Maharashtra",
+   "lat": 20.5487,
+   "lon": 78.8398,
+   "population": 101805,
+   "distance_km": 73.6,
+   "bearing_deg": 324.8
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 6.9,
+  "bearing_deg": 170.2,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      79.2467,
+      20.0084
+     ],
+     [
+      79.7047,
+      19.4896
+     ],
+     [
+      79.6549,
+      19.4541
+     ],
+     [
+      79.6021,
+      19.4227
+     ],
+     [
+      79.5466,
+      19.3959
+     ],
+     [
+      79.4889,
+      19.3736
+     ],
+     [
+      79.4293,
+      19.3562
+     ],
+     [
+      79.3684,
+      19.3437
+     ],
+     [
+      79.3065,
+      19.3363
+     ],
+     [
+      79.2442,
+      19.3339
+     ],
+     [
+      79.1819,
+      19.3367
+     ],
+     [
+      79.1201,
+      19.3445
+     ],
+     [
+      79.0593,
+      19.3574
+     ],
+     [
+      78.9998,
+      19.3752
+     ],
+     [
+      79.2467,
+      20.0084
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [
+   {
+    "name": "Chandrapur",
+    "state": "Maharashtra",
+    "lat": 19.9508,
+    "lon": 79.2952,
+    "population": 328351,
+    "distance_km": 8.2,
+    "bearing_deg": 141.6
+   }
+  ],
+  "sentence": "The Chandrapur cluster's plume is likely heading south toward the town of Chandrapur (wind 7 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-09T16:23:02+00:00",
+ "generated_at": "2026-10-10T04:10:22+00:00",
  "units": {
   "coef": "µmol/m² NO2 enhancement per MU/day (enhancement); ratio units per MU/day (ratio)",
   "backtest": "µmol/m², means over valid days of Apr 1 - May 31; generation in MU/day"
@@ -252,5 +252,70 @@
  "findings": [
   "In clusters where generation fell sharply during the 2020 lockdown (Chandrapur, Ramagundam, Marwa), satellite NO2 fell with it.",
   "Where generation stayed flat, NO2 still fell, showing non-power sources also contribute; so risk is based on sustained patterns, not absolute levels."
+ ],
+ "sources": [
+  {
+   "id": "cea_dgr",
+   "name": "CEA Daily Generation Report (DGR Subreport-2), National Power Portal",
+   "used_for": "reported daily generation per plant",
+   "access": "npp.gov.in",
+   "license": null,
+   "citation": null,
+   "doi": null
+  },
+  {
+   "id": "s5p_no2",
+   "name": "Sentinel-5P TROPOMI tropospheric NO2 (OFFL L3), Copernicus / ESA",
+   "used_for": "NO2 enhancement around each cluster",
+   "access": "Google Earth Engine COPERNICUS/S5P/OFFL/L3_NO2",
+   "license": null,
+   "citation": null,
+   "doi": null
+  },
+  {
+   "id": "era5",
+   "name": "ERA5 hourly reanalysis, Copernicus Climate Change Service / ECMWF",
+   "used_for": "10 m wind and boundary-layer height (model controls, wind trace)",
+   "access": "Google Earth Engine ECMWF/ERA5/HOURLY",
+   "license": null,
+   "citation": null,
+   "doi": null
+  },
+  {
+   "id": "gem",
+   "name": "Global Energy Monitor, Global Coal Plant Tracker",
+   "used_for": "plant coordinates, capacity in each ring",
+   "access": "gem.wiki",
+   "license": null,
+   "citation": null,
+   "doi": null
+  },
+  {
+   "id": "ghsl_pop",
+   "name": "GHSL GHS-POP R2023A population grid, 2020 epoch (100 m)",
+   "used_for": "population_20km: people living within 20 km of the cluster centroid (sum of the grid, rounded to 100)",
+   "access": "Google Earth Engine JRC/GHSL/P2023A/GHS_POP",
+   "license": "European Commission reuse notice: free reuse with acknowledgement of the source",
+   "citation": "Schiavina, M., Freire, S., Carioli, A., MacManus, K. (2023): GHS-POP R2023A - GHS population grid multitemporal (1975-2030). European Commission, Joint Research Centre (JRC).",
+   "doi": "10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE"
+  },
+  {
+   "id": "geonames",
+   "name": "GeoNames cities15000",
+   "used_for": "towns over 50,000 people in the wind trace",
+   "access": "download.geonames.org/export/dump",
+   "license": "CC BY 4.0",
+   "citation": "GeoNames (geonames.org), CC BY 4.0",
+   "doi": null
+  },
+  {
+   "id": "open_meteo",
+   "name": "Open-Meteo forecast API",
+   "used_for": "live 10 m wind for the wind trace (API only)",
+   "access": "api.open-meteo.com",
+   "license": "CC BY 4.0",
+   "citation": "Weather data by Open-Meteo.com",
+   "doi": null
+  }
  ]
 }

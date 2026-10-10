@@ -1,0 +1,151 @@
+{
+ "id": "kahalgaon",
+ "name": "Kahalgaon",
+ "lat": 25.2369,
+ "lon": 87.2656,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 7.4,
+  "from_deg": 253.7
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Bhagalpur",
+   "state": "Bihar",
+   "lat": 25.2445,
+   "lon": 86.9718,
+   "population": 400146,
+   "distance_km": 29.6,
+   "bearing_deg": 271.7
+  },
+  {
+   "name": "Sahibganj",
+   "state": "Jharkhand",
+   "lat": 25.2443,
+   "lon": 87.6348,
+   "population": 95890,
+   "distance_km": 37.1,
+   "bearing_deg": 88.7
+  },
+  {
+   "name": "Katihar",
+   "state": "Bihar",
+   "lat": 25.5385,
+   "lon": 87.5704,
+   "population": 240838,
+   "distance_km": 45.4,
+   "bearing_deg": 42.3
+  },
+  {
+   "name": "Sultanganj",
+   "state": "Bihar",
+   "lat": 25.2383,
+   "lon": 86.7356,
+   "population": 52892,
+   "distance_km": 53.3,
+   "bearing_deg": 270.3
+  },
+  {
+   "name": "Purnia",
+   "state": "Bihar",
+   "lat": 25.7789,
+   "lon": 87.4742,
+   "population": 282248,
+   "distance_km": 63.8,
+   "bearing_deg": 19.1
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 7.4,
+  "bearing_deg": 73.7,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      87.2656,
+      25.2369
+     ],
+     [
+      87.7829,
+      25.7236
+     ],
+     [
+      87.8279,
+      25.681
+     ],
+     [
+      87.8685,
+      25.635
+     ],
+     [
+      87.9046,
+      25.5859
+     ],
+     [
+      87.9357,
+      25.5342
+     ],
+     [
+      87.9617,
+      25.4803
+     ],
+     [
+      87.9824,
+      25.4245
+     ],
+     [
+      87.9976,
+      25.3673
+     ],
+     [
+      88.0072,
+      25.3091
+     ],
+     [
+      88.0112,
+      25.2503
+     ],
+     [
+      88.0094,
+      25.1915
+     ],
+     [
+      88.0021,
+      25.1331
+     ],
+     [
+      87.9891,
+      25.0754
+     ],
+     [
+      87.2656,
+      25.2369
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [
+   {
+    "name": "Sahibganj",
+    "state": "Jharkhand",
+    "lat": 25.2443,
+    "lon": 87.6348,
+    "population": 95890,
+    "distance_km": 37.1,
+    "bearing_deg": 88.7
+   }
+  ],
+  "sentence": "The Kahalgaon cluster's plume is likely heading east toward Sahibganj (wind 7 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

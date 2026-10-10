@@ -13,6 +13,9 @@
  "risk_level": "high",
  "confidence": "low",
  "headline": "Singrauli is high risk: over the last 90 days NO₂ ran 1.8 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 0.6× the peer median per unit generated (low confidence).",
+ "primary_anomaly_type": "persistent_excess",
+ "primary_anomaly_label": "Recent excess: NO₂ above what reported generation and weather predict",
+ "population_20km": 831900,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -168,5 +171,19 @@
   "ring_capacity_mw": 18275.7,
   "unreported_capacity_mw": 0.0,
   "unreported_plants": []
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2026-02-02",
+   "end": "2026-08-21",
+   "peak_z": 1.83,
+   "reason": "excess"
+  },
+  {
+   "start": "2024-01-10",
+   "end": "2024-04-12",
+   "peak_z": 1.56,
+   "reason": "excess"
+  }
+ ]
 }

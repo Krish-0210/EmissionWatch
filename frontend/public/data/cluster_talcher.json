@@ -12,6 +12,9 @@
  "risk_level": "high",
  "confidence": "high",
  "headline": "Talcher is high risk: over the last 90 days NO₂ ran 3.0 SD above what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 2.0× the peer median per unit generated (high confidence).",
+ "primary_anomaly_type": "persistent_excess",
+ "primary_anomaly_label": "Recent excess: NO₂ above what reported generation and weather predict",
+ "population_20km": 260000,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -136,5 +139,25 @@
   "ring_capacity_mw": 4200.0,
   "unreported_capacity_mw": 0.0,
   "unreported_plants": []
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2026-01-18",
+   "end": "2026-07-31",
+   "peak_z": 3.94,
+   "reason": "excess"
+  },
+  {
+   "start": "2024-08-12",
+   "end": "2024-11-16",
+   "peak_z": 3.0,
+   "reason": "excess"
+  },
+  {
+   "start": "2023-01-12",
+   "end": "2023-08-10",
+   "peak_z": 2.67,
+   "reason": "excess"
+  }
+ ]
 }

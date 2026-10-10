@@ -1,0 +1,205 @@
+{
+ "id": "neyveli",
+ "name": "Neyveli",
+ "lat": 11.5475,
+ "lon": 79.4362,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 8.5,
+  "from_deg": 66.4
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Neyveli",
+   "state": "Tamil Nadu",
+   "lat": 11.6088,
+   "lon": 79.4994,
+   "population": 179150,
+   "distance_km": 9.7,
+   "bearing_deg": 45.3
+  },
+  {
+   "name": "Virudhachalam",
+   "state": "Tamil Nadu",
+   "lat": 11.515,
+   "lon": 79.3282,
+   "population": 73585,
+   "distance_km": 12.3,
+   "bearing_deg": 252.9
+  },
+  {
+   "name": "Panruti",
+   "state": "Tamil Nadu",
+   "lat": 11.7766,
+   "lon": 79.5527,
+   "population": 60323,
+   "distance_km": 28.5,
+   "bearing_deg": 26.5
+  },
+  {
+   "name": "Chidambaram",
+   "state": "Tamil Nadu",
+   "lat": 11.3993,
+   "lon": 79.6914,
+   "population": 62153,
+   "distance_km": 32.3,
+   "bearing_deg": 120.6
+  },
+  {
+   "name": "Cuddalore",
+   "state": "Tamil Nadu",
+   "lat": 11.7562,
+   "lon": 79.7669,
+   "population": 173636,
+   "distance_km": 42.8,
+   "bearing_deg": 57.2
+  },
+  {
+   "name": "Villupuram",
+   "state": "Tamil Nadu",
+   "lat": 11.9398,
+   "lon": 79.4924,
+   "population": 97380,
+   "distance_km": 44.0,
+   "bearing_deg": 8.0
+  },
+  {
+   "name": "Mayiladuthurai",
+   "state": "Tamil Nadu",
+   "lat": 11.1035,
+   "lon": 79.655,
+   "population": 86660,
+   "distance_km": 54.8,
+   "bearing_deg": 154.2
+  },
+  {
+   "name": "Kallakurichi",
+   "state": "Tamil Nadu",
+   "lat": 11.7338,
+   "lon": 78.9592,
+   "population": 1682687,
+   "distance_km": 55.9,
+   "bearing_deg": 291.8
+  },
+  {
+   "name": "Gundupalaiyam",
+   "state": "Puducherry",
+   "lat": 11.941,
+   "lon": 79.8029,
+   "population": 300104,
+   "distance_km": 59.2,
+   "bearing_deg": 42.3
+  },
+  {
+   "name": "Puducherry",
+   "state": "Puducherry",
+   "lat": 11.9338,
+   "lon": 79.8298,
+   "population": 657209,
+   "distance_km": 60.7,
+   "bearing_deg": 44.9
+  },
+  {
+   "name": "Kumbakonam",
+   "state": "Tamil Nadu",
+   "lat": 10.9621,
+   "lon": 79.3912,
+   "population": 167155,
+   "distance_km": 65.3,
+   "bearing_deg": 184.3
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 8.5,
+  "bearing_deg": 246.4,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      79.4362,
+      11.5475
+     ],
+     [
+      79.0285,
+      11.0043
+     ],
+     [
+      78.9817,
+      11.0412
+     ],
+     [
+      78.9385,
+      11.0819
+     ],
+     [
+      78.899,
+      11.1262
+     ],
+     [
+      78.8636,
+      11.1737
+     ],
+     [
+      78.8325,
+      11.224
+     ],
+     [
+      78.806,
+      11.2768
+     ],
+     [
+      78.7842,
+      11.3316
+     ],
+     [
+      78.7675,
+      11.3881
+     ],
+     [
+      78.7558,
+      11.4458
+     ],
+     [
+      78.7492,
+      11.5043
+     ],
+     [
+      78.7479,
+      11.5632
+     ],
+     [
+      78.7519,
+      11.6219
+     ],
+     [
+      79.4362,
+      11.5475
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [
+   {
+    "name": "Virudhachalam",
+    "state": "Tamil Nadu",
+    "lat": 11.515,
+    "lon": 79.3282,
+    "population": 73585,
+    "distance_km": 12.3,
+    "bearing_deg": 252.9
+   }
+  ],
+  "sentence": "The Neyveli cluster's plume is likely heading south-west toward Virudhachalam (wind 8 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

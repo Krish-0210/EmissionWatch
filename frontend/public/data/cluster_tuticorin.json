@@ -12,6 +12,9 @@
  "risk_level": "low",
  "confidence": "high",
  "headline": "Tuticorin is low risk: over the last 90 days NO₂ ran 0.9 SD below what reported generation and weather predict, NO₂ per unit of electricity has been falling about 17% a year, and it is 0.4× the peer median per unit generated (high confidence).",
+ "primary_anomaly_type": "none",
+ "primary_anomaly_label": "No signal above the neutral level",
+ "population_20km": 591700,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -145,5 +148,25 @@
   "ring_capacity_mw": 3775.0,
   "unreported_capacity_mw": 0.0,
   "unreported_plants": []
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2025-10-26",
+   "end": "2026-02-27",
+   "peak_z": 1.79,
+   "reason": "excess"
+  },
+  {
+   "start": "2024-08-03",
+   "end": "2025-07-06",
+   "peak_z": 3.0,
+   "reason": "excess"
+  },
+  {
+   "start": "2023-07-27",
+   "end": "2023-10-24",
+   "peak_z": 1.54,
+   "reason": "excess"
+  }
+ ]
 }

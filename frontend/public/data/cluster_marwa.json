@@ -12,6 +12,9 @@
  "risk_level": "medium",
  "confidence": "low",
  "headline": "Marwa is medium risk: over the last 90 days NO₂ ran 0.1 SD below what reported generation and weather predict, with no clear trend in NO₂ per unit of electricity, and it is 1.5× the peer median per unit generated (low confidence).",
+ "primary_anomaly_type": "peer_intensity",
+ "primary_anomaly_label": "More NO₂ per unit of electricity than peer clusters",
+ "population_20km": 634800,
  "as_of": "2026-09-27",
  "plants": [
   {
@@ -122,5 +125,25 @@
   "ring_capacity_mw": 1000.0,
   "unreported_capacity_mw": 0.0,
   "unreported_plants": []
- }
+ },
+ "flagged_periods": [
+  {
+   "start": "2025-11-27",
+   "end": "2026-03-28",
+   "peak_z": 1.86,
+   "reason": "excess"
+  },
+  {
+   "start": "2024-09-13",
+   "end": "2025-03-11",
+   "peak_z": 2.98,
+   "reason": "excess"
+  },
+  {
+   "start": "2023-09-28",
+   "end": "2023-12-26",
+   "peak_z": 1.52,
+   "reason": "excess"
+  }
+ ]
 }

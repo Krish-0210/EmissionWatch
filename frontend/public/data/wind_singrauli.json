@@ -1,0 +1,123 @@
+{
+ "id": "singrauli",
+ "name": "Singrauli",
+ "lat": 24.1021,
+ "lon": 82.7304,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 13.9,
+  "from_deg": 318.1
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Singrauli",
+   "state": "Madhya Pradesh",
+   "lat": 24.1997,
+   "lon": 82.6753,
+   "population": 220257,
+   "distance_km": 12.2,
+   "bearing_deg": 332.8
+  },
+  {
+   "name": "Renukut",
+   "state": "Uttar Pradesh",
+   "lat": 24.2164,
+   "lon": 83.0358,
+   "population": 62413,
+   "distance_km": 33.5,
+   "bearing_deg": 67.6
+  },
+  {
+   "name": "Obra",
+   "state": "Uttar Pradesh",
+   "lat": 24.4186,
+   "lon": 82.988,
+   "population": 56110,
+   "distance_km": 43.8,
+   "bearing_deg": 36.5
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 13.9,
+  "bearing_deg": 138.1,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      82.7304,
+      24.1021
+     ],
+     [
+      83.4316,
+      23.891
+     ],
+     [
+      83.4087,
+      23.836
+     ],
+     [
+      83.3806,
+      23.783
+     ],
+     [
+      83.3476,
+      23.7325
+     ],
+     [
+      83.31,
+      23.6848
+     ],
+     [
+      83.268,
+      23.6403
+     ],
+     [
+      83.222,
+      23.5993
+     ],
+     [
+      83.1722,
+      23.5621
+     ],
+     [
+      83.1191,
+      23.529
+     ],
+     [
+      83.0632,
+      23.5002
+     ],
+     [
+      83.0047,
+      23.476
+     ],
+     [
+      82.9441,
+      23.4566
+     ],
+     [
+      82.882,
+      23.442
+     ],
+     [
+      82.7304,
+      24.1021
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [],
+  "sentence": "The Singrauli cluster's plume is likely heading south-east; no town of over 50,000 people lies within 75 km in that direction (wind 14 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}

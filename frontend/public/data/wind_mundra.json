@@ -1,0 +1,160 @@
+{
+ "id": "mundra",
+ "name": "Mundra",
+ "lat": 22.8197,
+ "lon": 69.5413,
+ "era5": {
+  "date": "2026-10-01",
+  "time_utc": "08:00",
+  "speed_kmh": 14.0,
+  "from_deg": 276.4
+ },
+ "cone": {
+  "half_angle_deg": 30,
+  "length_km": 75,
+  "max_towns": 5,
+  "min_town_population": 50000
+ },
+ "towns_within_cone_length": [
+  {
+   "name": "Mandvi",
+   "state": "Gujarat",
+   "lat": 22.8328,
+   "lon": 69.3524,
+   "population": 51376,
+   "distance_km": 19.4,
+   "bearing_deg": 274.3
+  },
+  {
+   "name": "Bhuj",
+   "state": "Gujarat",
+   "lat": 23.254,
+   "lon": 69.6693,
+   "population": 148834,
+   "distance_km": 50.0,
+   "bearing_deg": 15.1
+  },
+  {
+   "name": "Anjar",
+   "state": "Gujarat",
+   "lat": 23.1132,
+   "lon": 70.0267,
+   "population": 87183,
+   "distance_km": 59.5,
+   "bearing_deg": 56.6
+  },
+  {
+   "name": "Okha",
+   "state": "Gujarat",
+   "lat": 22.4676,
+   "lon": 69.07,
+   "population": 62052,
+   "distance_km": 62.2,
+   "bearing_deg": 231.1
+  },
+  {
+   "name": "Jamnagar",
+   "state": "Gujarat",
+   "lat": 22.4729,
+   "lon": 70.0667,
+   "population": 600943,
+   "distance_km": 66.3,
+   "bearing_deg": 125.5
+  },
+  {
+   "name": "Gandhidham",
+   "state": "Gujarat",
+   "lat": 23.0833,
+   "lon": 70.1333,
+   "population": 247992,
+   "distance_km": 67.3,
+   "bearing_deg": 64.1
+  }
+ ],
+ "trace": {
+  "source": "era5",
+  "as_of": "2026-10-01T13:30+05:30",
+  "speed_kmh": 14.0,
+  "bearing_deg": 96.4,
+  "cone_polygon": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      69.5413,
+      22.8197
+     ],
+     [
+      70.2132,
+      23.0883
+     ],
+     [
+      70.2359,
+      23.0333
+     ],
+     [
+      70.2534,
+      22.9767
+     ],
+     [
+      70.2654,
+      22.9189
+     ],
+     [
+      70.2718,
+      22.8604
+     ],
+     [
+      70.2728,
+      22.8016
+     ],
+     [
+      70.2681,
+      22.7429
+     ],
+     [
+      70.2579,
+      22.6848
+     ],
+     [
+      70.2423,
+      22.6277
+     ],
+     [
+      70.2214,
+      22.5722
+     ],
+     [
+      70.1953,
+      22.5185
+     ],
+     [
+      70.1643,
+      22.4671
+     ],
+     [
+      70.1286,
+      22.4184
+     ],
+     [
+      69.5413,
+      22.8197
+     ]
+    ]
+   ]
+  },
+  "towns_in_path": [
+   {
+    "name": "Jamnagar",
+    "state": "Gujarat",
+    "lat": 22.4729,
+    "lon": 70.0667,
+    "population": 600943,
+    "distance_km": 66.3,
+    "bearing_deg": 125.5
+   }
+  ],
+  "sentence": "The Mundra cluster's plume is likely heading east toward Jamnagar (wind 14 km/h, ERA5 reanalysis for 1 Oct 2026, 13:30 IST).",
+  "attribution": "Wind: ERA5 hourly reanalysis (Copernicus Climate Change Service / ECMWF). Towns: GeoNames, CC BY 4.0."
+ }
+}
