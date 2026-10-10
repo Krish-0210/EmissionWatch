@@ -6,9 +6,11 @@
 //   blast    release: sub-bass drop + filtered boom + crack + crackle tail into a generated reverb
 //   pluck    footer scan lines, a minor-pentatonic "telemetry harp"
 // Everything sums into a limiter (DynamicsCompressor, ratio 20) so the blast is loud but capped.
-// The preference lives in localStorage ('pc-sound'); audio starts only after a user gesture
-// (browsers block autoplay) and the context suspends while the tab is hidden. Off until the user
-// chooses (the intro asks "Sound on / Sound off"; the nav toggle is always there).
+// The preference lives in localStorage ('pc-sound'). One AudioContext with the whole graph is built
+// at idle after load (suspended); a gesture resumes it synchronously inside the event (browsers
+// block audio until a click / key / touch; hover is not a gesture). Switches show `active`
+// (preference on AND context running). The context suspends while the tab is hidden. Off until the
+// user chooses (the intro asks "Sound on / Sound off"; the nav toggle is always there).
 
 const KEY = 'pc-sound'
 const VOLUME = 0.7 // master, moderate
@@ -104,12 +106,13 @@ class SoundEngine {
   private noise!: AudioBuffer
   private crackle!: AudioBuffer
   private bedOn = false
+  private bedFaded = false
   private blipTimer = 0
   private lastHover = 0
   private lastClick = 0
   private hold: HoldVoice | null = null
   private listeners = new Set<Listener>()
-  private unlocked = false
+  private gestured = false
 
   subscribe(fn: Listener) {
     this.listeners.add(fn)
@@ -118,20 +121,8 @@ class SoundEngine {
     }
   }
 
-  /** Call from a user gesture (pointerdown / keydown). Creates or resumes the context. */
-  unlock() {
-    const first = !this.unlocked
-    this.unlocked = true
-    if (!this.enabled) {
-      if (first) this.listeners.forEach((f) => f())
-      return
-    }
-    if (!this.ctx) this.build()
-    const ctx = this.ctx
-    if (!ctx) return
-    if (ctx.state !== 'running' && !document.hidden) void ctx.resume().then(() => this.listeners.forEach((f) => f()))
-    if (!this.bedOn) this.startBed()
-    if (first) this.listeners.forEach((f) => f())
+  private emit() {
+    this.listeners.forEach((f) => f())
   }
 
   /** The user has made a sound choice (stored), so the intro need not ask. */
@@ -139,58 +130,74 @@ class SoundEngine {
     return storedPref() !== null
   }
 
-  /** A gesture has happened (audio can play). */
-  get started() {
-    return this.unlocked
+  /** Sound is really playing: preference on and the context running. Switches show this state. */
+  get active() {
+    return this.enabled && this.ctx?.state === 'running'
   }
 
-  get ready() {
-    return !!this.ctx && this.ctx.state === 'running' && this.enabled
+  private get ready() {
+    return this.active
   }
 
+  /** Build the context and the whole graph ahead of time; it stays suspended until a gesture. */
+  prewarm() {
+    if (!this.ctx) this.build()
+  }
+
+  /** Call synchronously inside a user gesture handler (not after an await or a timer): browsers only
+   *  let audio start from inside one. Resumes the context if the preference is on. */
+  resumeFromGesture() {
+    this.gestured = true
+    if (!this.enabled || document.hidden) return
+    this.prewarm()
+    const ctx = this.ctx
+    if (!ctx) return
+    if (ctx.state !== 'running') ctx.resume().catch(() => {})
+    if (!this.bedFaded) {
+      // The bed fades in once, the first time sound starts (its time line was frozen while suspended).
+      this.bedFaded = true
+      const bg = this.bedOut.gain, t = ctx.currentTime
+      bg.setValueAtTime(0, t)
+      bg.linearRampToValueAtTime(BED, t + 2.5)
+    }
+  }
+
+  /** Sound on/off from a click: call synchronously in the click handler. */
   setEnabled(on: boolean) {
     try {
       localStorage.setItem(KEY, on ? 'on' : 'off')
     } catch {
       /* storage blocked */
     }
-    if (on === this.enabled) {
-      this.listeners.forEach((f) => f())
-      return
-    }
     this.enabled = on
-    const ctx = this.ctx
     if (on) {
-      // The toggle click is itself a gesture.
-      this.unlock()
-      if (this.ctx) {
-        const g = this.master.gain, t = this.ctx.currentTime
+      this.resumeFromGesture() // the click is the gesture
+      const ctx = this.ctx
+      if (ctx) {
+        const g = this.master.gain, t = ctx.currentTime
         g.cancelScheduledValues(t)
         g.setValueAtTime(g.value, t)
-        g.linearRampToValueAtTime(VOLUME, t + 0.6)
-        this.toggleChirp(true)
+        g.linearRampToValueAtTime(VOLUME, t + 0.03)
+        this.toggleChirp(true) // confirmation tick, plays as soon as the device is running
       }
-    } else if (ctx) {
-      this.toggleChirp(false)
-      const g = this.master.gain, t = ctx.currentTime
+    } else if (this.ctx) {
+      const ctx = this.ctx, g = this.master.gain, t = ctx.currentTime
       g.cancelScheduledValues(t)
-      g.setValueAtTime(g.value, t)
-      g.linearRampToValueAtTime(0, t + 0.45)
-      window.setTimeout(() => {
-        if (!this.enabled && this.ctx?.state === 'running') void this.ctx.suspend()
-      }, 520)
+      if (ctx.state === 'running') {
+        this.toggleChirp(false)
+        g.setValueAtTime(g.value, t)
+        g.linearRampToValueAtTime(0, t + 0.45)
+        window.setTimeout(() => {
+          if (!this.enabled && this.ctx?.state === 'running') void this.ctx.suspend()
+        }, 520)
+      } else g.setValueAtTime(0, t) // nothing is scheduled on a suspended context: it would play later
     }
-    this.listeners.forEach((f) => f())
+    this.emit()
   }
 
-  toggle() {
-    this.setEnabled(!this.enabled)
-  }
-
-  /** What a sound switch does when pressed. */
+  /** What a sound switch does when pressed: flip what it shows (the real state, see `active`). */
   press() {
-    if (this.enabled && !this.unlocked) this.unlock()
-    else this.toggle()
+    this.setEnabled(!this.active)
   }
 
   private build() {
@@ -198,6 +205,8 @@ class SoundEngine {
     if (!AC) return
     const ctx = new AC({ latencyHint: 'interactive' })
     this.ctx = ctx
+    // Switches derive their state from the context's real state.
+    ctx.addEventListener('statechange', () => this.emit())
     const limiter = ctx.createDynamicsCompressor()
     limiter.threshold.value = -10
     limiter.knee.value = 0
@@ -205,8 +214,7 @@ class SoundEngine {
     limiter.attack.value = 0.001
     limiter.release.value = 0.22
     this.master = ctx.createGain()
-    this.master.gain.value = 0
-    this.master.gain.linearRampToValueAtTime(VOLUME, ctx.currentTime + 0.8)
+    this.master.gain.value = this.enabled ? VOLUME : 0 // full level from the first sound
     this.mix = ctx.createGain()
     this.mix.connect(limiter).connect(this.master).connect(ctx.destination)
     // Reverb send (blast, blips)
@@ -241,10 +249,13 @@ class SoundEngine {
     this.bedOut = ctx.createGain()
     this.bedOut.gain.value = 0
     this.bedOut.connect(this.mix)
+    this.startBed() // silent (bedOut 0) until sound first starts
+    // A context created after a gesture may start running: with sound off it must not render.
+    if (!this.enabled) void ctx.suspend()
     document.addEventListener('visibilitychange', () => {
       if (!this.ctx) return
       if (document.hidden) void this.ctx.suspend()
-      else if (this.enabled && this.unlocked) void this.ctx.resume()
+      else if (this.enabled && this.gestured) this.ctx.resume().catch(() => {})
     })
   }
 
@@ -299,8 +310,6 @@ class SoundEngine {
     drift.start(t)
     breath.start(t)
     air.start(t)
-    this.bedOut.gain.setValueAtTime(0, t)
-    this.bedOut.gain.linearRampToValueAtTime(BED, t + 2.5)
     this.scheduleBlip()
   }
 
@@ -331,6 +340,7 @@ class SoundEngine {
       o.type = 'sine'
       o.frequency.setValueAtTime(f * (i === n - 1 && n > 1 ? 1.5 : 1), t)
       const e = ctx.createGain()
+      e.gain.value = 0 // from 0, not the default 1: no stray sample before the envelope
       e.gain.setValueAtTime(0, t)
       e.gain.linearRampToValueAtTime(1, t + 0.004)
       e.gain.setTargetAtTime(0, t + 0.03, 0.012)
@@ -354,6 +364,7 @@ class SoundEngine {
     o.frequency.setValueAtTime(f, t)
     o.frequency.exponentialRampToValueAtTime(f * 0.82, t + 0.04)
     const e = ctx.createGain()
+    e.gain.value = 0
     e.gain.setValueAtTime(0, t)
     e.gain.linearRampToValueAtTime(0.045, t + 0.003)
     e.gain.setTargetAtTime(0, t + 0.008, 0.012)
@@ -367,6 +378,7 @@ class SoundEngine {
     hp.type = 'highpass'
     hp.frequency.value = 5000
     const ng = ctx.createGain()
+    ng.gain.value = 0 // from 0: a source can render a sample just before its start time
     ng.gain.setValueAtTime(0.03, t)
     ng.gain.setTargetAtTime(0, t + 0.002, 0.004)
     n.connect(hp).connect(ng).connect(this.mix)
@@ -392,6 +404,7 @@ class SoundEngine {
       o.frequency.exponentialRampToValueAtTime(2600 * mul, t + 0.07)
       o.frequency.exponentialRampToValueAtTime(1900 * mul, t + 0.12)
       const e = ctx.createGain()
+      e.gain.value = 0
       e.gain.setValueAtTime(0, t)
       e.gain.linearRampToValueAtTime(lvl, t + 0.006)
       e.gain.setTargetAtTime(0, t + 0.08, 0.025)
@@ -410,6 +423,7 @@ class SoundEngine {
       o.type = 'sine'
       o.frequency.value = (up ? [880, 1320] : [1320, 880])[i]
       const e = ctx.createGain()
+      e.gain.value = 0
       const s = t + i * 0.08
       e.gain.setValueAtTime(0, s)
       e.gain.linearRampToValueAtTime(0.05, s + 0.005)
@@ -648,7 +662,7 @@ class SoundEngine {
     nz.start(t, Math.random(), 0.05)
   }
 
-  /** Intro accents (only if already unlocked): orbit power-up, satellite pass. */
+  /** Intro accents (only while sound is playing): orbit power-up, satellite pass. */
   rise(dur = 1.2) {
     const ctx = this.ctx
     if (!this.ready || !ctx) return
@@ -670,17 +684,25 @@ class SoundEngine {
 
 export const sound = new SoundEngine()
 
-// First gesture anywhere unlocks audio (if the preference is on). Sound switches
-// ([data-sound-toggle]) handle their own press: before any gesture it starts the sound, after it toggles.
 if (typeof window !== 'undefined') {
-  // Deferred a tick: opening the audio device (~100 ms the first time) then falls outside the input
-  // event, e.g. inside a hold's 140 ms arming delay, instead of stalling a visible frame. The page's
-  // user activation is sticky, so the context may still start.
-  const first = (e: Event) => {
-    if (!(e.target as Element | null)?.closest?.('[data-sound-toggle]')) window.setTimeout(() => sound.unlock(), 0)
+  // Pre-warm: the context and every node and buffer are built right after load (the context stays
+  // suspended: no gesture yet), so a gesture only has to resume it. Creating the context opens the
+  // audio device (20–100 ms of main thread, up to ~300 ms while the globe renders), so it runs during
+  // page boot / the intro's loader beat, where the globe's GPU set-up already happens, not later.
+  const prewarm = () => {
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => sound.prewarm(), { timeout: 800 })
+    else sound.prewarm()
   }
-  window.addEventListener('pointerdown', first, { capture: true, passive: true })
-  window.addEventListener('keydown', first, { capture: true })
+  if (document.readyState === 'complete') prewarm()
+  else window.addEventListener('load', prewarm, { once: true })
+  // A gesture anywhere resumes audio if the preference is on (a returning visitor with sound on).
+  // Synchronous, inside the event: browsers only allow audio to start there. Sound switches
+  // ([data-sound-toggle]) handle their own click. Kept after the first gesture, so a context that a
+  // browser suspended (tab switch) comes back on the next gesture; it is a no-op otherwise.
+  const gesture = (e: Event) => {
+    if (!(e.target as Element | null)?.closest?.('[data-sound-toggle]')) sound.resumeFromGesture()
+  }
+  for (const type of ['pointerdown', 'keydown', 'touchstart']) window.addEventListener(type, gesture, { capture: true, passive: true })
 }
 
 // Dev-only handle for scripts/check-sound.mjs-style probing in the console.

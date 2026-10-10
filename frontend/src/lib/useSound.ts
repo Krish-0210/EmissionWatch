@@ -1,18 +1,19 @@
 import { useSyncExternalStore } from 'react'
 import { sound } from './sound'
 
-/** The sound preference (on/off), re-rendering on toggle. */
+/** Whether sound is really playing (preference on AND the audio context running), re-rendering on
+ *  toggle and on context state changes. Switches show this, never the preference alone. */
 export const useSoundOn = () =>
   useSyncExternalStore(
     (fn) => sound.subscribe(fn),
-    () => sound.enabled,
+    () => sound.active,
     () => false,
   )
 
-/** Whether a gesture has unlocked audio yet (the intro's hint reads this). */
-export const useSoundStarted = () =>
+/** The stored preference (on = sound starts at the next click / key / touch). */
+export const useSoundPref = () =>
   useSyncExternalStore(
     (fn) => sound.subscribe(fn),
-    () => sound.started,
+    () => sound.enabled,
     () => false,
   )

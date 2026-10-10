@@ -6,7 +6,7 @@ import { HERO_VIEW, heroView, latLon, lookFix, vec } from '../lib/globeView'
 import { holdNav, introFinished } from '../lib/intro'
 import { setText } from '../lib/motion'
 import { sound } from '../lib/sound'
-import { useSoundOn, useSoundStarted } from '../lib/useSound'
+import { useSoundOn, useSoundPref } from '../lib/useSound'
 import { heroGlobeScreen } from '../three/layout'
 import { LogoMark } from './Logo'
 import '../styles/intro.css'
@@ -222,10 +222,11 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
   }, [])
   const go = (ready && minDone) || waited || skippedEarly
   const soundOn = useSoundOn()
-  const soundStarted = useSoundStarted()
+  const soundPref = useSoundPref()
   // First visit: ask (no choice = off). Afterwards the same corner holds an on/off toggle.
   const [asked, setAsked] = useState(() => sound.chosen)
   const choose = (on: boolean) => {
+    // Synchronously in the click: the audio context may only resume inside the gesture.
     sound.setEnabled(on)
     setAsked(true)
   }
@@ -503,11 +504,11 @@ export default function Intro({ clusters, summary, reduced, ready, onBeat }: Pro
           className={`intro-sound ${soundOn ? 'on' : 'off'}`}
           aria-pressed={soundOn}
           data-sound-toggle
-          // Before any gesture, pressing it starts the sound (the press is the gesture); after, it toggles.
+          // Flips what it shows (the real state); the context resumes inside this click.
           onClick={() => sound.press()}
         >
           <span className="is-dot" aria-hidden="true" />
-          {!soundOn ? 'Sound off · tap for sound' : soundStarted ? 'Sound on · tap to mute' : 'Tap for sound'}
+          {soundOn ? 'Sound on · tap to mute' : soundPref ? 'Tap for sound' : 'Sound off · tap for sound'}
         </button>
       ) : (
         <div className="intro-sound intro-ask" role="group" aria-label="Play sound?">
