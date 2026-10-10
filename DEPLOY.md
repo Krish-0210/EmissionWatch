@@ -3,19 +3,24 @@
 Everything uses the `emissionwatch` profile. Run from Git Bash in the repo root unless noted.
 Nothing has been deployed yet; `cdk synth` and all tests pass.
 
+**Briefs default to template mode.** The Lambda's `BRIEF_MODE` (CDK context `brief_mode`) is `template` unless
+you choose otherwise: `POST /brief/{id}` never calls Bedrock and returns the deterministic template brief with
+`"source": "auto"` (the site labels it "Auto-generated brief"). Bedrock model access is then not needed.
+Deploy with `-c brief_mode=bedrock` to use Bedrock (falls back to the template, `"source": "template"`, on any error).
+
 ## 0. Prerequisites (once)
 ```bash
 aws sts get-caller-identity --profile emissionwatch          # note the account id
 cdk --version                                                # 2.1145.0 installed globally
 ```
-Bedrock: in the console (ap-south-1) open **Bedrock → Model access** and make sure
+Only for `brief_mode=bedrock`: in the console (ap-south-1) open **Bedrock → Model access** and make sure
 **Anthropic Claude Haiku 4.5** is enabled (Anthropic models need the one-time use-case form).
 Check the inference profile exists:
 ```bash
 aws bedrock list-inference-profiles --region ap-south-1 --profile emissionwatch \
   --query "inferenceProfileSummaries[?inferenceProfileId=='in.anthropic.claude-haiku-4-5-20251001-v1:0'].status"
 ```
-If briefs fail for any reason the API still answers with the template brief (`"source": "template"`).
+In bedrock mode, if Bedrock fails for any reason the API still answers with the template brief (`"source": "template"`).
 
 ## 1. Fresh data export (optional)
 ```bash
@@ -31,8 +36,13 @@ cd infra
 source .venv/Scripts/activate
 ACCOUNT=$(aws sts get-caller-identity --profile emissionwatch --query Account --output text)
 cdk bootstrap aws://$ACCOUNT/ap-south-1 --profile emissionwatch
-cdk deploy EmissionWatchStack --profile emissionwatch
+cdk deploy EmissionWatchStack --profile emissionwatch                          # briefs: template mode
+# or: cdk deploy EmissionWatchStack --profile emissionwatch -c brief_mode=bedrock
 ```
+Context values are not remembered between deploys: repeat `-c brief_mode=bedrock` on every later deploy (step 6
+too), or set `"brief_mode": "bedrock"` under `context` in `infra/cdk.json`. A deploy without it switches back to
+template mode. (For a quick test without redeploying, `BRIEF_MODE` can also be edited on the function in the Lambda
+console; the role may call Bedrock in both modes. The next deploy overwrites it.)
 Outputs: `ApiUrl` (e.g. `https://abc123.execute-api.ap-south-1.amazonaws.com`) and `BucketName`.
 Put them in `.env`: `S3_BUCKET_NAME=<BucketName>`, `BEDROCK_MODEL_ID=in.anthropic.claude-haiku-4-5-20251001-v1:0`.
 
@@ -44,10 +54,12 @@ curl -s $API/clusters/talcher | head -c 200; echo
 curl -s $API/clusters/talcher/timeseries | head -c 200; echo
 curl -s $API/summary | head -c 200; echo
 curl -s -o /dev/null -w "%{http_code}\n" $API/clusters/atlantis        # 404
-curl -s -X POST $API/brief/talcher | head -c 400; echo                 # "source": "bedrock" (or "template")
+curl -s -X POST $API/brief/talcher | head -c 400; echo                 # template mode: "source": "auto"
+                                                                       # bedrock mode: "bedrock" (or "template")
 ```
 Logs: `aws logs tail /aws/lambda/<function name> --follow --profile emissionwatch --region ap-south-1`
-(the function name is in the CloudFormation console; a "Bedrock failed" warning explains any template fallback).
+(the function name is in the CloudFormation console; in bedrock mode a "Bedrock failed" warning explains any
+template fallback).
 
 ## 4. Frontend against the API (local)
 ```bash
@@ -93,11 +105,13 @@ npm run dev                                                  # http://localhost:
 cd infra && source .venv/Scripts/activate
 cdk deploy EmissionWatchStack --profile emissionwatch -c allowed_origins=https://main.d1234abcd.amplifyapp.com
 ```
-(Comma-separate several origins. Add it to `cdk.json` → `context.allowed_origins` to make it stick.)
+(Comma-separate several origins. Add it to `cdk.json` → `context.allowed_origins` to make it stick. In bedrock mode
+add `-c brief_mode=bedrock` here too.)
 
 ## Limits and cost guards
 - HTTP API throttling: 10 rps, burst 20; `POST /brief/{id}` 1 rps, burst 2.
-- Lambda: 256 MB, 10 s timeout; Bedrock call times out after 7 s and falls back to the template.
+- Lambda: 256 MB, 10 s timeout. Template mode (default) makes no Bedrock calls; in bedrock mode the call times
+  out after 7 s and falls back to the template.
 - Bucket is private (block public access, SSE-S3, TLS only); only the Lambda reads `data/*`.
 
 ## Teardown

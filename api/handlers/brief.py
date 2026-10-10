@@ -1,11 +1,15 @@
-"""Inspection brief for one cluster: Bedrock (Converse) with a deterministic template fallback.
+"""Inspection brief for one cluster: a deterministic template, or Bedrock (Converse) with the template as fallback.
+
+BRIEF_MODE (Lambda env, set by the CDK stack): "template" (default) never calls Bedrock and returns the
+template with source "auto"; "bedrock" calls Bedrock and falls back to the template (source "template")
+on any error. Any other value is treated as "template".
 
 Both paths use the same FACTS, built only from the exported numbers (cluster_{id}.json and the
 cluster's row/coefficient in summary.json). Numbers are pre-formatted here; the model is told to
 copy them and add none. As a guard, a Bedrock answer containing any number that is not in FACTS
 (or in the fixed method description) is discarded and the template is returned instead.
 
-Returns {"markdown": str, "source": "bedrock" | "template"}.
+Returns {"markdown": str, "source": "auto" | "bedrock" | "template"}.
 """
 
 import json
@@ -214,9 +218,19 @@ def bedrock_brief(facts: dict) -> str:
     return text
 
 
+def brief_mode() -> str:
+    mode = os.environ.get("BRIEF_MODE", "template").strip().lower()
+    if mode not in ("template", "bedrock"):
+        log.warning("unknown BRIEF_MODE %r; using template", mode)
+        return "template"
+    return mode
+
+
 def make_brief(cid: str) -> dict:
     data.require_cluster(cid)
     facts = build_facts(cid)
+    if brief_mode() == "template":
+        return {"markdown": template_brief(facts), "source": "auto"}
     try:
         return {"markdown": bedrock_brief(facts), "source": "bedrock"}
     except Exception as e:  # any Bedrock/network/validation failure -> deterministic template

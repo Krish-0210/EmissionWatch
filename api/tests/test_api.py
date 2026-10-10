@@ -150,8 +150,9 @@ def test_template_uses_only_provided_numbers(cid):
     assert facts["audit_risk_score"] == f"{c['risk_score']:.0f}"
 
 
-def test_brief_without_bedrock_credentials_falls_back():
+def test_brief_without_bedrock_credentials_falls_back(monkeypatch):
     # No fake installed: the real client fails (no Bedrock in moto) and the template is used.
+    monkeypatch.setenv("BRIEF_MODE", "bedrock")
     status, b = call("POST", "/brief/{id}", "korba")
     assert status == 200 and b["source"] == "template"
     assert "BALCO" in b["markdown"]
@@ -195,3 +196,33 @@ def test_brief_names_panopticoal(bedrock):
     from handlers.brief import SYSTEM_PROMPT
 
     assert "PanoptiCoal" in SYSTEM_PROMPT and "EmissionWatch" not in SYSTEM_PROMPT
+
+
+# ---------- BRIEF_MODE ----------
+def _no_bedrock(monkeypatch):
+    from handlers import brief
+
+    def fail():
+        raise AssertionError("Bedrock must not be called in template mode")
+
+    monkeypatch.setattr(brief, "_bedrock_client", fail)
+
+
+@pytest.mark.parametrize("cid", CLUSTER_IDS)
+def test_brief_template_mode_is_default(cid, monkeypatch):
+    """BRIEF_MODE unset: no Bedrock call, the template brief with source "auto"."""
+    from handlers import brief
+
+    _no_bedrock(monkeypatch)
+    status, b = call("POST", "/brief/{id}", cid)
+    assert status == 200 and set(b) == {"markdown", "source"}
+    assert b["source"] == "auto"
+    assert b["markdown"] == brief.template_brief(brief.build_facts(cid))
+    assert "PanoptiCoal" in b["markdown"] and "EmissionWatch" not in b["markdown"]
+
+
+@pytest.mark.parametrize("mode,source", [("template", "auto"), (" TEMPLATE ", "auto"), ("nonsense", "auto"), ("Bedrock", "bedrock")])
+def test_brief_mode_values(mode, source, monkeypatch, bedrock):
+    bedrock(reply=good_reply)
+    monkeypatch.setenv("BRIEF_MODE", mode)
+    assert call("POST", "/brief/{id}", "talcher")[1]["source"] == source

@@ -5,7 +5,8 @@ Routes (contract: frontend/src/api.ts):
     GET  /clusters/{id}             -> ClusterDetail
     GET  /clusters/{id}/timeseries  -> TimeseriesFile
     GET  /summary                   -> SummaryFile
-    POST /brief/{id}                -> {markdown, source: "bedrock" | "template"}
+    POST /brief/{id}                -> {markdown, source: "auto" | "bedrock" | "template"}
+                                       (BRIEF_MODE=template -> "auto", no Bedrock call; see handlers/brief.py)
 CORS and throttling are configured on the HTTP API (infra/), not here.
 """
 

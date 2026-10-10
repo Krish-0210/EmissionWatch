@@ -25,6 +25,7 @@ def aws(monkeypatch):
     monkeypatch.setenv("DATA_BUCKET", BUCKET)
     monkeypatch.setenv("DATA_PREFIX", "data/")
     monkeypatch.setenv("BEDROCK_MODEL_ID", "in.anthropic.claude-haiku-4-5-20251001-v1:0")
+    monkeypatch.delenv("BRIEF_MODE", raising=False)  # default: template
     from handlers import brief, data
 
     data.clear_cache()
@@ -54,9 +55,11 @@ class FakeBedrock:
 
 @pytest.fixture
 def bedrock(monkeypatch):
+    """BRIEF_MODE=bedrock with a fake client; install(reply=... | error=...)."""
     from handlers import brief
 
     def install(**kw):
+        monkeypatch.setenv("BRIEF_MODE", "bedrock")
         fake = FakeBedrock(**kw)
         monkeypatch.setattr(brief, "_bedrock_client", lambda: fake)
         return fake

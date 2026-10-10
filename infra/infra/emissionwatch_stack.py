@@ -3,6 +3,8 @@
 Context (cdk.json or -c key=value):
     allowed_origins   comma-separated extra CORS origins (e.g. the Amplify domain)
     bedrock_model_id  Bedrock model or inference profile id for briefs
+    brief_mode        "template" (default: briefs never call Bedrock, source "auto") or "bedrock"
+                      (Bedrock with template fallback). Sets the Lambda's BRIEF_MODE.
 """
 
 from pathlib import Path
@@ -39,6 +41,9 @@ class EmissionWatchStack(Stack):
         if not (EXPORT_DIR / "clusters.json").exists():
             raise FileNotFoundError(f"{EXPORT_DIR} has no clusters.json; run `python -m src.export.to_json` in pipeline/")
         model_id = self.node.try_get_context("bedrock_model_id") or DEFAULT_MODEL_ID
+        brief_mode = (self.node.try_get_context("brief_mode") or "template").strip().lower()
+        if brief_mode not in ("template", "bedrock"):
+            raise ValueError(f"brief_mode must be 'template' or 'bedrock', got {brief_mode!r}")
         extra = self.node.try_get_context("allowed_origins") or ""
         origins = LOCAL_ORIGINS + [o.strip().rstrip("/") for o in extra.split(",") if o.strip()]
 
@@ -83,13 +88,15 @@ class EmissionWatchStack(Stack):
             environment={
                 "DATA_BUCKET": bucket.bucket_name,
                 "DATA_PREFIX": DATA_PREFIX,
+                "BRIEF_MODE": brief_mode,
                 "BEDROCK_MODEL_ID": model_id,
                 "BEDROCK_REGION": self.region,
                 "CACHE_TTL_SECONDS": "300",
             },
         )
 
-        # Least privilege: read objects under data/ in this bucket; invoke the one Bedrock model.
+        # Least privilege: read objects under data/ in this bucket; invoke the one Bedrock model (granted in both
+        # brief modes, so BRIEF_MODE can be switched on the function without a redeploy).
         fn.add_to_role_policy(
             iam.PolicyStatement(actions=["s3:GetObject"], resources=[bucket.arn_for_objects(f"{DATA_PREFIX}*")])
         )

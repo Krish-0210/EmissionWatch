@@ -1,11 +1,12 @@
 import aws_cdk as core
 import aws_cdk.assertions as assertions
+import pytest
 
 from infra.emissionwatch_stack import EmissionWatchStack
 
 
-def template():
-    app = core.App(context={"allowed_origins": "https://main.example.amplifyapp.com"})
+def template(**context):
+    app = core.App(context={"allowed_origins": "https://main.example.amplifyapp.com", **context})
     stack = EmissionWatchStack(app, "test", env=core.Environment(account="123456789012", region="ap-south-1"))
     return assertions.Template.from_stack(stack)
 
@@ -22,8 +23,18 @@ def test_lambda_config():
     t = template()
     t.has_resource_properties("AWS::Lambda::Function", {
         "Runtime": "python3.12", "Handler": "handlers.app.handler", "Timeout": 10, "MemorySize": 256,
-        "Environment": {"Variables": assertions.Match.object_like({"BEDROCK_MODEL_ID": "in.anthropic.claude-haiku-4-5-20251001-v1:0", "DATA_PREFIX": "data/"})},
+        "Environment": {"Variables": assertions.Match.object_like({
+            "BRIEF_MODE": "template", "BEDROCK_MODEL_ID": "in.anthropic.claude-haiku-4-5-20251001-v1:0", "DATA_PREFIX": "data/"})},
     })
+
+
+def test_brief_mode_context():
+    t = template(brief_mode="bedrock")
+    t.has_resource_properties("AWS::Lambda::Function", {
+        "Environment": {"Variables": assertions.Match.object_like({"BRIEF_MODE": "bedrock"})},
+    })
+    with pytest.raises(ValueError):
+        template(brief_mode="claude")
 
 
 def test_routes_cors_throttle():
