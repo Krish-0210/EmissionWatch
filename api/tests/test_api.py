@@ -14,7 +14,7 @@ DETAIL_KEYS = SUMMARY_KEYS | {"as_of", "plants", "weights", "signals", "model", 
 PLANT_KEYS = {"id", "name", "state", "lat", "lon", "capacity_mw", "status"}
 MODEL_KEYS = {"coef", "t", "p", "partial_r2", "r2", "n"}
 MONTH_KEYS = {"month", "generation_mu", "expected_no2", "observed_no2", "residual", "valid_fraction"}
-# Additive fields (pipeline to_json; not in api.ts yet, see FRONTEND_TODO.md). Checked exactly so nothing else sneaks in.
+# Scorecard fields and flagged periods (in api.ts since the frontend wired them). Checked exactly so nothing else sneaks in.
 ADDED_SUMMARY_KEYS = {"primary_anomaly_type", "primary_anomaly_label", "population_20km"}
 ADDED_DETAIL_KEYS = ADDED_SUMMARY_KEYS | {"flagged_periods"}
 BACKTEST_KEYS = {"cluster", "gen_2019", "gen_2020", "days_2019", "days_2020", "observed_2019", "observed_2020", "predicted_2020", "gen_change_pct", "observed_change_pct", "predicted_change_pct", "error"}

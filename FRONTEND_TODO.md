@@ -161,9 +161,8 @@ Notes for the UI:
 
 ## 6. Tests to update after wiring
 
-`api/tests/test_contract.py::test_specs_match_api_ts` compares `api.ts` interfaces with the API specs and already accepts the
-fields above in `ClusterSummary` / `ClusterDetail` / `SummaryFile`, so wiring them does not break it. Once they are
-in `api.ts`, make the check strict again: move `ADDED_SUMMARY` (and `flagged_periods`, `sources`) into the main
-specs there, drop the `may_add` allowance, and add `FlaggedPeriod`, `Source`, `WindTrace`, `WindTown`, `RtiDraft`,
-`IndiaPlant` (spec `INDIA_PLANT`), `PlantsIndiaFile`, `StateSummary` (spec `STATE`) and `StatesFile` to the
-parametrised list. The files themselves are already checked (`test_plants_and_states_files`).
+Done: `api/tests/test_contract.py` is strict again. `test_specs_match_api_ts` requires each interface's fields in
+`api.ts` to equal the served fields exactly (no `may_add` allowance), `test_every_api_ts_interface_is_checked` fails
+when `api.ts` gains an interface without a spec there, and `test_unions_match_api_ts` compares the string unions
+(`Brief.source`, `WindTrace.source`, `FlaggedPeriod.reason`, `AnomalyType`, ...). A new field or interface in
+`api.ts` therefore needs the matching change in the API/export and in that test.

@@ -10,7 +10,7 @@ Contract: frontend/src/api.ts. Writes to pipeline/data/export/ and copies to fro
   states.json              all 36 states / union territories: centroid, plant count, capacity, plant ids
 Also copies docs/figures/backtest.png to frontend/public/data/.
 
-Additive fields (not yet in api.ts; FRONTEND_TODO.md):
+Fields added later (additive; declared in api.ts):
   clusters.json rows + cluster_{id}.json: primary_anomaly_type, primary_anomaly_label, population_20km
   cluster_{id}.json: flagged_periods (risk_score.flagged_periods)
   summary.json: sources

@@ -7,7 +7,7 @@ Routes (contract: frontend/src/api.ts):
     GET  /summary                   -> SummaryFile
     POST /brief/{id}                -> {markdown, source: "auto" | "bedrock" | "template"}
                                        (BRIEF_MODE=template -> "auto", no Bedrock call; see handlers/brief.py)
-Added (additive, not yet read by the frontend; FRONTEND_TODO.md):
+Added later (additive; in api.ts too):
     GET  /clusters/{id}/wind        -> {source: "live" | "era5", as_of, speed_kmh, bearing_deg, cone_polygon,
                                         towns_in_path, sentence, attribution} (handlers/wind.py)
     POST /rti/{id}                  -> {markdown, plain_text} (handlers/rti.py, template only)

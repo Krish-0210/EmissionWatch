@@ -1,7 +1,8 @@
 """Types and values of every served file against frontend/src/api.ts (the key-set checks are in test_api.py).
 
 Strict JSON (no NaN/Infinity), numbers vs number|null, enum values, and the summary fields of
-cluster_{id}.json equal to that cluster's row in clusters.json.
+cluster_{id}.json equal to that cluster's row in clusters.json. The last section compares the specs with the
+interfaces declared in api.ts: every interface is checked and its fields must equal the spec exactly.
 """
 
 import json
@@ -13,12 +14,18 @@ import pytest
 from conftest import CLUSTER_IDS, EXPORT
 
 LEVEL = ("low", "medium", "high")
+ANOMALY = ("persistent_excess", "intensity_trend", "peer_intensity", "none")
+ADDED_SUMMARY = {"primary_anomaly_type": ANOMALY, "primary_anomaly_label": "str", "population_20km": "num"}
 SUMMARY = {"id": "str", "name": "str", "states": ["str"], "lat": "num", "lon": "num", "capacity_mw": "num", "n_plants": "num",
-           "risk_score": "num", "risk_level": LEVEL, "confidence": LEVEL, "headline": "str"}
+           "risk_score": "num", "risk_level": LEVEL, "confidence": LEVEL, "headline": "str", **ADDED_SUMMARY}
+PERIOD = {"start": "str", "end": "str", "peak_z": "num", "reason": ("excess", "score_window")}
+SOURCE = {"id": "str", "name": "str", "used_for": "str", "access": "str", "license": "str|null", "citation": "str|null",
+          "doi": "str|null"}
 MS = {k: "num" for k in ("coef", "t", "p", "partial_r2", "r2", "n")}
 DETAIL = dict(
     SUMMARY,
     as_of="str",
+    flagged_periods=[PERIOD],
     plants=[{"id": "str", "name": "str", "state": "str", "lat": "num", "lon": "num", "capacity_mw": "num", "status": ("operating", "retired")}],
     weights={"persistent_excess": "num", "intensity_trend": "num", "peer_intensity": "num"},
     signals={
@@ -34,7 +41,7 @@ MONTH = {"month": "str", **{k: "num|null" for k in ("generation_mu", "expected_n
 BACKTEST = {"cluster": "str", **{k: "num" for k in ("gen_2019", "gen_2020", "days_2019", "days_2020", "observed_2019", "observed_2020",
                                                    "predicted_2020", "gen_change_pct", "observed_change_pct", "predicted_change_pct", "error")}}
 SUMMARY_FILE = {"generated_at": "str", "units": {"coef": "str", "backtest": "str"}, "pooled_model": {"enhancement": MS, "ratio": MS},
-                "clusters": [{"id": "str", "generation_coef": "num", "p": "num"}], "backtest": [BACKTEST], "findings": ["str"]}
+                "clusters": [{"id": "str", "generation_coef": "num", "p": "num"}], "backtest": [BACKTEST], "findings": ["str"], "sources": [SOURCE]}
 
 
 def load(name: str):
@@ -103,56 +110,7 @@ def test_summary_file():
     assert not errs, errs
 
 
-# ---------- The specs above against the live frontend/src/api.ts ----------
-API_TS = EXPORT.parents[1] / "src" / "api.ts"
-
-
-def ts_interfaces() -> dict[str, set[str]]:
-    """Top-level keys of every `export interface` in api.ts (inline object types are not descended; extends merged)."""
-    src = API_TS.read_text(encoding="utf-8")
-    out: dict[str, set[str]] = {}
-    for m in re.finditer(r"^export interface (\w+)(?: extends (\w+))? \{\n(.*?)^\}", src, re.M | re.S):
-        keys = set(re.findall(r"^  (\w+)\??:", m.group(3), re.M))
-        out[m.group(1)] = keys | out.get(m.group(2), set()) if m.group(2) else keys
-    return out
-
-
-@pytest.mark.parametrize(
-    "iface,spec",
-    [
-        ("ClusterSummary", SUMMARY),
-        ("ClustersFile", {"generated_at", "as_of", "clusters"}),
-        ("Plant", DETAIL["plants"][0]),
-        ("ModelStats", MS),
-        ("Signals", DETAIL["signals"]),
-        ("ClusterDetail", DETAIL),
-        ("MonthPoint", MONTH),
-        ("TimeseriesFile", {"id", "months"}),
-        ("BacktestRow", BACKTEST),
-        ("SummaryFile", SUMMARY_FILE),
-        ("Brief", {"markdown", "source"}),
-    ],
-)
-def test_specs_match_api_ts(iface, spec):
-    """Every field the frontend types declare is served, and api.ts declares nothing else except the documented
-    additive fields (FRONTEND_TODO.md), which it may adopt at any time."""
-    may_add = {"ClusterSummary": set(ADDED_SUMMARY), "ClusterDetail": set(ADDED_SUMMARY) | {"flagged_periods"},
-               "SummaryFile": {"sources"}}.get(iface, set())
-    keys = ts_interfaces()[iface]
-    assert set(spec) <= keys and keys - set(spec) <= may_add, (keys - set(spec)) - may_add or set(spec) - keys
-
-
-def test_brief_sources_match_api_ts():
-    src = API_TS.read_text(encoding="utf-8")
-    union = re.search(r"interface Brief \{.*?source: ([^\n/]+)", src, re.S).group(1)
-    assert set(re.findall(r"'(\w+)'", union)) == {"auto", "bedrock", "template"}  # what handlers/brief.py returns
-
-
-# ---------- Additive fields (pipeline to_json; not in api.ts yet, see FRONTEND_TODO.md) ----------
-ANOMALY = ("persistent_excess", "intensity_trend", "peer_intensity", "none")
-ADDED_SUMMARY = {"primary_anomaly_type": ANOMALY, "primary_anomaly_label": "str", "population_20km": "num"}
-PERIOD = {"start": "str", "end": "str", "peak_z": "num", "reason": ("excess", "score_window")}
-SOURCE = {"id": "str", "name": "str", "used_for": "str", "access": "str"}
+# ---------- Scorecard fields, flagged periods, sources, wind, plants and states ----------
 TOWN = {"name": "str", "state": "str", "lat": "num", "lon": "num", "population": "num", "distance_km": "num", "bearing_deg": "num"}
 TRACE = {"source": ("era5",), "as_of": "str", "speed_kmh": "num", "bearing_deg": "num",
          "cone_polygon": {"type": ("Polygon",), "coordinates": [[["num"]]]}, "towns_in_path": [TOWN], "sentence": "str",
@@ -245,3 +203,71 @@ def test_wind_file(cid):
     assert w["id"] == cid
     assert all(t["population"] > 50_000 and t["distance_km"] <= 75 for t in w["towns_within_cone_length"])
     assert w["trace"]["bearing_deg"] == round((w["era5"]["from_deg"] + 180) % 360, 1)
+
+
+# ---------- The specs above against the live frontend/src/api.ts (strict) ----------
+API_TS = EXPORT.parents[1] / "src" / "api.ts"
+# Interface -> the spec (or key set) the API serves for it. WindTrace: the file spec has source ("era5",); the API
+# also answers "live" (test_wind.py); the keys are the same.
+INTERFACES = {
+    "ClusterSummary": SUMMARY,
+    "ClustersFile": {"generated_at", "as_of", "clusters"},
+    "Plant": DETAIL["plants"][0],
+    "ModelStats": MS,
+    "Signals": DETAIL["signals"],
+    "FlaggedPeriod": PERIOD,
+    "ClusterDetail": DETAIL,
+    "MonthPoint": MONTH,
+    "TimeseriesFile": {"id", "months"},
+    "BacktestRow": BACKTEST,
+    "Source": SOURCE,
+    "SummaryFile": SUMMARY_FILE,
+    "IndiaPlant": INDIA_PLANT,
+    "PlantsIndiaFile": {"boundaries", "plants"},
+    "StateSummary": STATE,
+    "StatesFile": {"boundaries", "states"},
+    "WindTown": TOWN,
+    "WindTrace": TRACE,
+    "RtiDraft": {"markdown", "plain_text"},
+    "Brief": {"markdown", "source"},
+}
+
+
+def ts_interfaces() -> dict[str, set[str]]:
+    """Top-level keys of every `export interface` in api.ts (inline object types are not descended; extends merged)."""
+    src = API_TS.read_text(encoding="utf-8")
+    out: dict[str, set[str]] = {}
+    for m in re.finditer(r"^export interface (\w+)(?: extends (\w+))? \{\n(.*?)^\}", src, re.M | re.S):
+        keys = set(re.findall(r"^  (\w+)\??:", m.group(3), re.M))
+        out[m.group(1)] = keys | out.get(m.group(2), set()) if m.group(2) else keys
+    return out
+
+
+def test_every_api_ts_interface_is_checked():
+    """A new interface in api.ts needs a spec here (and a served shape) before this passes."""
+    assert set(ts_interfaces()) == set(INTERFACES)
+
+
+@pytest.mark.parametrize("iface", INTERFACES)
+def test_specs_match_api_ts(iface):
+    """The fields api.ts declares are exactly the fields the API serves: nothing missing, nothing extra."""
+    keys, spec = ts_interfaces()[iface], set(INTERFACES[iface])
+    assert keys == spec, {"only in api.ts": keys - spec, "only in the API": spec - keys}
+
+
+def _union(src: str, iface: str, field: str) -> set[str]:
+    return set(re.findall(r"'(\w+)'", re.search(rf"interface {iface} \{{.*?^  {field}: ([^\n/]+)", src, re.S | re.M).group(1)))
+
+
+def test_unions_match_api_ts():
+    """String unions in api.ts equal the values the API can return."""
+    src = API_TS.read_text(encoding="utf-8")
+    assert _union(src, "Brief", "source") == {"auto", "bedrock", "template"}  # handlers/brief.py
+    assert _union(src, "WindTrace", "source") == {"live", "era5"}  # handlers/wind.py
+    assert _union(src, "FlaggedPeriod", "reason") == set(PERIOD["reason"])
+    assert _union(src, "Plant", "status") == set(DETAIL["plants"][0]["status"])
+    assert _union(src, "IndiaPlant", "status") == set(INDIA_PLANT["status"])
+    anomaly = re.search(r"^export type AnomalyType = ([^\n]+)", src, re.M).group(1)
+    assert set(re.findall(r"'(\w+)'", anomaly)) == set(ANOMALY)
+    level = re.search(r"^export type RiskLevel = ([^\n]+)", src, re.M).group(1)
+    assert set(re.findall(r"'(\w+)'", level)) == set(LEVEL)
